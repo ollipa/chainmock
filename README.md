@@ -1,6 +1,6 @@
 # TODO
 
-- Cleanup tests
+- Fix staticmethod mocking
 - Chained methods
 - Patching
 - Spying
