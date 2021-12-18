@@ -110,8 +110,8 @@ class Mocker:
         if self._target is None:
             setattr(self, name, attr_mock)
         else:
-            original = getattr(self._target, name)
-            local_override = self._setattr(self._target, name, attr_mock)
+            original = self._get_original(name)
+            local_override = self._set_mocked_attribute(name, attr_mock)
             if local_override:
                 self._overrides.append(name)
             elif name not in self._overrides and name not in [name for _, name in self._originals]:
@@ -120,20 +120,26 @@ class Mocker:
         self._assertions.append(assertion)
         return assertion
 
-    @staticmethod
-    def _setattr(target: Any, name: str, attr_mock: Any) -> bool:
-        """Set mock on target object and override attributes locally when
-        possible.
+    def _get_original(self, name: str) -> Any:
+        """Get original attribute from target object."""
+        if hasattr(self._target, "__dict__") and vars(self._target).get(name):
+            # This is necessary for static methods to be restored correctly
+            return vars(self._target)[name]
+        return getattr(self._target, name)
+
+    def _set_mocked_attribute(self, name: str, attr_mock: Any) -> bool:
+        """Set mocked attribute on target object and override attributes locally
+        when possible.
         """
         local_override = False
-        if hasattr(target, "__dict__") and not vars(target).get(name):
-            if isinstance(vars(target), dict):
+        if hasattr(self._target, "__dict__") and not vars(self._target).get(name):
+            if isinstance(vars(self._target), dict):
                 # Override attribute on a class instance.
                 local_override = True
-            elif inspect.isclass(target):
+            elif inspect.isclass(self._target):
                 # Override attribute on a derived class.
                 local_override = True
-        setattr(target, name, attr_mock)
+        setattr(self._target, name, attr_mock)
         return local_override
 
     def reset(self) -> None:

@@ -1,6 +1,5 @@
 # TODO
 
-- Fix staticmethod mocking
 - Chained methods
 - Patching
 - Spying

@@ -78,8 +78,7 @@ class TestMocking:
         assert SomeClass().staticmethod() == "static_mocked"
         MockerState.teardown()
         assert SomeClass.staticmethod() == "static_value"
-        # TODO: fix restoring static methods on instances
-        # assert SomeClass().staticmethod() == "static_value"
+        assert SomeClass().staticmethod() == "static_value"
 
     def test_mock_side_effect_raise_exception(self) -> None:
         mocker(SomeClass).mock("instance_method").side_effect(RuntimeError("error")).called_once()
