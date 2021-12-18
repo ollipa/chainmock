@@ -68,8 +68,9 @@ class MockAssert:
         self._assertions.append(functools.partial(self._assert_call_count, call_count))
         return self
 
-    def teardown(self) -> None:
-        for assertion in self._assertions:
+    def validate(self) -> None:
+        while len(self._assertions) > 0:
+            assertion = self._assertions.pop()
             assertion()
 
     def self(self) -> Mocker:
@@ -136,14 +137,17 @@ class Mocker:
         return local_override
 
     def reset(self) -> None:
-        for original, name in self._originals:
+        while len(self._originals) > 0:
+            original, name = self._originals.pop()
             setattr(self._target, name, original)
-        for name in self._overrides:
+        while len(self._overrides) > 0:
+            name = self._overrides.pop()
             delattr(self._target, name)
 
-    def teardown(self) -> None:
-        for assertion in self._assertions:
-            assertion.teardown()
+    def validate(self) -> None:
+        while len(self._assertions) > 0:
+            assertion = self._assertions.pop()
+            assertion.validate()
 
 
 class MockerState:
@@ -163,10 +167,15 @@ class MockerState:
             mocker_.reset()
 
     @classmethod
-    def teardown(cls) -> None:
+    def validate(cls) -> None:
         for key in list(cls.MOCKERS):
             mocker_ = cls.MOCKERS.pop(key)
-            mocker_.teardown()
+            mocker_.validate()
+
+    @classmethod
+    def teardown(cls) -> None:
+        cls.reset()
+        cls.validate()
 
 
 def mocker(target: Any = None) -> Mocker:
