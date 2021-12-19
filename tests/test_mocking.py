@@ -1,5 +1,7 @@
 """Test mocking functionality."""
 # pylint: disable=missing-docstring,no-self-use
+from typing import Type
+
 import pytest
 
 from mokit._api import MockerState, mocker
@@ -140,3 +142,25 @@ class TestMocking:
         MockerState.teardown()
         assert FooClass().method() == "value"
         assert instance.method() == "value"
+
+    def test_mock_chaining_methods(self) -> None:
+        class Third:
+            @classmethod
+            def method(cls) -> str:
+                return "value"
+
+        class Second:
+            def get_third(self) -> Type[Third]:
+                return Third
+
+        class First:
+            def get_second(self) -> Second:
+                return Second()
+
+        assert First().get_second().get_third().method() == "value"
+
+        mocker(First).mock("get_second.get_third.method").return_value("mock_chain")
+        assert First().get_second().get_third().method() == "mock_chain"
+        MockerState.teardown()
+
+        assert First().get_second().get_third().method() == "value"

@@ -108,6 +108,10 @@ class Mocker:
         MockerState.add_mocker(self, target)
 
     def mock(self, name: str) -> MockAssert:
+        parts = name.split(".")
+        if not parts:
+            raise ValueError("Method name can not be empty")
+        name = parts[0]
         attr_mock = getattr(self._mock, name)
         if self._target is None:
             setattr(self, name, attr_mock)
@@ -119,6 +123,11 @@ class Mocker:
             elif name not in self._overrides and name not in [name for _, name in self._originals]:
                 self._originals.append((original, name))
         assertion = MockAssert(self, attr_mock, name, _mokit=True)
+        if len(parts) > 1:
+            # Support for chaining methods
+            stub = Mocker(_mokit=True)
+            assertion.return_value(stub)
+            assertion = stub.mock(".".join(parts[1:]))
         self._assertions.append(assertion)
         return assertion
 

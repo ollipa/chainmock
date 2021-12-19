@@ -1,6 +1,5 @@
 # TODO
 
-- Chained methods
 - Patching
 - Spying
 - Mocking properties
