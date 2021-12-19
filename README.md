@@ -1,9 +1,13 @@
 # TODO
 
-- Check all args that can be passed to unittest methods
-- Prettier error messages in pytest
+- Fix, teardown swallows pytest exceptions
 - Patching
 - Fix spying instance methods
 - Async stubs?
-- Test mocking derived classes
+  - Allow setting spec when creating stub?
 - Test coverage
+- Mocking mangled methods
+- Call at_least and at_most modifiers
+- Unclear error message when call arguments not mathed:
+  - AssertionError: Expected 'class_method_with_args' to have been called twice. Called 1 times.
+- Implement match call args method

@@ -6,7 +6,8 @@ import pytest
 
 from chainmock import Mock, mocker
 
-from .common import SomeClass
+from . import common
+from .common import DerivedClass, SomeClass
 from .utils import assert_raises
 
 
@@ -25,6 +26,12 @@ class TestMocking:
 
     def test_teardown_called(self) -> None:
         assert SomeClass().instance_method() == "instance_attr"
+
+    def test_mock_module_function_return_value(self) -> None:
+        mocker(common).mock("some_function").return_value("mocked").called_once()
+        assert common.some_function("foo") == "mocked"
+        Mock.teardown()
+        assert common.some_function("foo") == "foo"
 
     def test_mock_instance_method_return_value(self) -> None:
         mocker(SomeClass).mock("instance_method").return_value("mocked").called_once()
@@ -158,3 +165,108 @@ class TestMocking:
         Mock.teardown()
 
         assert First().get_second().get_third().method() == "value"
+
+    def test_mock_instance_method_on_derived_class(self) -> None:
+        mocker(DerivedClass).mock("instance_method").return_value("foo").called_once()
+        assert DerivedClass().instance_method() == "foo"
+        Mock.teardown()
+        assert DerivedClass().instance_method() == "instance_attr"
+
+    def test_mock_instance_method_on_derived_class_and_base_class(self) -> None:
+        mocker(SomeClass).mock("instance_method").return_value("foo").called_once()
+        assert SomeClass().instance_method() == "foo"
+        mocker(DerivedClass).mock("instance_method").return_value("bar").called_once()
+        assert DerivedClass().instance_method() == "bar"
+        Mock.teardown()
+        assert SomeClass().instance_method() == "instance_attr"
+        assert DerivedClass().instance_method() == "instance_attr"
+
+    def test_mock_class_method_on_derived_class(self) -> None:
+        mocker(DerivedClass).mock("class_method").return_value("foo").called_twice()
+        assert DerivedClass().class_method() == "foo"
+        assert DerivedClass.class_method() == "foo"
+        Mock.teardown()
+        assert DerivedClass().class_method() == "class_attr"
+        assert DerivedClass.class_method() == "class_attr"
+
+    def test_mock_class_method_on_derived_class_and_base_class(self) -> None:
+        mocker(SomeClass).mock("class_method").return_value("foo").called_once()
+        assert SomeClass.class_method() == "foo"
+        mocker(DerivedClass).mock("class_method").return_value("bar").called_twice()
+        assert DerivedClass().class_method() == "bar"
+        assert DerivedClass.class_method() == "bar"
+        Mock.teardown()
+        assert SomeClass.class_method() == "class_attr"
+        assert DerivedClass().class_method() == "class_attr"
+        assert DerivedClass.class_method() == "class_attr"
+
+    def test_mock_static_method_on_derived_class(self) -> None:
+        mocker(DerivedClass).mock("static_method").return_value("foo").called_twice()
+        assert DerivedClass().static_method() == "foo"
+        assert DerivedClass.static_method() == "foo"
+        Mock.teardown()
+        assert DerivedClass().static_method() == "static_value"
+        assert DerivedClass.static_method() == "static_value"
+
+    def test_mock_static_method_on_derived_class_and_base_class(self) -> None:
+        mocker(SomeClass).mock("static_method").return_value("foo").called_once()
+        assert SomeClass.static_method() == "foo"
+        mocker(DerivedClass).mock("static_method").return_value("bar").called_twice()
+        assert DerivedClass().static_method() == "bar"
+        assert DerivedClass.static_method() == "bar"
+        Mock.teardown()
+        assert SomeClass.static_method() == "static_value"
+        assert DerivedClass().static_method() == "static_value"
+        assert DerivedClass.static_method() == "static_value"
+
+    def test_mock_instance_method_on_derived_class_called_with_args(self) -> None:
+        mocker(DerivedClass).mock("instance_method_with_args").called_with(1).return_value(
+            2
+        ).called_once()
+        assert DerivedClass().instance_method_with_args(1) == 2
+
+    def test_mock_instance_method_on_derived_class_and_base_class_called_with_args(self) -> None:
+        mocker(SomeClass).mock("instance_method_with_args").called_with(1).return_value(
+            2
+        ).called_once()
+        assert SomeClass().instance_method_with_args(1) == 2
+        mocker(DerivedClass).mock("instance_method_with_args").called_with(2).return_value(
+            3
+        ).called_once()
+        assert DerivedClass().instance_method_with_args(2) == 3
+
+    def test_mock_class_method_on_derived_class_called_with_args(self) -> None:
+        mocker(DerivedClass).mock("class_method_with_args").called_with(1).return_value(
+            2
+        ).called_twice()
+        assert DerivedClass().class_method_with_args(1) == 2
+        assert DerivedClass.class_method_with_args(1) == 2
+
+    def test_mock_class_method_on_derived_class_and_base_class_called_with_args(self) -> None:
+        mocker(SomeClass).mock("class_method_with_args").called_with(1).return_value(
+            2
+        ).called_once()
+        assert SomeClass.class_method_with_args(1) == 2
+        mocker(DerivedClass).mock("class_method_with_args").called_with(2).return_value(
+            3
+        ).called_twice()
+        assert DerivedClass().class_method_with_args(2) == 3
+        assert DerivedClass.class_method_with_args(2) == 3
+
+    def test_mock_static_method_on_derived_class_called_with_args(self) -> None:
+        mocker(DerivedClass).mock("static_method_with_args").called_with(1).return_value(
+            2
+        ).called_twice()
+        assert DerivedClass().static_method_with_args(1) == 2
+        assert DerivedClass.static_method_with_args(1) == 2
+
+    def test_mock_static_method_on_derived_class_and_base_class_called_with_args(self) -> None:
+        mocker(SomeClass).mock("static_method_with_args").called_with(1).return_value(
+            2
+        ).called_once()
+        assert SomeClass.static_method_with_args(1) == 2
+        mocker(DerivedClass).mock("static_method_with_args").called_with(2).return_value(
+            3
+        ).called_twice()
+        assert DerivedClass().static_method_with_args(2) == 3
+        assert DerivedClass.static_method_with_args(2) == 3
