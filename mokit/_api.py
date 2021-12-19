@@ -100,14 +100,24 @@ class Mocker:
                 "Mocker should not be initialized directly. Use mocker function instead."
             )
         self._target = target
-        self._mock = umock.Mock()
+        self._mock = umock.Mock(wraps=self._target)
         self._assertions: List[MockAssert] = []
         self._originals: List[Tuple[Any, str]] = []
         self._overrides: List[str] = []
 
         MockerState.add_mocker(self, target)
 
+    def spy(self, name: str) -> MockAssert:
+        if self._target is None:
+            raise RuntimeError("Stubs can not be spied. Did you mean to call mock()?")
+        return self._attr_mock(name)
+
     def mock(self, name: str) -> MockAssert:
+        assertion = self._attr_mock(name)
+        assertion.return_value(None)
+        return assertion
+
+    def _attr_mock(self, name: str) -> MockAssert:
         parts = name.split(".")
         if not parts:
             raise ValueError("Method name can not be empty")

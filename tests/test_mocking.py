@@ -6,28 +6,8 @@ import pytest
 
 from mokit._api import MockerState, mocker
 
+from .common import SomeClass
 from .utils import assert_raises
-
-
-class SomeClass:
-    ATTR = "class_attr"
-
-    def __init__(self) -> None:
-        self.attr = "instance_attr"
-
-    def instance_method(self) -> str:
-        return self.attr
-
-    def instance_method_with_args(self, arg1: int) -> int:
-        return arg1
-
-    @classmethod
-    def class_method(cls) -> str:
-        return cls.ATTR
-
-    @staticmethod
-    def staticmethod() -> str:
-        return "static_value"
 
 
 class TestMocking:
@@ -39,7 +19,7 @@ class TestMocking:
         properly.
         """
         assert SomeClass().instance_method() == "instance_attr"
-        mocker(SomeClass).mock("method").return_value("teardown_mock")
+        mocker(SomeClass).mock("instance_method").return_value("teardown_mock")
         assert SomeClass().instance_method() == "teardown_mock"
         raise RuntimeError()
 
