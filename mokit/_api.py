@@ -12,7 +12,9 @@ from unittest import mock as umock
 
 
 class MockAssert:
-    def __init__(self, parent: Mocker, attr_mock: Any, name: str) -> None:
+    def __init__(self, parent: Mocker, attr_mock: Any, name: str, _mokit: bool = False) -> None:
+        if not _mokit:
+            raise RuntimeError("MockAssert should not be initialized directly.")
         self._parent = parent
         self._attr_mock: umock.Mock = attr_mock
         self._name = name
@@ -116,7 +118,7 @@ class Mocker:
                 self._overrides.append(name)
             elif name not in self._overrides and name not in [name for _, name in self._originals]:
                 self._originals.append((original, name))
-        assertion = MockAssert(self, attr_mock, name)
+        assertion = MockAssert(self, attr_mock, name, _mokit=True)
         self._assertions.append(assertion)
         return assertion
 
