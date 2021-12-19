@@ -11,13 +11,27 @@ class SomeClass:
     def instance_method(self) -> str:
         return self.attr
 
+    async def async_instance_method(self) -> str:
+        return self.attr
+
     def instance_method_with_args(self, arg1: int) -> int:
+        return arg1
+
+    async def async_instance_method_with_args(self, arg1: int) -> int:
         return arg1
 
     @classmethod
     def class_method(cls) -> str:
         return cls.ATTR
 
+    @classmethod
+    async def async_class_method(cls) -> str:
+        return cls.ATTR
+
     @staticmethod
-    def staticmethod() -> str:
+    def static_method() -> str:
+        return "static_value"
+
+    @staticmethod
+    async def async_static_method() -> str:
         return "static_value"

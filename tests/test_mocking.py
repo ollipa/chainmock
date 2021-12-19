@@ -49,18 +49,18 @@ class TestMocking:
 
     def test_mock_static_method_on_an_instance(self) -> None:
         instance = SomeClass()
-        mocker(instance).mock("staticmethod").return_value("static_mocked")
-        assert instance.staticmethod() == "static_mocked"
+        mocker(instance).mock("static_method").return_value("static_mocked")
+        assert instance.static_method() == "static_mocked"
         MockerState.teardown()
-        assert instance.staticmethod() == "static_value"
+        assert instance.static_method() == "static_value"
 
     def test_mock_static_method_return_value(self) -> None:
-        mocker(SomeClass).mock("staticmethod").return_value("static_mocked")
-        assert SomeClass.staticmethod() == "static_mocked"
-        assert SomeClass().staticmethod() == "static_mocked"
+        mocker(SomeClass).mock("static_method").return_value("static_mocked")
+        assert SomeClass.static_method() == "static_mocked"
+        assert SomeClass().static_method() == "static_mocked"
         MockerState.teardown()
-        assert SomeClass.staticmethod() == "static_value"
-        assert SomeClass().staticmethod() == "static_value"
+        assert SomeClass.static_method() == "static_value"
+        assert SomeClass().static_method() == "static_value"
 
     def test_mock_side_effect_raise_exception(self) -> None:
         mocker(SomeClass).mock("instance_method").side_effect(RuntimeError("error")).called_once()

@@ -7,7 +7,7 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 from unittest import mock as umock
 
 
@@ -16,7 +16,7 @@ class MockAssert:
         if not _mokit:
             raise RuntimeError("MockAssert should not be initialized directly.")
         self._parent = parent
-        self._attr_mock: umock.Mock = attr_mock
+        self._attr_mock: Union[umock.AsyncMock, umock.MagicMock] = attr_mock
         self._name = name
         self._assertions: List[Callable[..., None]] = []
 
@@ -34,9 +34,21 @@ class MockAssert:
         )
         return self
 
+    def awaited_with(self, *args: Any, **kwargs: Any) -> MockAssert:
+        self._assertions.append(
+            functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)
+        )
+        return self
+
     def called_once_with(self, *args: Any, **kwargs: Any) -> MockAssert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_called_once_with, *args, **kwargs)
+        )
+        return self
+
+    def awaited_once_with(self, *args: Any, **kwargs: Any) -> MockAssert:
+        self._assertions.append(
+            functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)
         )
         return self
 
@@ -44,9 +56,21 @@ class MockAssert:
         self._assertions.append(functools.partial(self._attr_mock.assert_any_call, *args, **kwargs))
         return self
 
-    def assert_has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> MockAssert:
+    def any_await(self, *args: Any, **kwargs: Any) -> MockAssert:
+        self._assertions.append(
+            functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
+        )
+        return self
+
+    def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> MockAssert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_has_calls, calls, any_order)
+        )
+        return self
+
+    def has_awaits(self, calls: Sequence[umock._Call], any_order: bool = False) -> MockAssert:
+        self._assertions.append(
+            functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)
         )
         return self
 
@@ -54,20 +78,40 @@ class MockAssert:
         self._assertions.append(functools.partial(self._attr_mock.assert_not_called))
         return self
 
+    def not_awaited(self) -> MockAssert:
+        self._assertions.append(functools.partial(self._attr_mock.assert_not_awaited))
+        return self
+
     def called(self) -> MockAssert:
         self._assertions.append(functools.partial(self._attr_mock.assert_called))
+        return self
+
+    def awaited(self) -> MockAssert:
+        self._assertions.append(functools.partial(self._attr_mock.assert_awaited))
         return self
 
     def called_once(self) -> MockAssert:
         self._assertions.append(functools.partial(self._assert_call_count, 1))
         return self
 
+    def awaited_once(self) -> MockAssert:
+        self._assertions.append(functools.partial(self._assert_await_count, 1))
+        return self
+
     def called_twice(self) -> MockAssert:
         self._assertions.append(functools.partial(self._assert_call_count, 2))
         return self
 
+    def awaited_twice(self) -> MockAssert:
+        self._assertions.append(functools.partial(self._assert_await_count, 2))
+        return self
+
     def called_times(self, call_count: int) -> MockAssert:
         self._assertions.append(functools.partial(self._assert_call_count, call_count))
+        return self
+
+    def awaited_times(self, await_count: int) -> MockAssert:
+        self._assertions.append(functools.partial(self._assert_await_count, await_count))
         return self
 
     def validate(self) -> None:
@@ -77,6 +121,20 @@ class MockAssert:
 
     def self(self) -> Mocker:
         return self._parent
+
+    def _assert_await_count(self, await_count: int) -> None:
+        if not self._attr_mock.await_count == await_count:
+            if await_count == 1:
+                times = "once"
+            elif await_count == 2:
+                times = "twice"
+            else:
+                times = f"{await_count} times"
+            msg = (
+                f"Expected '{self._name}' to have been awaited {times}. "
+                f"Awaited {self._attr_mock.await_count} times."
+            )
+            raise AssertionError(msg)
 
     def _assert_call_count(self, call_count: int) -> None:
         if not self._attr_mock.call_count == call_count:
@@ -100,7 +158,7 @@ class Mocker:
                 "Mocker should not be initialized directly. Use mocker function instead."
             )
         self._target = target
-        self._mock = umock.Mock(wraps=self._target)
+        self._mock = umock.MagicMock(spec=self._target, wraps=self._target)
         self._assertions: List[MockAssert] = []
         self._originals: List[Tuple[Any, str]] = []
         self._overrides: List[str] = []

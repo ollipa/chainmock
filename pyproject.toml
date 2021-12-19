@@ -16,6 +16,7 @@ pylint = "^2.12.2"
 isort = "^5.10.1"
 black = "^21.12b0"
 ipython = "^7.30.1"
+pytest-asyncio = "^0.16.0"
 
 [tool.poetry.plugins.pytest11]
 mokit = "mokit._pytest_plugin"
