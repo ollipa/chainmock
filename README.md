@@ -5,3 +5,5 @@
 - Patching
 - Fix spying instance methods
 - Async stubs?
+- Test mocking derived classes
+- Test coverage

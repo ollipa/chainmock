@@ -2,7 +2,7 @@
 # pylint: disable=missing-docstring,no-self-use
 import pytest
 
-from mokit._api import mocker
+from chainmock import mocker
 
 from .common import SomeClass
 from .utils import assert_raises
@@ -11,7 +11,7 @@ from .utils import assert_raises
 class TestMocking:
     @pytest.mark.xfail
     def test_spy_call_count_on_instance_method(self) -> None:
-        # TODO: fix spying instance methods
+        # TODO: fix spying instance methods # pylint: disable=fixme
         assert SomeClass().instance_method() == "instance_attr"
         mocker(SomeClass).spy("instance_method").called_once()
         assert SomeClass().instance_method() == "instance_attr"

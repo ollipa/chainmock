@@ -4,7 +4,7 @@ from typing import Type
 
 import pytest
 
-from mokit._api import MockerState, mocker
+from chainmock import Mock, mocker
 
 from .common import SomeClass
 from .utils import assert_raises
@@ -13,7 +13,7 @@ from .utils import assert_raises
 class TestMocking:
     @pytest.mark.xfail
     def test_pytest_automatic_teardown_when_an_exception_is_raised(self) -> None:
-        """Mokit should call teardown even if a test fails with an exception.
+        """Teardown should be called even if a test fails with an exception.
 
         If this does not work, the subsequent tests would fail because mocks are not cleaned up
         properly.
@@ -29,28 +29,28 @@ class TestMocking:
     def test_mock_instance_method_return_value(self) -> None:
         mocker(SomeClass).mock("instance_method").return_value("mocked").called_once()
         assert SomeClass().instance_method() == "mocked"
-        MockerState.teardown()
+        Mock.teardown()
         assert SomeClass().instance_method() == "instance_attr"
 
     def test_mock_class_method_return_value(self) -> None:
         mocker(SomeClass).mock("class_method").return_value("class_mocked")
         assert SomeClass.class_method() == "class_mocked"
         assert SomeClass().class_method() == "class_mocked"
-        MockerState.teardown()
+        Mock.teardown()
         assert SomeClass.class_method() == "class_attr"
         assert SomeClass().class_method() == "class_attr"
 
     def test_mock_property_return_value(self) -> None:
         mocker(SomeClass).mock("some_property").return_value("propertymocked")
         assert SomeClass().some_property == "propertymocked"
-        MockerState.teardown()
+        Mock.teardown()
         assert SomeClass().some_property == "instance_attr"
 
     def test_mock_and_set_properties_with_kwargs(self) -> None:
         mocker(SomeClass, some_property="foo", instance_method="bar")
         assert SomeClass().some_property == "foo"
         assert SomeClass().instance_method() == "bar"
-        MockerState.teardown()
+        Mock.teardown()
         assert SomeClass().some_property == "instance_attr"
         assert SomeClass().instance_method() == "instance_attr"
 
@@ -58,21 +58,21 @@ class TestMocking:
         instance = SomeClass()
         mocker(instance).mock("class_method").return_value("class_mocked")
         assert instance.class_method() == "class_mocked"
-        MockerState.teardown()
+        Mock.teardown()
         assert instance.class_method() == "class_attr"
 
     def test_mock_static_method_on_an_instance(self) -> None:
         instance = SomeClass()
         mocker(instance).mock("static_method").return_value("static_mocked")
         assert instance.static_method() == "static_mocked"
-        MockerState.teardown()
+        Mock.teardown()
         assert instance.static_method() == "static_value"
 
     def test_mock_static_method_return_value(self) -> None:
         mocker(SomeClass).mock("static_method").return_value("static_mocked")
         assert SomeClass.static_method() == "static_mocked"
         assert SomeClass().static_method() == "static_mocked"
-        MockerState.teardown()
+        Mock.teardown()
         assert SomeClass.static_method() == "static_value"
         assert SomeClass().static_method() == "static_value"
 
@@ -102,7 +102,7 @@ class TestMocking:
                 "Actual: instance_method_with_args(5)"
             ),
         ):
-            MockerState.teardown()
+            Mock.teardown()
 
     def test_mock_called_once_with_no_call(self) -> None:
         mocker(SomeClass).mock("instance_method_with_args").return_value(1).called_once_with(10)
@@ -110,14 +110,14 @@ class TestMocking:
             AssertionError,
             "Expected 'instance_method_with_args' to be called once. Called 0 times.",
         ):
-            MockerState.teardown()
+            Mock.teardown()
 
     def test_mock_same_method_multiple_times(self) -> None:
         mocker(SomeClass).mock("instance_method").return_value("mocked1")
         assert SomeClass().instance_method() == "mocked1"
         mocker(SomeClass).mock("instance_method").return_value("mocked2")
         assert SomeClass().instance_method() == "mocked2"
-        MockerState.teardown()
+        Mock.teardown()
         assert SomeClass().instance_method() == "instance_attr"
 
     def test_mock_class_and_instance_at_the_same_time(self) -> None:
@@ -133,7 +133,7 @@ class TestMocking:
         assert FooClass().method() == "mocked1"
         assert instance.method() == "mocked2"
 
-        MockerState.teardown()
+        Mock.teardown()
         assert FooClass().method() == "value"
         assert instance.method() == "value"
 
@@ -155,6 +155,6 @@ class TestMocking:
 
         mocker(First).mock("get_second.get_third.method").return_value("mock_chain")
         assert First().get_second().get_third().method() == "mock_chain"
-        MockerState.teardown()
+        Mock.teardown()
 
         assert First().get_second().get_third().method() == "value"

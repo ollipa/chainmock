@@ -1,1 +1,1 @@
-"""Mokit tests."""
+"""Chainmock tests."""

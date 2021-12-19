@@ -1,118 +1,117 @@
-"""Mokit.
-
-Spy, stub, and mock library for Python and Pytest.
-"""
+"""Chainmock API implementation."""
 # pylint: disable=missing-docstring
 from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Sequence, Tuple, Union
 from unittest import mock as umock
 
 AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
 
 
-class MockAssert:
-    def __init__(self, parent: Mocker, attr_mock: AnyMock, name: str, _mokit: bool = False) -> None:
-        if not _mokit:
-            raise RuntimeError("MockAssert should not be initialized directly.")
+class Assert:  # pylint: disable=too-many-public-methods
+    def __init__(
+        self, parent: Mock, attr_mock: AnyMock, name: str, _internal: bool = False
+    ) -> None:
+        if not _internal:
+            raise RuntimeError("Assert should not be initialized directly.")
         self._parent = parent
         self._attr_mock = attr_mock
         self._name = name
         self._assertions: List[Callable[..., None]] = []
 
-    def return_value(self, value: Any) -> MockAssert:
+    def return_value(self, value: Any) -> Assert:
         self._attr_mock.return_value = value
         return self
 
-    def side_effect(self, value: Any) -> MockAssert:
+    def side_effect(self, value: Any) -> Assert:
         self._attr_mock.side_effect = value
         return self
 
-    def called_with(self, *args: Any, **kwargs: Any) -> MockAssert:
+    def called_with(self, *args: Any, **kwargs: Any) -> Assert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_called_with, *args, **kwargs)
         )
         return self
 
-    def awaited_with(self, *args: Any, **kwargs: Any) -> MockAssert:
+    def awaited_with(self, *args: Any, **kwargs: Any) -> Assert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)
         )
         return self
 
-    def called_once_with(self, *args: Any, **kwargs: Any) -> MockAssert:
+    def called_once_with(self, *args: Any, **kwargs: Any) -> Assert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_called_once_with, *args, **kwargs)
         )
         return self
 
-    def awaited_once_with(self, *args: Any, **kwargs: Any) -> MockAssert:
+    def awaited_once_with(self, *args: Any, **kwargs: Any) -> Assert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)
         )
         return self
 
-    def any_call(self, *args: Any, **kwargs: Any) -> MockAssert:
+    def any_call(self, *args: Any, **kwargs: Any) -> Assert:
         self._assertions.append(functools.partial(self._attr_mock.assert_any_call, *args, **kwargs))
         return self
 
-    def any_await(self, *args: Any, **kwargs: Any) -> MockAssert:
+    def any_await(self, *args: Any, **kwargs: Any) -> Assert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
         )
         return self
 
-    def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> MockAssert:
+    def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_has_calls, calls, any_order)
         )
         return self
 
-    def has_awaits(self, calls: Sequence[umock._Call], any_order: bool = False) -> MockAssert:
+    def has_awaits(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
         self._assertions.append(
             functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)
         )
         return self
 
-    def not_called(self) -> MockAssert:
+    def not_called(self) -> Assert:
         self._assertions.append(functools.partial(self._attr_mock.assert_not_called))
         return self
 
-    def not_awaited(self) -> MockAssert:
+    def not_awaited(self) -> Assert:
         self._assertions.append(functools.partial(self._attr_mock.assert_not_awaited))
         return self
 
-    def called(self) -> MockAssert:
+    def called(self) -> Assert:
         self._assertions.append(functools.partial(self._attr_mock.assert_called))
         return self
 
-    def awaited(self) -> MockAssert:
+    def awaited(self) -> Assert:
         self._assertions.append(functools.partial(self._attr_mock.assert_awaited))
         return self
 
-    def called_once(self) -> MockAssert:
+    def called_once(self) -> Assert:
         self._assertions.append(functools.partial(self._assert_call_count, 1))
         return self
 
-    def awaited_once(self) -> MockAssert:
+    def awaited_once(self) -> Assert:
         self._assertions.append(functools.partial(self._assert_await_count, 1))
         return self
 
-    def called_twice(self) -> MockAssert:
+    def called_twice(self) -> Assert:
         self._assertions.append(functools.partial(self._assert_call_count, 2))
         return self
 
-    def awaited_twice(self) -> MockAssert:
+    def awaited_twice(self) -> Assert:
         self._assertions.append(functools.partial(self._assert_await_count, 2))
         return self
 
-    def called_times(self, call_count: int) -> MockAssert:
+    def called_times(self, call_count: int) -> Assert:
         self._assertions.append(functools.partial(self._assert_call_count, call_count))
         return self
 
-    def awaited_times(self, await_count: int) -> MockAssert:
+    def awaited_times(self, await_count: int) -> Assert:
         self._assertions.append(functools.partial(self._assert_await_count, await_count))
         return self
 
@@ -121,7 +120,7 @@ class MockAssert:
             assertion = self._assertions.pop()
             assertion()
 
-    def self(self) -> Mocker:
+    def self(self) -> Mock:
         return self._parent
 
     def _assert_await_count(self, await_count: int) -> None:
@@ -153,31 +152,31 @@ class MockAssert:
             raise AssertionError(msg)
 
 
-class Mocker:
-    def __init__(self, target: Any = None, *, _mokit: bool = False) -> None:
-        if not _mokit:
+class Mock:
+    MOCKS: Dict[int, Mock] = {}
+
+    def __init__(self, target: Any = None, *, _internal: bool = False) -> None:
+        if not _internal:
             raise RuntimeError(
-                "Mocker should not be initialized directly. Use mocker function instead."
+                "Mock should not be initialized directly. Use mocker function instead."
             )
         self._target = target
         self._mock = umock.MagicMock(spec=target, wraps=target)
-        self._assertions: List[MockAssert] = []
+        self._assertions: List[Assert] = []
         self._originals: List[Tuple[Any, str]] = []
         self._overrides: List[str] = []
 
-        MockerState.add_mocker(self, target)
-
-    def spy(self, name: str) -> MockAssert:
+    def spy(self, name: str) -> Assert:
         if self._target is None:
             raise RuntimeError("Stubs can not be spied. Did you mean to call mock()?")
         return self._attr_mock(name)
 
-    def mock(self, name: str) -> MockAssert:
+    def mock(self, name: str) -> Assert:
         assertion = self._attr_mock(name)
         assertion.return_value(None)
         return assertion
 
-    def _attr_mock(self, name: str) -> MockAssert:
+    def _attr_mock(self, name: str) -> Assert:
         parts = name.split(".")
         if not parts:
             raise ValueError("Method name can not be empty")
@@ -194,10 +193,10 @@ class Mocker:
                 self._overrides.append(name)
             elif name not in self._overrides and name not in [name for _, name in self._originals]:
                 self._originals.append((original, name))
-        assertion = MockAssert(self, attr_mock, name, _mokit=True)
+        assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 1:
             # Support for chaining methods
-            stub = Mocker(_mokit=True)
+            stub = Mock(_internal=True)
             assertion.return_value(stub)
             assertion = stub.mock(".".join(parts[1:]))
         self._assertions.append(assertion)
@@ -238,39 +237,35 @@ class Mocker:
             assertion = self._assertions.pop()
             assertion.validate()
 
-
-class MockerState:
-    MOCKERS: Dict[int, Mocker] = {}
+    @classmethod
+    def get_mock(cls, target: Any) -> Mock:
+        mock = cls.MOCKS.get(id(target))
+        if mock is None:
+            mock = cls(target, _internal=True)
+            cls.MOCKS[id(target)] = mock
+        return mock
 
     @classmethod
-    def add_mocker(cls, mocker_: Mocker, target: Any) -> None:
-        cls.MOCKERS[id(target)] = mocker_
+    def reset_mocks(cls) -> None:
+        for mock in cls.MOCKS.values():
+            mock.reset()
 
     @classmethod
-    def get_mocker(cls, target: Any) -> Optional[Mocker]:
-        return cls.MOCKERS.get(id(target))
-
-    @classmethod
-    def reset(cls) -> None:
-        for mocker_ in cls.MOCKERS.values():
-            mocker_.reset()
-
-    @classmethod
-    def validate(cls) -> None:
-        for key in list(cls.MOCKERS):
-            mocker_ = cls.MOCKERS.pop(key)
-            mocker_.validate()
+    def validate_mocks(cls) -> None:
+        for key in list(cls.MOCKS):
+            mock = cls.MOCKS.pop(key)
+            mock.validate()
 
     @classmethod
     def teardown(cls) -> None:
-        cls.reset()
-        cls.validate()
+        cls.reset_mocks()
+        cls.validate_mocks()
 
 
-def mocker(target: Any = None, **kwargs: Any) -> Mocker:
-    mocker_instance = MockerState.get_mocker(target)
-    if mocker_instance is None:
-        mocker_instance = Mocker(target, _mokit=True)
+def mocker(target: Any = None, **kwargs: Any) -> Mock:
+    mock = Mock.get_mock(target)
+    if mock is None:
+        mock = Mock(target, _internal=True)
     for name, value in kwargs.items():
-        mocker_instance.mock(name).return_value(value)
-    return mocker_instance
+        mock.mock(name).return_value(value)
+    return mock

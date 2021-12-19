@@ -1,6 +1,6 @@
 """Test stubbing functionality."""
 # pylint: disable=missing-docstring,no-self-use
-from mokit._api import mocker
+from chainmock import mocker
 
 
 class TestStubbing:
