@@ -40,6 +40,20 @@ class TestMocking:
         assert SomeClass.class_method() == "class_attr"
         assert SomeClass().class_method() == "class_attr"
 
+    def test_mock_property_return_value(self) -> None:
+        mocker(SomeClass).mock("some_property").return_value("propertymocked")
+        assert SomeClass().some_property == "propertymocked"
+        MockerState.teardown()
+        assert SomeClass().some_property == "instance_attr"
+
+    def test_mock_and_set_properties_with_kwargs(self) -> None:
+        mocker(SomeClass, some_property="foo", instance_method="bar")
+        assert SomeClass().some_property == "foo"
+        assert SomeClass().instance_method() == "bar"
+        MockerState.teardown()
+        assert SomeClass().some_property == "instance_attr"
+        assert SomeClass().instance_method() == "instance_attr"
+
     def test_mock_class_method_on_an_instance(self) -> None:
         instance = SomeClass()
         mocker(instance).mock("class_method").return_value("class_mocked")

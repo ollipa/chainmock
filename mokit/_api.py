@@ -10,13 +10,15 @@ import inspect
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 from unittest import mock as umock
 
+AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
+
 
 class MockAssert:
-    def __init__(self, parent: Mocker, attr_mock: Any, name: str, _mokit: bool = False) -> None:
+    def __init__(self, parent: Mocker, attr_mock: AnyMock, name: str, _mokit: bool = False) -> None:
         if not _mokit:
             raise RuntimeError("MockAssert should not be initialized directly.")
         self._parent = parent
-        self._attr_mock: Union[umock.AsyncMock, umock.MagicMock] = attr_mock
+        self._attr_mock = attr_mock
         self._name = name
         self._assertions: List[Callable[..., None]] = []
 
@@ -158,7 +160,7 @@ class Mocker:
                 "Mocker should not be initialized directly. Use mocker function instead."
             )
         self._target = target
-        self._mock = umock.MagicMock(spec=self._target, wraps=self._target)
+        self._mock = umock.MagicMock(spec=target, wraps=target)
         self._assertions: List[MockAssert] = []
         self._originals: List[Tuple[Any, str]] = []
         self._overrides: List[str] = []
@@ -180,11 +182,13 @@ class Mocker:
         if not parts:
             raise ValueError("Method name can not be empty")
         name = parts[0]
-        attr_mock = getattr(self._mock, name)
+        attr_mock: AnyMock = getattr(self._mock, name)
         if self._target is None:
             setattr(self, name, attr_mock)
         else:
             original = self._get_original(name)
+            if isinstance(original, property):
+                attr_mock = umock.PropertyMock()
             local_override = self._set_mocked_attribute(name, attr_mock)
             if local_override:
                 self._overrides.append(name)
@@ -263,8 +267,10 @@ class MockerState:
         cls.validate()
 
 
-def mocker(target: Any = None) -> Mocker:
+def mocker(target: Any = None, **kwargs: Any) -> Mocker:
     mocker_instance = MockerState.get_mocker(target)
     if mocker_instance is None:
         mocker_instance = Mocker(target, _mokit=True)
+    for name, value in kwargs.items():
+        mocker_instance.mock(name).return_value(value)
     return mocker_instance

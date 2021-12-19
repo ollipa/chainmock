@@ -35,3 +35,7 @@ class SomeClass:
     @staticmethod
     async def async_static_method() -> str:
         return "static_value"
+
+    @property
+    def some_property(self) -> str:
+        return self.attr
