@@ -4,7 +4,8 @@ from typing import Type
 
 import pytest
 
-from chainmock import Mock, mocker
+from chainmock import mocker
+from chainmock._api import State
 
 from . import common
 from .common import DerivedClass, SomeClass
@@ -30,34 +31,34 @@ class TestMocking:
     def test_mock_module_function_return_value(self) -> None:
         mocker(common).mock("some_function").return_value("mocked").called_once()
         assert common.some_function("foo") == "mocked"
-        Mock.teardown()
+        State.teardown()
         assert common.some_function("foo") == "foo"
 
     def test_mock_instance_method_return_value(self) -> None:
         mocker(SomeClass).mock("instance_method").return_value("mocked").called_once()
         assert SomeClass().instance_method() == "mocked"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass().instance_method() == "instance_attr"
 
     def test_mock_class_method_return_value(self) -> None:
         mocker(SomeClass).mock("class_method").return_value("class_mocked")
         assert SomeClass.class_method() == "class_mocked"
         assert SomeClass().class_method() == "class_mocked"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass.class_method() == "class_attr"
         assert SomeClass().class_method() == "class_attr"
 
     def test_mock_property_return_value(self) -> None:
         mocker(SomeClass).mock("some_property").return_value("propertymocked")
         assert SomeClass().some_property == "propertymocked"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass().some_property == "instance_attr"
 
     def test_mock_and_set_properties_with_kwargs(self) -> None:
         mocker(SomeClass, some_property="foo", instance_method="bar")
         assert SomeClass().some_property == "foo"
         assert SomeClass().instance_method() == "bar"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass().some_property == "instance_attr"
         assert SomeClass().instance_method() == "instance_attr"
 
@@ -65,21 +66,21 @@ class TestMocking:
         instance = SomeClass()
         mocker(instance).mock("class_method").return_value("class_mocked")
         assert instance.class_method() == "class_mocked"
-        Mock.teardown()
+        State.teardown()
         assert instance.class_method() == "class_attr"
 
     def test_mock_static_method_on_an_instance(self) -> None:
         instance = SomeClass()
         mocker(instance).mock("static_method").return_value("static_mocked")
         assert instance.static_method() == "static_mocked"
-        Mock.teardown()
+        State.teardown()
         assert instance.static_method() == "static_value"
 
     def test_mock_static_method_return_value(self) -> None:
         mocker(SomeClass).mock("static_method").return_value("static_mocked")
         assert SomeClass.static_method() == "static_mocked"
         assert SomeClass().static_method() == "static_mocked"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass.static_method() == "static_value"
         assert SomeClass().static_method() == "static_value"
 
@@ -109,7 +110,7 @@ class TestMocking:
                 "Actual: instance_method_with_args(5)"
             ),
         ):
-            Mock.teardown()
+            State.teardown()
 
     def test_mock_called_once_with_no_call(self) -> None:
         mocker(SomeClass).mock("instance_method_with_args").return_value(1).called_once_with(10)
@@ -117,14 +118,14 @@ class TestMocking:
             AssertionError,
             "Expected 'instance_method_with_args' to be called once. Called 0 times.",
         ):
-            Mock.teardown()
+            State.teardown()
 
     def test_mock_same_method_multiple_times(self) -> None:
         mocker(SomeClass).mock("instance_method").return_value("mocked1")
         assert SomeClass().instance_method() == "mocked1"
         mocker(SomeClass).mock("instance_method").return_value("mocked2")
         assert SomeClass().instance_method() == "mocked2"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass().instance_method() == "instance_attr"
 
     def test_mock_class_and_instance_at_the_same_time(self) -> None:
@@ -140,7 +141,7 @@ class TestMocking:
         assert FooClass().method() == "mocked1"
         assert instance.method() == "mocked2"
 
-        Mock.teardown()
+        State.teardown()
         assert FooClass().method() == "value"
         assert instance.method() == "value"
 
@@ -162,14 +163,14 @@ class TestMocking:
 
         mocker(First).mock("get_second.get_third.method").return_value("mock_chain")
         assert First().get_second().get_third().method() == "mock_chain"
-        Mock.teardown()
+        State.teardown()
 
         assert First().get_second().get_third().method() == "value"
 
     def test_mock_instance_method_on_derived_class(self) -> None:
         mocker(DerivedClass).mock("instance_method").return_value("foo").called_once()
         assert DerivedClass().instance_method() == "foo"
-        Mock.teardown()
+        State.teardown()
         assert DerivedClass().instance_method() == "instance_attr"
 
     def test_mock_instance_method_on_derived_class_and_base_class(self) -> None:
@@ -177,7 +178,7 @@ class TestMocking:
         assert SomeClass().instance_method() == "foo"
         mocker(DerivedClass).mock("instance_method").return_value("bar").called_once()
         assert DerivedClass().instance_method() == "bar"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass().instance_method() == "instance_attr"
         assert DerivedClass().instance_method() == "instance_attr"
 
@@ -185,7 +186,7 @@ class TestMocking:
         mocker(DerivedClass).mock("class_method").return_value("foo").called_twice()
         assert DerivedClass().class_method() == "foo"
         assert DerivedClass.class_method() == "foo"
-        Mock.teardown()
+        State.teardown()
         assert DerivedClass().class_method() == "class_attr"
         assert DerivedClass.class_method() == "class_attr"
 
@@ -195,7 +196,7 @@ class TestMocking:
         mocker(DerivedClass).mock("class_method").return_value("bar").called_twice()
         assert DerivedClass().class_method() == "bar"
         assert DerivedClass.class_method() == "bar"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass.class_method() == "class_attr"
         assert DerivedClass().class_method() == "class_attr"
         assert DerivedClass.class_method() == "class_attr"
@@ -204,7 +205,7 @@ class TestMocking:
         mocker(DerivedClass).mock("static_method").return_value("foo").called_twice()
         assert DerivedClass().static_method() == "foo"
         assert DerivedClass.static_method() == "foo"
-        Mock.teardown()
+        State.teardown()
         assert DerivedClass().static_method() == "static_value"
         assert DerivedClass.static_method() == "static_value"
 
@@ -214,7 +215,7 @@ class TestMocking:
         mocker(DerivedClass).mock("static_method").return_value("bar").called_twice()
         assert DerivedClass().static_method() == "bar"
         assert DerivedClass.static_method() == "bar"
-        Mock.teardown()
+        State.teardown()
         assert SomeClass.static_method() == "static_value"
         assert DerivedClass().static_method() == "static_value"
         assert DerivedClass.static_method() == "static_value"

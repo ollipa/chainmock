@@ -4,7 +4,7 @@ from typing import Generator
 import pytest
 from pytest import Item
 
-from . import Mock
+from ._api import State
 
 
 @pytest.hookimpl(hookwrapper=True)  # type: ignore
@@ -15,5 +15,5 @@ def pytest_runtest_call(
     try:
         yield
     finally:
-        Mock.reset_mocks()
-    Mock.teardown()
+        State.reset_mocks()
+    State.teardown()

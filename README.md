@@ -2,7 +2,6 @@
 
 - Fix, teardown swallows pytest exceptions
 - Patching
-- Fix spying instance methods
 - Async stubs?
   - Allow setting spec when creating stub?
 - Test coverage
@@ -11,3 +10,4 @@
 - Unclear error message when call arguments not mathed:
   - AssertionError: Expected 'class_method_with_args' to have been called twice. Called 1 times.
 - Implement match call args method
+- Implement spying
