@@ -1,6 +1,5 @@
 # TODO
 
-- Fix, teardown swallows pytest exceptions
 - Patching
 - Async stubs?
   - Allow setting spec when creating stub?

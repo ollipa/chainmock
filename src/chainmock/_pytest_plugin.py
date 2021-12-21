@@ -1,19 +1,23 @@
 """Pytest plugin."""
-from typing import Generator
+from typing import Generator, Optional
 
 import pytest
-from pytest import Item
+from _pytest.runner import CallInfo, ExceptionInfo, Item, TestReport
 
 from ._api import State
 
 
 @pytest.hookimpl(hookwrapper=True)  # type: ignore
-def pytest_runtest_call(
+def pytest_runtest_makereport(
     item: Item,  # pylint: disable=unused-argument
+    call: CallInfo[None],
 ) -> Generator[None, None, None]:
     """Hook into test execution and execute teardown after a test."""
-    try:
-        yield
-    finally:
-        State.reset_mocks()
-    State.teardown()
+    State.reset_mocks()
+    if call.excinfo is None:
+        try:
+            State.validate_mocks()
+        except BaseException:  # pylint: disable=broad-except
+            call.excinfo = ExceptionInfo.from_current()
+
+    _test_report: Optional[TestReport] = yield

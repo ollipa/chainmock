@@ -6,6 +6,7 @@ import pytest
 
 from chainmock import mocker
 from chainmock._api import State
+from chainmock.mock import call
 
 from . import common
 from .common import DerivedClass, SomeClass
@@ -237,9 +238,9 @@ class TestMocking:
         assert DerivedClass().instance_method_with_args(2) == 3
 
     def test_mock_class_method_on_derived_class_called_with_args(self) -> None:
-        mocker(DerivedClass).mock("class_method_with_args").called_with(1).return_value(
-            2
-        ).called_twice()
+        mocker(DerivedClass).mock("class_method_with_args").has_calls(
+            [call(1), call(1)]
+        ).return_value(2).called_twice()
         assert DerivedClass().class_method_with_args(1) == 2
         assert DerivedClass.class_method_with_args(1) == 2
 
@@ -248,16 +249,16 @@ class TestMocking:
             2
         ).called_once()
         assert SomeClass.class_method_with_args(1) == 2
-        mocker(DerivedClass).mock("class_method_with_args").called_with(2).return_value(
-            3
-        ).called_twice()
+        mocker(DerivedClass).mock("class_method_with_args").has_calls(
+            [call(2), call(2)]
+        ).return_value(3).called_twice()
         assert DerivedClass().class_method_with_args(2) == 3
         assert DerivedClass.class_method_with_args(2) == 3
 
     def test_mock_static_method_on_derived_class_called_with_args(self) -> None:
-        mocker(DerivedClass).mock("static_method_with_args").called_with(1).return_value(
-            2
-        ).called_twice()
+        mocker(DerivedClass).mock("static_method_with_args").has_calls(
+            [call(1), call(1)]
+        ).return_value(2).called_twice()
         assert DerivedClass().static_method_with_args(1) == 2
         assert DerivedClass.static_method_with_args(1) == 2
 
@@ -266,8 +267,8 @@ class TestMocking:
             2
         ).called_once()
         assert SomeClass.static_method_with_args(1) == 2
-        mocker(DerivedClass).mock("static_method_with_args").called_with(2).return_value(
-            3
-        ).called_twice()
+        mocker(DerivedClass).mock("static_method_with_args").has_calls(
+            [call(2), call(2)]
+        ).return_value(3).called_twice()
         assert DerivedClass().static_method_with_args(2) == 3
         assert DerivedClass.static_method_with_args(2) == 3
