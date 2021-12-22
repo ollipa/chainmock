@@ -1,6 +1,6 @@
 # TODO
 
-- Patching
+- Patching instances
 - Async stubs?
   - Allow setting spec when creating stub?
 - Test coverage
@@ -10,3 +10,5 @@
   - AssertionError: Expected 'class_method_with_args' to have been called twice. Called 1 times.
 - Implement match call args method
 - Implement spying
+- Use autospec?
+- Patching and mocking attributes that exist only during runtime?

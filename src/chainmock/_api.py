@@ -4,10 +4,11 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, Dict, List, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 from unittest import mock as umock
 
 AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
+AsyncAndSyncMock = Union[umock.AsyncMock, umock.MagicMock]
 
 
 class Assert:  # pylint: disable=too-many-public-methods
@@ -157,14 +158,22 @@ class Assert:  # pylint: disable=too-many-public-methods
 
 
 class State:
-    MOCKS: Dict[int, Mock] = {}
+    MOCKS: Dict[Union[int, str], Mock] = {}
 
     @classmethod
-    def get_mock(cls, target: Any) -> Mock:
-        mock = cls.MOCKS.get(id(target))
+    def get_or_create_mock(cls, target: Any) -> Mock:
+        key: Union[int, str]
+        if isinstance(target, str):
+            key = target
+        else:
+            key = id(target)
+        mock = cls.MOCKS.get(key)
         if mock is None:
-            mock = Mock(target, _internal=True)
-            cls.MOCKS[id(target)] = mock
+            patch = None
+            if isinstance(target, str):
+                patch = umock.patch(target, spec=True)
+            mock = Mock(target, patch, _internal=True)
+            cls.MOCKS[key] = mock
         return mock
 
     @classmethod
@@ -185,13 +194,22 @@ class State:
 
 
 class Mock:
-    def __init__(self, target: Any = None, *, _internal: bool = False) -> None:
+    def __init__(
+        self,
+        target: Any = None,
+        patch: Optional[
+            umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
+        ] = None,
+        *,
+        _internal: bool = False,
+    ) -> None:
         if not _internal:
             raise RuntimeError(
                 "Mock should not be initialized directly. Use mocker function instead."
             )
         self._target = target
-        self._mock = umock.MagicMock(spec=target)
+        self._patch = patch
+        self._mock = patch.start() if patch else umock.MagicMock(spec=target)
         self._assertions: List[Assert] = []
         self._originals: List[Tuple[Any, str]] = []
         self._overrides: List[str] = []
@@ -204,6 +222,8 @@ class Mock:
         attr_mock: AnyMock = getattr(self._mock, name)
         if self._target is None:
             assertion = self._stub_attribute(name, attr_mock, parts)
+        elif self._patch is not None:
+            assertion = self._patch_attribute(name, attr_mock, parts)
         else:
             assertion = self._mock_attribute(name, attr_mock, parts)
         assertion.return_value(None)
@@ -213,6 +233,15 @@ class Mock:
     def _stub_attribute(self, name: str, attr_mock: AnyMock, parts: List[str]) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
+        setattr(self, name, attr_mock)
+        assertion = Assert(self, attr_mock, name, _internal=True)
+        if len(parts) > 1:
+            # Support for chaining methods
+            assertion.return_value(self)
+            assertion = self.mock(".".join(parts[1:]))
+        return assertion
+
+    def _patch_attribute(self, name: str, attr_mock: AnyMock, parts: List[str]) -> Assert:
         setattr(self, name, attr_mock)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 1:
@@ -267,6 +296,8 @@ class Mock:
         while len(self._overrides) > 0:
             name = self._overrides.pop()
             delattr(self._target, name)
+        if self._patch is not None:
+            self._patch.stop()
 
     def _validate(self) -> None:
         while len(self._assertions) > 0:
@@ -275,9 +306,7 @@ class Mock:
 
 
 def mocker(target: Any = None, **kwargs: Any) -> Mock:
-    mock = State.get_mock(target)
-    if mock is None:
-        mock = Mock(target, _internal=True)
+    mock = State.get_or_create_mock(target)
     for name, value in kwargs.items():
         mock.mock(name).return_value(value)
     return mock
