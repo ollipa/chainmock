@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "chainmock"
 version = "0.1.0"
-description = "Spy, stub, and mock library for Python and Pytest"
+description = "Mocking library for Python and Pytest"
 authors = ["Olli Paakkunainen <olli@paakkunainen.fi>"]
 license = "MIT"
 packages = [{ include = "chainmock", from = "src" }]

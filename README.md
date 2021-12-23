@@ -10,3 +10,4 @@
 - Patching and mocking attributes that exist only during runtime?
 - Test mocking proxies
 - Reimports from unittest
+- Add tox tests
