@@ -1,6 +1,5 @@
 # TODO
 
-- Patching instances
 - Async stubs?
   - Allow setting spec when creating stub?
 - Test coverage
@@ -12,3 +11,4 @@
 - Implement spying
 - Use autospec?
 - Patching and mocking attributes that exist only during runtime?
+- Test mocking proxies

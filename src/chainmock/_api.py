@@ -161,7 +161,7 @@ class State:
     MOCKS: Dict[Union[int, str], Mock] = {}
 
     @classmethod
-    def get_or_create_mock(cls, target: Any) -> Mock:
+    def get_or_create_mock(cls, target: Any, patch_class: bool) -> Mock:
         key: Union[int, str]
         if isinstance(target, str):
             key = target
@@ -172,7 +172,7 @@ class State:
             patch = None
             if isinstance(target, str):
                 patch = umock.patch(target, spec=True)
-            mock = Mock(target, patch, _internal=True)
+            mock = Mock(target, patch, patch_class, _internal=True)
             cls.MOCKS[key] = mock
         return mock
 
@@ -200,6 +200,7 @@ class Mock:
         patch: Optional[
             umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
         ] = None,
+        patch_class: bool = False,
         *,
         _internal: bool = False,
     ) -> None:
@@ -213,13 +214,17 @@ class Mock:
         self._assertions: List[Assert] = []
         self._originals: List[Tuple[Any, str]] = []
         self._overrides: List[str] = []
+        self._patch_class: bool = patch_class
 
     def mock(self, name: str) -> Assert:
         parts = name.split(".")
         if not parts:
             raise ValueError("Method name cannot be empty")
         name = parts[0]
-        attr_mock: AnyMock = getattr(self._mock, name)
+        if not self._patch_class and self._patch and inspect.isclass(self._patch.temp_original):
+            attr_mock: AnyMock = getattr(self._mock(), name)
+        else:
+            attr_mock = getattr(self._mock, name)
         if self._target is None:
             assertion = self._stub_attribute(name, attr_mock, parts)
         elif self._patch is not None:
@@ -305,8 +310,8 @@ class Mock:
             assertion._validate()  # pylint: disable=protected-access
 
 
-def mocker(target: Any = None, **kwargs: Any) -> Mock:
-    mock = State.get_or_create_mock(target)
+def mocker(target: Any = None, patch_class: bool = False, **kwargs: Any) -> Mock:
+    mock = State.get_or_create_mock(target, patch_class)
     for name, value in kwargs.items():
         mock.mock(name).return_value(value)
     return mock
