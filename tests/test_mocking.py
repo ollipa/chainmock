@@ -2,8 +2,6 @@
 # pylint: disable=missing-docstring,no-self-use
 from typing import Type
 
-import pytest
-
 from chainmock import mocker
 from chainmock._api import State
 from chainmock.mock import call
@@ -13,22 +11,7 @@ from .common import DerivedClass, SomeClass
 from .utils import assert_raises
 
 
-class TestMocking:
-    @pytest.mark.xfail
-    def test_pytest_automatic_teardown_when_an_exception_is_raised(self) -> None:
-        """Teardown should be called even if a test fails with an exception.
-
-        If this does not work, the subsequent tests would fail because mocks are not cleaned up
-        properly.
-        """
-        assert SomeClass().instance_method() == "instance_attr"
-        mocker(SomeClass).mock("instance_method").return_value("teardown_mock")
-        assert SomeClass().instance_method() == "teardown_mock"
-        raise RuntimeError()
-
-    def test_teardown_called(self) -> None:
-        assert SomeClass().instance_method() == "instance_attr"
-
+class TestMocking:  # pylint: disable=too-many-public-methods
     def test_mock_module_function_return_value(self) -> None:
         mocker(common).mock("some_function").return_value("mocked").called_once()
         assert common.some_function("foo") == "mocked"

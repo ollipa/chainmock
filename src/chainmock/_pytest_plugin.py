@@ -13,11 +13,12 @@ def pytest_runtest_makereport(
     call: CallInfo[None],
 ) -> Generator[None, None, None]:
     """Hook into test execution and execute teardown after a test."""
-    State.reset_mocks()
-    if call.excinfo is None:
-        try:
-            State.validate_mocks()
-        except BaseException:  # pylint: disable=broad-except
-            call.excinfo = ExceptionInfo.from_current()
+    if call.when == "call":
+        State.reset_mocks()
+        if call.excinfo is None:
+            try:
+                State.validate_mocks()
+            except BaseException:  # pylint: disable=broad-except
+                call.excinfo = ExceptionInfo.from_current()
 
     _test_report: Optional[TestReport] = yield

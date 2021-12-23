@@ -1,8 +1,5 @@
 # TODO
 
-- Async stubs?
-  - Allow setting spec when creating stub?
-- Test coverage
 - Mocking mangled methods
 - Call at_least and at_most modifiers
 - Unclear error message when call arguments not mathed:
@@ -12,3 +9,4 @@
 - Use autospec?
 - Patching and mocking attributes that exist only during runtime?
 - Test mocking proxies
+- Reimports from unittest

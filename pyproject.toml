@@ -11,13 +11,13 @@ python = "^3.8"
 pytest = "^6.2.5"
 
 [tool.poetry.dev-dependencies]
-pytest-cov = "^3.0.0"
 mypy = "^0.920"
 pylint = "^2.12.2"
 isort = "^5.10.1"
 black = "^21.12b0"
 ipython = "^7.30.1"
 pytest-asyncio = "^0.16.0"
+coverage = "^6.2"
 
 [tool.poetry.plugins.pytest11]
 chainmock = "chainmock._pytest_plugin"
@@ -27,7 +27,7 @@ requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
 
 [tool.pylint.messages_control]
-disable = ["too-few-public-methods"]
+disable = ["too-few-public-methods", "duplicate-code"]
 
 [tool.pylint.format]
 max-line-length = "100"

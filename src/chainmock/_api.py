@@ -161,7 +161,13 @@ class State:
     MOCKS: Dict[Union[int, str], Mock] = {}
 
     @classmethod
-    def get_or_create_mock(cls, target: Any, patch_class: bool) -> Mock:
+    def get_or_create_mock(
+        cls,
+        target: Optional[Any],
+        *,
+        spec: Optional[Any] = None,
+        patch_class: bool = False,
+    ) -> Mock:
         key: Union[int, str]
         if isinstance(target, str):
             key = target
@@ -172,7 +178,7 @@ class State:
             patch = None
             if isinstance(target, str):
                 patch = umock.patch(target, spec=True)
-            mock = Mock(target, patch, patch_class, _internal=True)
+            mock = Mock(target, patch=patch, spec=spec, patch_class=patch_class, _internal=True)
             cls.MOCKS[key] = mock
         return mock
 
@@ -197,11 +203,12 @@ class Mock:
     def __init__(
         self,
         target: Optional[Any] = None,
+        *,
         patch: Optional[
             umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
         ] = None,
+        spec: Optional[Any] = None,
         patch_class: bool = False,
-        *,
         _internal: bool = False,
     ) -> None:
         if not _internal:
@@ -209,8 +216,11 @@ class Mock:
                 "Mock should not be initialized directly. Use mocker function instead."
             )
         self._target = target
+        self._spec = spec
         self._patch = patch
-        self._mock = patch.start() if patch else umock.MagicMock(spec=target)
+        self._mock = (
+            patch.start() if patch else umock.MagicMock(spec=spec if spec is not None else target)
+        )
         self._assertions: List[Assert] = []
         self._object_patches: List[
             umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
@@ -286,8 +296,14 @@ class Mock:
             assertion._validate()  # pylint: disable=protected-access
 
 
-def mocker(target: Optional[Any] = None, patch_class: bool = False, **kwargs: Any) -> Mock:
-    mock = State.get_or_create_mock(target, patch_class)
+def mocker(
+    target: Optional[Any] = None,
+    *,
+    spec: Optional[Any] = None,
+    patch_class: bool = False,
+    **kwargs: Any,
+) -> Mock:
+    mock = State.get_or_create_mock(target, spec=spec, patch_class=patch_class)
     for name, value in kwargs.items():
         mock.mock(name).return_value(value)
     return mock
