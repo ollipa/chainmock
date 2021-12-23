@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 from unittest import mock as umock
 
 AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
@@ -196,7 +196,7 @@ class State:
 class Mock:
     def __init__(
         self,
-        target: Any = None,
+        target: Optional[Any] = None,
         patch: Optional[
             umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
         ] = None,
@@ -212,8 +212,9 @@ class Mock:
         self._patch = patch
         self._mock = patch.start() if patch else umock.MagicMock(spec=target)
         self._assertions: List[Assert] = []
-        self._originals: List[Tuple[Any, str]] = []
-        self._overrides: List[str] = []
+        self._object_patches: List[
+            umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
+        ] = []
         self._patch_class: bool = patch_class
 
     def mock(self, name: str) -> Assert:
@@ -221,23 +222,20 @@ class Mock:
         if not parts:
             raise ValueError("Method name cannot be empty")
         name = parts[0]
-        if not self._patch_class and self._patch and inspect.isclass(self._patch.temp_original):
-            attr_mock: AnyMock = getattr(self._mock(), name)
-        else:
-            attr_mock = getattr(self._mock, name)
         if self._target is None:
-            assertion = self._stub_attribute(name, attr_mock, parts)
+            assertion = self._stub_attribute(name, parts)
         elif self._patch is not None:
-            assertion = self._patch_attribute(name, attr_mock, parts)
+            assertion = self._patch_attribute(name, parts)
         else:
-            assertion = self._mock_attribute(name, attr_mock, parts)
+            assertion = self._mock_attribute(name, parts)
         assertion.return_value(None)
         self._assertions.append(assertion)
         return assertion
 
-    def _stub_attribute(self, name: str, attr_mock: AnyMock, parts: List[str]) -> Assert:
+    def _stub_attribute(self, name: str, parts: List[str]) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
+        attr_mock = getattr(self._mock, name)
         setattr(self, name, attr_mock)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 1:
@@ -246,7 +244,11 @@ class Mock:
             assertion = self.mock(".".join(parts[1:]))
         return assertion
 
-    def _patch_attribute(self, name: str, attr_mock: AnyMock, parts: List[str]) -> Assert:
+    def _patch_attribute(self, name: str, parts: List[str]) -> Assert:
+        if not self._patch_class and self._patch and inspect.isclass(self._patch.temp_original):
+            attr_mock: AnyMock = getattr(self._mock(), name)
+        else:
+            attr_mock = getattr(self._mock, name)
         setattr(self, name, attr_mock)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 1:
@@ -255,15 +257,14 @@ class Mock:
             assertion = self.mock(".".join(parts[1:]))
         return assertion
 
-    def _mock_attribute(self, name: str, attr_mock: AnyMock, parts: List[str]) -> Assert:
-        original = self._get_original(name)
+    def _mock_attribute(self, name: str, parts: List[str]) -> Assert:
+        original = getattr(self._target, name)
         if isinstance(original, property):
-            attr_mock = umock.PropertyMock()
-        local_override = self._set_mocked_attribute(name, attr_mock)
-        if local_override:
-            self._overrides.append(name)
-        elif name not in self._overrides and name not in [name for _, name in self._originals]:
-            self._originals.append((original, name))
+            patch = umock.patch.object(self._target, name, new_callable=umock.PropertyMock)
+        else:
+            patch = umock.patch.object(self._target, name)
+        attr_mock = patch.start()
+        self._object_patches.append(patch)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 1:
             # Support for chaining methods
@@ -272,35 +273,10 @@ class Mock:
             assertion = stub.mock(".".join(parts[1:]))
         return assertion
 
-    def _get_original(self, name: str) -> Any:
-        """Get original attribute from target object."""
-        if hasattr(self._target, "__dict__") and vars(self._target).get(name):
-            # This is necessary for static methods to be restored correctly
-            return vars(self._target)[name]
-        return getattr(self._target, name)
-
-    def _set_mocked_attribute(self, name: str, attr_mock: Any) -> bool:
-        """Set mocked attribute on target object and override attributes locally
-        when possible.
-        """
-        local_override = False
-        if hasattr(self._target, "__dict__") and not vars(self._target).get(name):
-            if isinstance(vars(self._target), dict):
-                # Override attribute on a class instance.
-                local_override = True
-            elif inspect.isclass(self._target):
-                # Override attribute on a derived class.
-                local_override = True
-        setattr(self._target, name, attr_mock)
-        return local_override
-
     def _reset(self) -> None:
-        while len(self._originals) > 0:
-            original, name = self._originals.pop()
-            setattr(self._target, name, original)
-        while len(self._overrides) > 0:
-            name = self._overrides.pop()
-            delattr(self._target, name)
+        while len(self._object_patches) > 0:
+            patch = self._object_patches.pop()
+            patch.stop()
         if self._patch is not None:
             self._patch.stop()
 
@@ -310,7 +286,7 @@ class Mock:
             assertion._validate()  # pylint: disable=protected-access
 
 
-def mocker(target: Any = None, patch_class: bool = False, **kwargs: Any) -> Mock:
+def mocker(target: Optional[Any] = None, patch_class: bool = False, **kwargs: Any) -> Mock:
     mock = State.get_or_create_mock(target, patch_class)
     for name, value in kwargs.items():
         mock.mock(name).return_value(value)
