@@ -16,103 +16,356 @@ class Assert:  # pylint: disable=too-many-public-methods
         self, parent: Mock, attr_mock: AnyMock, name: str, _internal: bool = False
     ) -> None:
         if not _internal:
-            raise RuntimeError("Assert should not be initialized directly.")
+            raise RuntimeError(
+                "Assert should not be initialized directly. Use mocker function instead."
+            )
         self._parent = parent
         self._attr_mock = attr_mock
         self._name = name
         self._assertions: List[Callable[..., None]] = []
 
     def return_value(self, value: Any) -> Assert:
+        """Set the value that will be returned when the mocked attribute is
+        called.
+
+        Wrapper for `unittest.mock.Mock.return_value`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.return_value
+
+        Args:
+            value: Return value to set to the mocked call.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._attr_mock.return_value = value
         return self
 
     def side_effect(self, value: Any) -> Assert:
+        """Set a side effect that will occur when the mocked attribute is
+        called.
+
+        If you pass in a function it will be called with same arguments as the
+        mock.
+
+        If you pass in an iterable, it is used to retrieve an iterator which
+        must yield a value on every call. This value can either be an exception
+        instance to be raised, or a value to be returned from the call to the
+        mock.
+
+        Wrapper for `unittest.mock.Mock.side_effect`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.side_effect
+
+        Args:
+            value: Function to be called when the mock is called, an iterable or
+                an exception (class or instance) to be raised.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._attr_mock.side_effect = value
         return self
 
-    def called_with(self, *args: Any, **kwargs: Any) -> Assert:
+    def called_last_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that the last call was made with the specified arguments.
+
+        Wrapper for `unittest.mock.Mock.assert_called_with`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_with
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(
             functools.partial(self._attr_mock.assert_called_with, *args, **kwargs)
         )
         return self
 
-    def awaited_with(self, *args: Any, **kwargs: Any) -> Assert:
+    def awaited_last_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that the last await was with the specified arguments.
+
+        Wrapper for `unittest.mock.AsyncMock.assert_awaited_with`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_with
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(
             functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)
         )
         return self
 
     def called_once_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that the mock was called exactly once and that call was with
+        the specified arguments.
+
+        Wrapper for `unittest.mock.Mock.assert_called_once_with`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_once_with
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(
             functools.partial(self._attr_mock.assert_called_once_with, *args, **kwargs)
         )
         return self
 
     def awaited_once_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that the mock was awaited exactly once with the specified
+        arguments.
+
+        Wrapper for `unittest.mock.AsyncMock.assert_awaited_once_with`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_once_with
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(
             functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)
         )
         return self
 
-    def any_call(self, *args: Any, **kwargs: Any) -> Assert:
+    def any_call_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert the mock has been called with the specified arguments.
+
+        The assert passes if the mock has _ever_ been called with given
+        arguments.
+
+        Wrapper for `unittest.mock.Mock.assert_any_call`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_any_call
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._attr_mock.assert_any_call, *args, **kwargs))
         return self
 
-    def any_await(self, *args: Any, **kwargs: Any) -> Assert:
+    def any_await_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert the mock has been awaited with the specified arguments.
+
+        The assert passes if the mock has _ever_ been awaited with given
+        arguments.
+
+        Wrapper for `unittest.mock.AsyncMock.assert_any_await`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_any_await
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(
             functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
         )
         return self
 
     def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
+        """Assert the mock has been called with the specified calls.
+
+        If `any_order` is True then the calls can be in any order, but they must
+        all be matched. If `any_order` is False (default) then the calls must be
+        sequential but there can be extra calls before or after the specified
+        calls.
+
+        Wrapper for `unittest.mock.Mock.assert_has_calls`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_has_calls
+
+        Args:
+            calls: Expected calls. You can import the call type from
+                `chainmock.mock.call` or from `unittest.mock.call`.
+            any_order: Indicates if the calls must be sequential
+                (False, default) or in any order (True).
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(
             functools.partial(self._attr_mock.assert_has_calls, calls, any_order)
         )
         return self
 
     def has_awaits(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
+        """Assert the mock has been awaited with the specified calls.
+
+        If `any_order` is True then the calls can be in any order, but they must
+        all be matched. If `any_order` is False (default) then the calls must be
+        sequential but there can be extra calls before or after the specified
+        calls.
+
+        Wrapper for `unittest.mock.AsyncMock.assert_has_awaits`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_has_awaits
+
+        Args:
+            calls: Expected calls. You can import the call type from
+                `chainmock.mock.call` or from `unittest.mock.call`.
+            any_order: Indicates if the calls must be sequential
+                (False, default) or in any order (True).
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(
             functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)
         )
         return self
 
     def not_called(self) -> Assert:
+        """Assert that the mock was never called.
+
+        Wrapper for `unittest.mock.Mock.assert_not_called`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_not_called
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._attr_mock.assert_not_called))
         return self
 
     def not_awaited(self) -> Assert:
+        """Assert that the mock was never awaited.
+
+        Wrapper for `unittest.mock.AsyncMock.assert_not_awaited`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_not_awaited
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._attr_mock.assert_not_awaited))
         return self
 
     def called(self) -> Assert:
+        """Assert that the mock was called at least once.
+
+        Wrapper for `unittest.mock.Mock.assert_called`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._attr_mock.assert_called))
         return self
 
     def awaited(self) -> Assert:
+        """Assert that the mock was awaited at least once.
+
+        Wrapper for `unittest.mock.AsyncMock.assert_awaited`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._attr_mock.assert_awaited))
         return self
 
     def called_once(self) -> Assert:
+        """Assert that the mock was called exactly once.
+
+        Provides similar functionality to `unittest.mock.Mock.assert_called_once`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_once
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._assert_call_count, 1))
         return self
 
     def awaited_once(self) -> Assert:
+        """Assert that the mock was awaited exactly once.
+
+        Provides similar functionality to `unittest.mock.AsyncMock.assert_awaited_once`.
+
+        For more details see:
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_once
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._assert_await_count, 1))
         return self
 
     def called_twice(self) -> Assert:
+        """Assert that the mock was called exactly twice.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._assert_call_count, 2))
         return self
 
     def awaited_twice(self) -> Assert:
+        """Assert that the mock was awaited exactly twice.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._assert_await_count, 2))
         return self
 
     def called_times(self, call_count: int) -> Assert:
+        """Assert that the mock was called the specified number of times.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._assert_call_count, call_count))
         return self
 
     def awaited_times(self, await_count: int) -> Assert:
+        """Assert that the mock was awaited the specified number of times.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
         self._assertions.append(functools.partial(self._assert_await_count, await_count))
         return self
 
@@ -126,15 +379,10 @@ class Assert:  # pylint: disable=too-many-public-methods
 
     def _assert_await_count(self, await_count: int) -> None:
         if not self._attr_mock.await_count == await_count:
-            if await_count == 1:
-                times = "once"
-            elif await_count == 2:
-                times = "twice"
-            else:
-                times = f"{await_count} times"
             msg = (
-                f"Expected '{self._name}' to have been awaited {times}. "
-                f"Awaited {self._attr_mock.await_count} times."
+                f"Expected '{self._name}' to have been awaited "
+                f"{self._format_call_count(await_count)}. "
+                f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
             )
             raise AssertionError(msg)
 
@@ -229,9 +477,9 @@ class Mock:
 
     def mock(self, name: str) -> Assert:
         parts = name.split(".")
-        if not parts:
-            raise ValueError("Method name cannot be empty")
         name = parts[0]
+        if not name:
+            raise ValueError("Method name cannot be empty.")
         if self._target is None:
             assertion = self._stub_attribute(name, parts)
         elif self._patch is not None:
@@ -263,8 +511,9 @@ class Mock:
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 1:
             # Support for chaining methods
-            assertion.return_value(self)
-            assertion = self.mock(".".join(parts[1:]))
+            stub = Mock(_internal=True)
+            assertion.return_value(stub)
+            assertion = stub.mock(".".join(parts[1:]))
         return assertion
 
     def _mock_attribute(self, name: str, parts: List[str]) -> Assert:

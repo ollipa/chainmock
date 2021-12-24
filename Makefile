@@ -28,7 +28,8 @@ pytest:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running pytest$(off)\n'
 	@printf '*****************\n'
-	pytest tests
+	coverage run --source chainmock -m pytest tests
+	coverage report --fail-under=100 --show-missing
 
 .PHONY: mypy
 mypy:
@@ -57,11 +58,3 @@ pylint:
 	@printf '$(color)Running pylint$(off)\n'
 	@printf '*****************\n'
 	pylint ${TARGETS}
-
-.PHONY: coverage
-coverage:
-	@printf '\n\n*****************\n'
-	@printf '$(color)Running coverage$(off)\n'
-	@printf '*****************\n'
-	coverage run --source chainmock -m pytest tests
-	coverage report --fail-under=100 --show-missing

@@ -148,7 +148,6 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         mocker(First).mock("get_second.get_third.method").return_value("mock_chain")
         assert First().get_second().get_third().method() == "mock_chain"
         State.teardown()
-
         assert First().get_second().get_third().method() == "value"
 
     def test_mock_instance_method_on_derived_class(self) -> None:
@@ -205,17 +204,17 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         assert DerivedClass.static_method() == "static_value"
 
     def test_mock_instance_method_on_derived_class_called_with_args(self) -> None:
-        mocker(DerivedClass).mock("instance_method_with_args").called_with(1).return_value(
+        mocker(DerivedClass).mock("instance_method_with_args").called_last_with(1).return_value(
             2
         ).called_once()
         assert DerivedClass().instance_method_with_args(1) == 2
 
     def test_mock_instance_method_on_derived_class_and_base_class_called_with_args(self) -> None:
-        mocker(SomeClass).mock("instance_method_with_args").called_with(1).return_value(
+        mocker(SomeClass).mock("instance_method_with_args").called_last_with(1).return_value(
             2
         ).called_once()
         assert SomeClass().instance_method_with_args(1) == 2
-        mocker(DerivedClass).mock("instance_method_with_args").called_with(2).return_value(
+        mocker(DerivedClass).mock("instance_method_with_args").called_last_with(2).return_value(
             3
         ).called_once()
         assert DerivedClass().instance_method_with_args(2) == 3
@@ -228,7 +227,7 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         assert DerivedClass.class_method_with_args(1) == 2
 
     def test_mock_class_method_on_derived_class_and_base_class_called_with_args(self) -> None:
-        mocker(SomeClass).mock("class_method_with_args").called_with(1).return_value(
+        mocker(SomeClass).mock("class_method_with_args").called_last_with(1).return_value(
             2
         ).called_once()
         assert SomeClass.class_method_with_args(1) == 2
@@ -246,7 +245,7 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         assert DerivedClass.static_method_with_args(1) == 2
 
     def test_mock_static_method_on_derived_class_and_base_class_called_with_args(self) -> None:
-        mocker(SomeClass).mock("static_method_with_args").called_with(1).return_value(
+        mocker(SomeClass).mock("static_method_with_args").called_last_with(1).return_value(
             2
         ).called_once()
         assert SomeClass.static_method_with_args(1) == 2
@@ -255,3 +254,132 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         ).return_value(3).called_twice()
         assert DerivedClass().static_method_with_args(2) == 3
         assert DerivedClass.static_method_with_args(2) == 3
+
+    def test_mock_instance_method_called_last_with(self) -> None:
+        class FooClass:
+            def method(self, arg1: str, arg2: int = 10) -> str:
+                return arg1 + str(arg2)
+
+        mocker(FooClass).mock("method").called_last_with("foo", arg2=5)
+        FooClass().method("foo", arg2=5)
+        State.teardown()
+
+        mocker(FooClass).mock("method").called_last_with("foo", arg2=5)
+        FooClass().method("foo", arg2=10)
+        with assert_raises(
+            AssertionError,
+            (
+                "expected call not found.\n"
+                "Expected: method('foo', arg2=5)\n"
+                "Actual: method('foo', arg2=10)"
+            ),
+        ):
+            State.teardown()
+
+    def test_mock_instance_method_any_call_with(self) -> None:
+        class FooClass:
+            def method(self, arg1: str, arg2: int = 10) -> str:
+                return arg1 + str(arg2)
+
+        mocker(FooClass).mock("method").any_call_with("bar", arg2=2)
+        FooClass().method("foo", arg2=1)
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        State.teardown()
+
+        mocker(FooClass).mock("method").any_call_with("foo", arg2=4)
+        FooClass().method("foo", arg2=1)
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        with assert_raises(AssertionError, "method('foo', arg2=4) call not found"):
+            State.teardown()
+
+    def test_mock_instance_method_not_called(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").not_called()
+        State.teardown()
+
+        mocker(FooClass).mock("method").not_called()
+        FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to not have been called. Called 1 times.\nCalls: [call()].",
+        ):
+            State.teardown()
+
+    def test_mock_instance_method_called(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").called()
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").called()
+        with assert_raises(AssertionError, "Expected 'method' to have been called."):
+            State.teardown()
+
+    def test_mock_instance_method_called_once(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").called_once()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").called_once()
+        with assert_raises(
+            AssertionError, "Expected 'method' to have been called once. Called 0 times."
+        ):
+            State.teardown()
+
+    def test_mock_instance_method_called_twice(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").called_twice()
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").called_twice()
+        FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been called twice. Called once.\nCalls: [call()].",
+        ):
+            State.teardown()
+
+    def test_mock_instance_method_called_times(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").called_times(3)
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").called_times(3)
+        FooClass().method()
+        FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been called 3 times. "
+            "Called twice.\nCalls: [call(), call()].",
+        ):
+            State.teardown()
+
+    def test_mock_empty_method_name(self) -> None:
+        with assert_raises(ValueError, "Method name cannot be empty."):
+            mocker(SomeClass).mock("")
+        with assert_raises(ValueError, "Method name cannot be empty."):
+            mocker(SomeClass).mock("instance_method.")
