@@ -18,6 +18,7 @@ Mocking library for Python and Pytest.
 - Implement spying
 - Use autospec?
 - Add tox tests
+  - Test with different pytest versions
 - Update docstrings
 - Create documentation
 - Test with doctest
@@ -34,4 +35,3 @@ Mocking library for Python and Pytest.
   - method_calls?
   - mock_calls?
 - NonCallableMock for non-callable mocking?
-- Update project information in pyproject.toml

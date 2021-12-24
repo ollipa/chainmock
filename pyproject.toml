@@ -4,7 +4,30 @@ version = "0.1.0"
 description = "Mocking library for Python and Pytest"
 authors = ["Olli Paakkunainen <olli@paakkunainen.fi>"]
 license = "MIT"
+repository = "https://github.com/ollipa/chainmock"
+readme = "README.md"
+keywords = ["testing", "mock", "mocking", "pytest"]
+classifiers = [
+    "License :: OSI Approved :: MIT License",
+    "Intended Audience :: Developers",
+    "Development Status :: 3 - Alpha",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: Implementation :: PyPy",
+    "Topic :: Software Development :: Testing",
+    "Topic :: Software Development :: Testing :: Mocking",
+    "Topic :: Software Development :: Testing :: Unit",
+    "Typing :: Typed",
+]
 packages = [{ include = "chainmock", from = "src" }]
+
+[tool.poetry.urls]
+"Source Code" = "https://github.com/ollipa/chainmock"
+"Issue Tracker" = "https://github.com/ollipa/chainmock/issues"
 
 [tool.poetry.dependencies]
 python = "^3.8"
