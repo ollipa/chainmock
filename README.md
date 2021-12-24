@@ -4,17 +4,12 @@ Mocking library for Python and Pytest.
 
 ## TODO
 
-### Before release
-
 - Unclear error message when call arguments not mathed:
   - AssertionError: Expected 'class_method_with_args' to have been called twice. Called 1 times.
   - any_call_with: does not print call list.
 - Patching and mocking attributes that exist only during runtime?
 - Reimports from unittest
-- CI pipeline
 - Print await_args_list with await args error messages
-
-### Later
 
 - Test mocking proxies
 - Mocking mangled methods
@@ -39,3 +34,4 @@ Mocking library for Python and Pytest.
   - method_calls?
   - mock_calls?
 - NonCallableMock for non-callable mocking?
+- Update project information in pyproject.toml
