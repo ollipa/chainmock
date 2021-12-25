@@ -6,6 +6,7 @@ import functools
 import inspect
 from typing import Any, Callable, Dict, List, Optional, Sequence, Union
 from unittest import mock as umock
+from unittest.util import safe_repr
 
 AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
 AsyncAndSyncMock = Union[umock.AsyncMock, umock.MagicMock]
@@ -383,6 +384,7 @@ class Assert:  # pylint: disable=too-many-public-methods
                 f"Expected '{self._name}' to have been awaited "
                 f"{self._format_call_count(await_count)}. "
                 f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
+                f"{self._awaits_repr()}"
             )
             raise AssertionError(msg)
 
@@ -395,6 +397,15 @@ class Assert:  # pylint: disable=too-many-public-methods
                 f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
             )
             raise AssertionError(msg)
+
+    def _awaits_repr(self) -> str:
+        """Renders self.mock_awaits as a string.
+
+        Provides similar functionality to `unittest.mock.NonCallableMock._calls_repr`.
+        """
+        if not self._attr_mock.await_args_list:
+            return ""
+        return f"\nAwaits: {safe_repr(self._attr_mock.await_args_list)}."
 
     @staticmethod
     def _format_call_count(call_count: int) -> str:

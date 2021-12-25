@@ -197,7 +197,8 @@ class TestAsyncMocking:
         mocker(FooClass).mock("method").awaited_twice()
         await FooClass().method()
         with assert_raises(
-            AssertionError, "Expected 'method' to have been awaited twice. Awaited once."
+            AssertionError,
+            "Expected 'method' to have been awaited twice. Awaited once.\nAwaits: [call()].",
         ):
             State.teardown()
 
@@ -217,6 +218,8 @@ class TestAsyncMocking:
         await FooClass().method()
         await FooClass().method()
         with assert_raises(
-            AssertionError, "Expected 'method' to have been awaited 3 times. Awaited twice."
+            AssertionError,
+            "Expected 'method' to have been awaited 3 times. "
+            "Awaited twice.\nAwaits: [call(), call()].",
         ):
             State.teardown()
