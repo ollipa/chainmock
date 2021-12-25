@@ -5,7 +5,6 @@ Mocking library for Python and Pytest.
 ## TODO
 
 - Patching and mocking attributes that exist only during runtime?
-- Reimports from unittest
 
 - Test mocking proxies
 - Mocking mangled methods

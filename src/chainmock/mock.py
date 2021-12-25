@@ -1,6 +1,36 @@
 """Re-exports from stdlib unittest."""
-from unittest.mock import call
+from unittest.mock import (
+    ANY,
+    DEFAULT,
+    FILTER_DIR,
+    AsyncMock,
+    MagicMock,
+    Mock,
+    NonCallableMagicMock,
+    NonCallableMock,
+    PropertyMock,
+    call,
+    create_autospec,
+    mock_open,
+    patch,
+    seal,
+    sentinel,
+)
 
 __all__ = [
+    "ANY",
+    "DEFAULT",
+    "FILTER_DIR",
+    "AsyncMock",
+    "MagicMock",
+    "Mock",
+    "NonCallableMagicMock",
+    "NonCallableMock",
+    "PropertyMock",
     "call",
+    "create_autospec",
+    "mock_open",
+    "patch",
+    "seal",
+    "sentinel",
 ]
