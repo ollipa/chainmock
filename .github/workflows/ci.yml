@@ -36,11 +36,10 @@ jobs:
 
       - name: Install dependencies
         run: |
-          poetry config virtualenvs.in-project true
-          poetry install
+          pip install tox tox-gh-actions
 
-      - name: Run tests
-        run: poetry run make test
+      - name: Run tests with tox
+        run: tox
 
   lint:
     name: Run linters

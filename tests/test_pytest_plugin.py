@@ -1,8 +1,10 @@
 """Test pytest plugin."""
-import pytest
+from typing import Any
 
 
-def test_teardown_on_chainmock_success(testdir: pytest.Pytester) -> None:
+# Pytester available only in Pytest>=6.2
+# testdir: Pytest.Pytester
+def test_teardown_on_chainmock_success(testdir: Any) -> None:
     """Test that mocks are teared down after a successful test."""
     testdir.makepyfile(
         """
@@ -26,7 +28,7 @@ def test_teardown_on_chainmock_success(testdir: pytest.Pytester) -> None:
     result.assert_outcomes(passed=2)
 
 
-def test_teardown_on_chainmock_failure(testdir: pytest.Pytester) -> None:
+def test_teardown_on_chainmock_failure(testdir: Any) -> None:
     """Test that mocks are teared down after a chainmock validations fail."""
     testdir.makepyfile(
         """
@@ -53,7 +55,7 @@ def test_teardown_on_chainmock_failure(testdir: pytest.Pytester) -> None:
     )
 
 
-def test_teardown_on_other_failure(testdir: pytest.Pytester) -> None:
+def test_teardown_on_other_failure(testdir: Any) -> None:
     """Test that mocks are teared down after test failure not related to chainmock.
 
     Chainmock validators should not be executed if test fails before validators are executed.
