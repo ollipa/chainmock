@@ -17,8 +17,6 @@ Mocking library for Python and Pytest.
 - Implement match call args method
 - Implement spying
 - Use autospec?
-- Add tox tests
-  - Test with different pytest versions
 - Update docstrings
 - Create documentation
 - Test with doctest
