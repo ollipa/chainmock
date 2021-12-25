@@ -19,7 +19,8 @@ def assert_raises(
     except Exception as raised_exception:  # pylint: disable=broad-except
         if not isinstance(raised_exception, expected_exception):
             raise AssertionError(  # pylint: disable=raise-missing-from
-                f"Expected exception '{expected_exception}' but '{raised_exception}' was raised"
+                f"\nExpected exception: '{expected_exception}'\n"
+                f"Raised exception: '{type(raised_exception)}'"
             )
         fail = False
         if isinstance(match, re.Pattern):

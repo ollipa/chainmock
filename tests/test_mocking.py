@@ -397,8 +397,8 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    def test_mock_empty_method_name(self) -> None:
-        with assert_raises(ValueError, "Method name cannot be empty."):
+    def test_mock_empty_attribute_name(self) -> None:
+        with assert_raises(ValueError, "Attribute name cannot be empty."):
             mocker(SomeClass).mock("")
-        with assert_raises(ValueError, "Method name cannot be empty."):
+        with assert_raises(ValueError, "Attribute name cannot be empty."):
             mocker(SomeClass).mock("instance_method.")

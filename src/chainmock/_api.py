@@ -447,9 +447,14 @@ class State:
             mock._reset()  # pylint: disable=protected-access
 
     @classmethod
+    def reset_state(cls) -> None:
+        cls.MOCKS = {}
+
+    @classmethod
     def validate_mocks(cls) -> None:
-        for key in list(cls.MOCKS):
-            mock = cls.MOCKS.pop(key)
+        mocks = cls.MOCKS
+        cls.MOCKS = {}
+        for mock in mocks.values():
             mock._validate()  # pylint: disable=protected-access
 
     @classmethod
@@ -486,17 +491,46 @@ class Mock:
         ] = []
         self._patch_class: bool = patch_class
 
+    def spy(self, name: str) -> Assert:
+        if self._target is None:
+            raise RuntimeError("Spying is not available for stubs. Call 'mock' instead.")
+        if not name:
+            raise ValueError("Attribute name cannot be empty.")
+        original = getattr(self._target, name)
+        attr_mock = getattr(self._mock, name)
+        parameters = tuple(inspect.signature(original).parameters.keys())
+
+        def pass_through(*args: Any, **kwargs: Any) -> Any:
+            has_self = len(parameters) > 0 and parameters[0] == "self"
+            skip_first = len(args) > len(parameters)
+            if has_self or skip_first:
+                attr_mock(*list(args)[1:], **kwargs)
+            else:
+                attr_mock(*args, **kwargs)
+            if skip_first:
+                return original(*list(args)[1:], **kwargs)
+            return original(*args, **kwargs)
+
+        patch = umock.patch.object(self._target, name, new_callable=lambda: pass_through)
+        patch.start()
+        self._object_patches.append(patch)
+        assertion = Assert(self, attr_mock, name, _internal=True)
+        self._assertions.append(assertion)
+        return assertion
+
     def mock(self, name: str) -> Assert:
         parts = name.split(".")
         name = parts[0]
+        parts = parts[1:]
         if not name:
-            raise ValueError("Method name cannot be empty.")
+            raise ValueError("Attribute name cannot be empty.")
         if self._target is None:
             assertion = self._stub_attribute(name, parts)
         elif self._patch is not None:
             assertion = self._patch_attribute(name, parts)
         else:
-            assertion = self._mock_attribute(name, parts)
+            original = getattr(self._target, name)
+            assertion = self._mock_attribute(name, parts, original)
         assertion.return_value(None)
         self._assertions.append(assertion)
         return assertion
@@ -507,10 +541,10 @@ class Mock:
         attr_mock = getattr(self._mock, name)
         setattr(self, name, attr_mock)
         assertion = Assert(self, attr_mock, name, _internal=True)
-        if len(parts) > 1:
+        if len(parts) > 0:
             # Support for chaining methods
             assertion.return_value(self)
-            assertion = self.mock(".".join(parts[1:]))
+            assertion = self.mock(".".join(parts))
         return assertion
 
     def _patch_attribute(self, name: str, parts: List[str]) -> Assert:
@@ -520,15 +554,14 @@ class Mock:
             attr_mock = getattr(self._mock, name)
         setattr(self, name, attr_mock)
         assertion = Assert(self, attr_mock, name, _internal=True)
-        if len(parts) > 1:
+        if len(parts) > 0:
             # Support for chaining methods
             stub = Mock(_internal=True)
             assertion.return_value(stub)
-            assertion = stub.mock(".".join(parts[1:]))
+            assertion = stub.mock(".".join(parts))
         return assertion
 
-    def _mock_attribute(self, name: str, parts: List[str]) -> Assert:
-        original = getattr(self._target, name)
+    def _mock_attribute(self, name: str, parts: List[str], original: Any) -> Assert:
         if isinstance(original, property):
             patch = umock.patch.object(self._target, name, new_callable=umock.PropertyMock)
         else:
@@ -536,11 +569,11 @@ class Mock:
         attr_mock = patch.start()
         self._object_patches.append(patch)
         assertion = Assert(self, attr_mock, name, _internal=True)
-        if len(parts) > 1:
+        if len(parts) > 0:
             # Support for chaining methods
             stub = Mock(_internal=True)
             assertion.return_value(stub)
-            assertion = stub.mock(".".join(parts[1:]))
+            assertion = stub.mock(".".join(parts))
         return assertion
 
     def _reset(self) -> None:
