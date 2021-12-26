@@ -6,11 +6,19 @@ from chainmock import mocker
 from chainmock._api import State
 from chainmock.mock import call
 
+from . import common
 from .common import SomeClass
 from .utils import assert_raises
 
 
 class TestAsyncMocking:
+    @pytest.mark.asyncio
+    async def test_mock_async_function_return_value(self) -> None:
+        mocker(common).mock("some_async_function").return_value("async_mocked")
+        assert await common.some_async_function("foo") == "async_mocked"
+        State.teardown()
+        assert await common.some_async_function("foo") == "foo"
+
     @pytest.mark.asyncio
     async def test_mock_async_instance_method_return_value(self) -> None:
         mocker(SomeClass).mock("async_instance_method").return_value("instance_mocked")

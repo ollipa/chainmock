@@ -505,15 +505,29 @@ class Mock:
         def pass_through(*args: Any, **kwargs: Any) -> Any:
             has_self = len(parameters) > 0 and parameters[0] == "self"
             skip_first = len(args) > len(parameters) and (is_class_method or is_static_method)
+            mock_args = list(args)
             if has_self or skip_first:
-                attr_mock(*list(args)[1:], **kwargs)
-            else:
-                attr_mock(*args, **kwargs)
+                mock_args = mock_args[1:]
+            attr_mock(*mock_args, **kwargs)
             if skip_first:
-                return original(*list(args)[1:], **kwargs)
+                args = tuple(list(args)[1:])
             return original(*args, **kwargs)
 
-        patch = umock.patch.object(self._target, name, new_callable=lambda: pass_through)
+        async def async_pass_through(*args: Any, **kwargs: Any) -> Any:
+            has_self = len(parameters) > 0 and parameters[0] == "self"
+            skip_first = len(args) > len(parameters) and (is_class_method or is_static_method)
+            mock_args = list(args)
+            if has_self or skip_first:
+                mock_args = mock_args[1:]
+            await attr_mock(*mock_args, **kwargs)
+            if skip_first:
+                args = tuple(list(args)[1:])
+            return await original(*args, **kwargs)
+
+        if isinstance(attr_mock, umock.AsyncMock):
+            patch = umock.patch.object(self._target, name, new_callable=lambda: async_pass_through)
+        else:
+            patch = umock.patch.object(self._target, name, new_callable=lambda: pass_through)
         patch.start()
         self._object_patches.append(patch)
         assertion = Assert(self, attr_mock, name, _internal=True)

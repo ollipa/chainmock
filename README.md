@@ -4,7 +4,6 @@ Mocking library for Python and Pytest.
 
 ## TODO
 
-- Support spying async methods and functions
 - Patch class and class instance automatically by doing both at the same time?
 - Patching and mocking attributes that exist only during runtime?
 - Test mocking proxies

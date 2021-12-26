@@ -32,6 +32,10 @@ class SomeClass:
     async def async_class_method(cls) -> str:
         return cls.ATTR
 
+    @classmethod
+    async def async_class_method_with_args(cls, arg1: int) -> int:
+        return arg1
+
     @staticmethod
     def static_method() -> str:
         return "static_value"
@@ -44,6 +48,10 @@ class SomeClass:
     async def async_static_method() -> str:
         return "static_value"
 
+    @staticmethod
+    async def async_static_method_with_args(arg1: int) -> int:
+        return arg1
+
     @property
     def some_property(self) -> str:
         return self.attr
@@ -54,4 +62,8 @@ class DerivedClass(SomeClass):
 
 
 def some_function(arg1: str) -> str:
+    return arg1
+
+
+async def some_async_function(arg1: str) -> str:
     return arg1
