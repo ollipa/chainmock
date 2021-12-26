@@ -74,7 +74,7 @@ class TestMocking:  # pylint: disable=too-many-public-methods
             SomeClass().instance_method()
 
     def test_mock_side_effect_multiple_return_values(self) -> None:
-        mocker(SomeClass).mock("instance_method").side_effect(["1", "2", "3"]).called_times(3)
+        mocker(SomeClass).mock("instance_method").side_effect(["1", "2", "3"]).call_count(3)
         assert SomeClass().instance_method() == "1"
         assert SomeClass().instance_method() == "2"
         assert SomeClass().instance_method() == "3"
@@ -376,24 +376,117 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    def test_mock_instance_method_called_times(self) -> None:
+    def test_mock_instance_method_call_count(self) -> None:
         class FooClass:
             def method(self) -> None:
                 pass
 
-        mocker(FooClass).mock("method").called_times(3)
+        mocker(FooClass).mock("method").call_count(3)
         FooClass().method()
         FooClass().method()
         FooClass().method()
         State.teardown()
 
-        mocker(FooClass).mock("method").called_times(3)
+        mocker(FooClass).mock("method").call_count(3)
         FooClass().method()
         FooClass().method()
         with assert_raises(
             AssertionError,
             "Expected 'method' to have been called 3 times. "
             "Called twice.\nCalls: [call(), call()].",
+        ):
+            State.teardown()
+
+    def test_mock_instance_method_call_count_at_least(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").call_count_at_least(3)
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").call_count_at_least(3)
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").call_count_at_least(3)
+        FooClass().method()
+        FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been called at least 3 times. "
+            "Called twice.\nCalls: [call(), call()].",
+        ):
+            State.teardown()
+
+    def test_mock_instance_method_call_count_at_most(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").call_count_at_most(3)
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").call_count_at_most(3)
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").call_count_at_most(3)
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been called at most 3 times. "
+            "Called 4 times.\nCalls: [call(), call(), call(), call()].",
+        ):
+            State.teardown()
+
+    def test_mock_instance_method_call_count_at_most_and_at_most(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").call_count_at_least(2).call_count_at_most(3)
+        FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been called at least twice. "
+            "Called once.\nCalls: [call()].",
+        ):
+            State.teardown()
+
+        mocker(FooClass).mock("method").call_count_at_least(2).call_count_at_most(3)
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").call_count_at_least(2).call_count_at_most(3)
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").call_count_at_least(2).call_count_at_most(3)
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been called at most 3 times. "
+            "Called 4 times.\nCalls: [call(), call(), call(), call()].",
         ):
             State.teardown()
 

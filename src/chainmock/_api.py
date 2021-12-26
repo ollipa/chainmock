@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Type, Union
 from unittest import mock as umock
 from unittest.util import safe_repr
 
@@ -352,13 +352,40 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(functools.partial(self._assert_await_count, 2))
         return self
 
-    def called_times(self, call_count: int) -> Assert:
+    def call_count(self, call_count: int) -> Assert:
         """Assert that the mock was called the specified number of times.
+
+        Args:
+            call_count: Expected call count.
 
         Returns:
             Assert instance so that calls can be chained.
         """
         self._assertions.append(functools.partial(self._assert_call_count, call_count))
+        return self
+
+    def call_count_at_least(self, call_count: int) -> Assert:
+        """Assert that the mock was called _at least_ the specified number of times.
+
+        Args:
+            call_count: Expected call count.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(functools.partial(self._assert_call_count, call_count, "at least"))
+        return self
+
+    def call_count_at_most(self, call_count: int) -> Assert:
+        """Assert that the mock was called _at most_ the specified number of times.
+
+        Args:
+            call_count: Expected call count.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(functools.partial(self._assert_call_count, call_count, "at most"))
         return self
 
     def awaited_times(self, await_count: int) -> Assert:
@@ -388,15 +415,23 @@ class Assert:  # pylint: disable=too-many-public-methods
             )
             raise AssertionError(msg)
 
-    def _assert_call_count(self, call_count: int) -> None:
-        if not self._attr_mock.call_count == call_count:
-            msg = (
-                f"Expected '{self._name}' to have been called "
-                f"{self._format_call_count(call_count)}. "
-                f"Called {self._format_call_count(self._attr_mock.call_count)}."
-                f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
-            )
-            raise AssertionError(msg)
+    def _assert_call_count(
+        self, call_count: int, modifier: Optional[Literal["at least", "at most"]] = None
+    ) -> None:
+        if modifier is None and self._attr_mock.call_count == call_count:
+            return
+        if modifier == "at least" and self._attr_mock.call_count >= call_count:
+            return
+        if modifier == "at most" and self._attr_mock.call_count <= call_count:
+            return
+        modifier_str = f"{modifier} " if modifier else ""
+        msg = (
+            f"Expected '{self._name}' to have been called {modifier_str}"
+            f"{self._format_call_count(call_count)}. "
+            f"Called {self._format_call_count(self._attr_mock.call_count)}."
+            f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
+        )
+        raise AssertionError(msg)
 
     def _awaits_repr(self) -> str:
         """Renders self.mock_awaits as a string.
