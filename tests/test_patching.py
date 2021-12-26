@@ -5,6 +5,8 @@ from typing import Type
 from chainmock import mocker
 from chainmock._api import State
 
+from .utils import assert_raises
+
 
 class PatchClass:
     ATTR = "class_attr"
@@ -82,3 +84,16 @@ class TestPatching:
         assert First().get_second().get_third().method() == "mock_chain"
         State.teardown()
         assert First().get_second().get_third().method() == "value"
+
+    def test_patch_non_existing_attribute(self) -> None:
+        # pylint: disable=no-member
+
+        mocker("tests.test_patching.PatchClass").mock("foo_method", create=True).return_value(
+            "mocked"
+        ).called_once()
+        assert PatchClass().foo_method() == "mocked"  # type: ignore
+
+    def test_patch_non_existing_attribute_fail(self) -> None:
+
+        with assert_raises(AttributeError, "Mock object has no attribute 'foo_method'"):
+            mocker("tests.test_patching.PatchClass").mock("foo_method", create=False)

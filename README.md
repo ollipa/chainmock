@@ -4,8 +4,6 @@ Mocking library for Python and Pytest.
 
 ## TODO
 
-- Patch class and class instance automatically by doing both at the same time?
-- Patching and mocking attributes that exist only during runtime?
 - Test mocking proxies
 - Test spying proxies
 - Mocking mangled methods

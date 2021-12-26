@@ -402,3 +402,48 @@ class TestMocking:  # pylint: disable=too-many-public-methods
             mocker(SomeClass).mock("")
         with assert_raises(ValueError, "Attribute name cannot be empty."):
             mocker(SomeClass).mock("instance_method.")
+
+    def test_mock_runtime_class_attribute(self) -> None:
+        class FooClass:
+            pass
+
+        FooClass.method = lambda: "foo"  # type: ignore
+        assert FooClass.method() == "foo"  # type: ignore
+        mocker(FooClass).mock("method").return_value("mocked").called_once()
+        assert FooClass.method() == "mocked"  # type: ignore
+        State.teardown()
+        assert FooClass.method() == "foo"  # type: ignore
+
+    def test_mock_runtime_instance_attribute(self) -> None:
+        # pylint: disable=attribute-defined-outside-init
+        class FooClass:
+            pass
+
+        FooClass.method1 = lambda self: "foo"  # type: ignore
+        instance = FooClass()
+        instance.method2 = lambda: "bar"  # type: ignore
+        assert instance.method1() == "foo"  # type: ignore
+        assert instance.method2() == "bar"  # type: ignore
+        mocker(instance).mock("method1").return_value("mocked1").called_once()
+        mocker(instance).mock("method2").return_value("mocked2").called_once()
+        assert instance.method1() == "mocked1"  # type: ignore
+        assert instance.method2() == "mocked2"  # type: ignore
+        State.teardown()
+        assert instance.method1() == "foo"  # type: ignore
+        assert instance.method2() == "bar"  # type: ignore
+
+    def test_mock_non_existing_attribute(self) -> None:
+        # pylint: disable=no-member
+        class FooClass:
+            pass
+
+        mocker(FooClass).mock("method", create=True).return_value("mocked").called_twice()
+        assert FooClass.method() == "mocked"  # type: ignore
+        assert FooClass().method() == "mocked"  # type: ignore
+
+    def test_mock_non_existing_attribute_fail(self) -> None:
+        class FooClass:
+            pass
+
+        with assert_raises(AttributeError, "type object 'FooClass' has no attribute 'method'"):
+            mocker(FooClass).mock("method", create=False)

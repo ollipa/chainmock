@@ -534,24 +534,32 @@ class Mock:
         self._assertions.append(assertion)
         return assertion
 
-    def mock(self, name: str) -> Assert:
+    def mock(self, name: str, create: bool = False) -> Assert:
         parts = name.split(".")
         name = parts[0]
         parts = parts[1:]
         if not name:
             raise ValueError("Attribute name cannot be empty.")
         if self._target is None:
-            assertion = self._stub_attribute(name, parts)
+            assertion = self.__stub_attribute(name, parts)
         elif self._patch is not None:
-            assertion = self._patch_attribute(name, parts)
+            assertion = self.__patch_attribute(name, parts, create=create)
         else:
-            original = getattr(self._target, name)
-            assertion = self._mock_attribute(name, parts, original)
+            original = self.__get_original(name, create)
+            assertion = self.__mock_attribute(name, parts, original, create=create)
         assertion.return_value(None)
         self._assertions.append(assertion)
         return assertion
 
-    def _stub_attribute(self, name: str, parts: List[str]) -> Assert:
+    def __get_original(self, name: str, create: bool) -> Optional[Any]:
+        try:
+            return getattr(self._target, name)
+        except AttributeError:
+            if create is True:
+                return None
+            raise
+
+    def __stub_attribute(self, name: str, parts: List[str]) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
         attr_mock = getattr(self._mock, name)
@@ -563,11 +571,11 @@ class Mock:
             assertion = self.mock(".".join(parts))
         return assertion
 
-    def _patch_attribute(self, name: str, parts: List[str]) -> Assert:
+    def __patch_attribute(self, name: str, parts: List[str], *, create: bool) -> Assert:
         if not self._patch_class and self._patch and inspect.isclass(self._patch.temp_original):
-            attr_mock: AnyMock = getattr(self._mock(), name)
+            attr_mock: AnyMock = self.__get_patch_attr_mock(self._mock(), name, create)
         else:
-            attr_mock = getattr(self._mock, name)
+            attr_mock = self.__get_patch_attr_mock(self._mock, name, create)
         setattr(self, name, attr_mock)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
@@ -577,11 +585,26 @@ class Mock:
             assertion = stub.mock(".".join(parts))
         return assertion
 
-    def _mock_attribute(self, name: str, parts: List[str], original: Any) -> Assert:
-        if isinstance(original, property):
-            patch = umock.patch.object(self._target, name, new_callable=umock.PropertyMock)
+    @staticmethod
+    def __get_patch_attr_mock(mock: AnyMock, name: str, create: bool) -> AnyMock:
+        try:
+            return getattr(mock, name)
+        except AttributeError:
+            if create is True:
+                attr_mock = umock.MagicMock()
+                setattr(mock, name, attr_mock)
+                return attr_mock
+            raise
+
+    def __mock_attribute(
+        self, name: str, parts: List[str], original: Optional[Any], *, create: bool
+    ) -> Assert:
+        if original is not None and isinstance(original, property):
+            patch = umock.patch.object(
+                self._target, name, new_callable=umock.PropertyMock, create=create
+            )
         else:
-            patch = umock.patch.object(self._target, name)
+            patch = umock.patch.object(self._target, name, create=create)
         attr_mock = patch.start()
         self._object_patches.append(patch)
         assertion = Assert(self, attr_mock, name, _internal=True)
