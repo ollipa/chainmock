@@ -4,8 +4,6 @@ Mocking library for Python and Pytest.
 
 ## TODO
 
-- Test mocking proxies
-- Test spying proxies
 - Mocking mangled methods
 - Call at_least and at_most modifiers
 - Implement match call args method

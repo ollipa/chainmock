@@ -4,7 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
-from typing import Any, Callable, Dict, List, Optional, Sequence, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Type, Union
 from unittest import mock as umock
 from unittest.util import safe_repr
 
@@ -497,10 +497,10 @@ class Mock:
         if not name:
             raise ValueError("Attribute name cannot be empty.")
         original = getattr(self._target, name)
-        attr_mock = getattr(self._mock, name)
+        attr_mock = self.__get_patch_attr_mock(self._mock, name, create=True)
         parameters = tuple(inspect.signature(original).parameters.keys())
-        is_class_method = isinstance(inspect.getattr_static(self._target, name), classmethod)
-        is_static_method = isinstance(inspect.getattr_static(self._target, name), staticmethod)
+        is_class_method = self.__get_method_type(name, classmethod)
+        is_static_method = self.__get_method_type(name, staticmethod)
 
         def pass_through(*args: Any, **kwargs: Any) -> Any:
             has_self = len(parameters) > 0 and parameters[0] == "self"
@@ -533,6 +533,20 @@ class Mock:
         assertion = Assert(self, attr_mock, name, _internal=True)
         self._assertions.append(assertion)
         return assertion
+
+    def __get_method_type(
+        self, name: str, method_type: Union[Type[classmethod], Type[staticmethod]]
+    ) -> bool:
+        try:
+            return isinstance(inspect.getattr_static(self._target, name), method_type)
+        except AttributeError:
+            # Inspecting proxied objects raises AttributeError
+            if hasattr(self._target, "__mro__"):
+                for cls in inspect.getmro(self._target):  # type: ignore
+                    method = vars(cls).get(name)
+                    if method is not None:
+                        return isinstance(method, method_type)
+            return False
 
     def mock(self, name: str, create: bool = False) -> Assert:
         parts = name.split(".")

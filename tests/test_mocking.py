@@ -7,7 +7,7 @@ from chainmock._api import State
 from chainmock.mock import call
 
 from . import common
-from .common import DerivedClass, SomeClass
+from .common import DerivedClass, Proxy, SomeClass
 from .utils import assert_raises
 
 
@@ -447,3 +447,59 @@ class TestMocking:  # pylint: disable=too-many-public-methods
 
         with assert_raises(AttributeError, "type object 'FooClass' has no attribute 'method'"):
             mocker(FooClass).mock("method", create=False)
+
+    def test_mock_proxied_class_instance_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        SomeClassProxy = Proxy(SomeClass)
+        mocker(SomeClassProxy).mock("instance_method_with_args").return_value(3).called_once_with(1)
+        assert SomeClassProxy().instance_method_with_args(1) == 3  # type: ignore
+
+    def test_mock_proxied_class_class_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        SomeClassProxy = Proxy(SomeClass)
+        mocker(SomeClassProxy).mock("class_method_with_args").return_value(3).has_calls(
+            [call(1), call(2)]
+        )
+        assert SomeClassProxy().class_method_with_args(1) == 3  # type: ignore
+        assert SomeClassProxy.class_method_with_args(2) == 3
+
+    def test_mock_proxied_class_static_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        SomeClassProxy = Proxy(SomeClass)
+        mocker(SomeClassProxy).mock("static_method_with_args").return_value(3).has_calls(
+            [call(1), call(2)]
+        )
+        assert SomeClassProxy().static_method_with_args(1) == 3  # type: ignore
+        assert SomeClassProxy.static_method_with_args(2) == 3
+
+    def test_mock_proxied_derived_instance_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        DerivedClassProxy = Proxy(DerivedClass)
+        mocker(DerivedClassProxy).mock("instance_method_with_args").return_value(
+            3
+        ).called_once_with(1)
+        assert DerivedClassProxy().instance_method_with_args(1) == 3  # type: ignore
+
+    def test_mock_proxied_derived_class_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        DerivedClassProxy = Proxy(DerivedClass)
+        mocker(DerivedClassProxy).mock("class_method_with_args").return_value(3).has_calls(
+            [call(1), call(2)]
+        )
+        assert DerivedClassProxy().class_method_with_args(1) == 3  # type: ignore
+        assert DerivedClassProxy.class_method_with_args(2) == 3
+
+    def test_mock_proxied_derived_static_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        DerivedClassProxy = Proxy(DerivedClass)
+        mocker(DerivedClassProxy).mock("static_method_with_args").return_value(3).has_calls(
+            [call(1), call(2)]
+        )
+        assert DerivedClassProxy().static_method_with_args(1) == 3  # type: ignore
+        assert DerivedClassProxy.static_method_with_args(2) == 3
+
+    def test_mock_proxied_module_function_with_args(self) -> None:
+        # pylint: disable=not-callable
+        common_proxy = Proxy(common)
+        mocker(common_proxy).mock("some_function").return_value(3).called_once_with(1)
+        assert common_proxy.some_function(1) == 3

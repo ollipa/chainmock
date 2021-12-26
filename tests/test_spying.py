@@ -2,9 +2,10 @@
 # pylint: disable=missing-docstring,no-self-use
 from chainmock import mocker
 from chainmock._api import State
+from chainmock.mock import call
 
 from . import common
-from .common import DerivedClass, SomeClass
+from .common import DerivedClass, Proxy, SomeClass
 from .utils import assert_raises
 
 
@@ -539,3 +540,49 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         mocker(SomeClass).spy("instance_method").called_once()
         SomeClass().instance_method()
         State.teardown()
+
+    def test_spy_proxied_class_instance_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        SomeClassProxy = Proxy(SomeClass)
+        mocker(SomeClassProxy).spy("instance_method_with_args").called_once_with(1)
+        assert SomeClassProxy().instance_method_with_args(1) == 1  # type: ignore
+
+    def test_spy_proxied_class_class_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        SomeClassProxy = Proxy(SomeClass)
+        mocker(SomeClassProxy).spy("class_method_with_args").has_calls([call(1), call(2)])
+        assert SomeClassProxy().class_method_with_args(1) == 1  # type: ignore
+        assert SomeClassProxy.class_method_with_args(2) == 2
+
+    def test_spy_proxied_class_static_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        SomeClassProxy = Proxy(SomeClass)
+        mocker(SomeClassProxy).spy("static_method_with_args").has_calls([call(1), call(2)])
+        assert SomeClassProxy().static_method_with_args(1) == 1  # type: ignore
+        assert SomeClassProxy.static_method_with_args(2) == 2
+
+    def test_spy_proxied_derived_instance_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        DerivedClassProxy = Proxy(DerivedClass)
+        mocker(DerivedClassProxy).spy("instance_method_with_args").called_once_with(1)
+        assert DerivedClassProxy().instance_method_with_args(1) == 1  # type: ignore
+
+    def test_spy_proxied_derived_class_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        DerivedClassProxy = Proxy(DerivedClass)
+        mocker(DerivedClassProxy).spy("class_method_with_args").has_calls([call(1), call(2)])
+        assert DerivedClassProxy().class_method_with_args(1) == 1  # type: ignore
+        assert DerivedClassProxy.class_method_with_args(2) == 2
+
+    def test_spy_proxied_derived_static_method_with_args(self) -> None:
+        # pylint: disable=not-callable,invalid-name
+        DerivedClassProxy = Proxy(DerivedClass)
+        mocker(DerivedClassProxy).spy("static_method_with_args").has_calls([call(1), call(2)])
+        assert DerivedClassProxy().static_method_with_args(1) == 1  # type: ignore
+        assert DerivedClassProxy.static_method_with_args(2) == 2
+
+    def test_spy_proxied_module_function_with_args(self) -> None:
+        # pylint: disable=not-callable
+        common_proxy = Proxy(common)
+        mocker(common_proxy).spy("some_function").called_once_with(1)
+        assert common_proxy.some_function(1) == 1
