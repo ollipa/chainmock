@@ -1,6 +1,5 @@
 # Chainmock
 
-<p align="center">
 <a href="https://pypi.org/project/chainmock/">
   <img src="https://img.shields.io/pypi/v/chainmock" alt="pypi">
 </a>
@@ -13,7 +12,6 @@
 <a href="./LICENSE">
   <img src="https://img.shields.io/pypi/l/chainmock" alt="license">
 </a>
-</p>
 
 Mocking library for Python and Pytest.
 
