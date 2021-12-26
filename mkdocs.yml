@@ -1,0 +1,54 @@
+site_name: Chainmock docs
+site_description: chainmock - Mocking library for Python and Pytest
+site_url: https://chainmock.readthedocs.io/en/latest/
+theme:
+  name: material
+  logo: assets/icon_white.png
+  favicon: assets/icon_black.png
+  features:
+    - content.code.annotate
+    - navigation.expand
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      toggle:
+        icon: material/lightbulb
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      toggle:
+        icon: material/lightbulb-outline
+        name: Switch to light mode
+  icon:
+    repo: fontawesome/brands/github
+extra_css:
+  - assets/extra.css
+repo_name: chainmock
+repo_url: https://github.com/ollipa/chainmock
+edit_uri: ""
+
+nav:
+- API reference: index.md
+
+plugins:
+- search
+- mkdocstrings:
+    handlers:
+      python:
+        selection:
+          filters:
+            - "!^_"  # exlude all members starting with _
+        rendering:
+          show_source: false
+          show_root_heading: true
+          show_root_full_path: false
+
+markdown_extensions:
+  - admonition
+  - pymdownx.details
+  - pymdownx.highlight
+  - pymdownx.inlinehilite
+  - pymdownx.superfences
+  - pymdownx.snippets
+  - markdown_include.include:
+      base_path: docs

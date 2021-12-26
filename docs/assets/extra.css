@@ -1,0 +1,19 @@
+/* mkdocs */
+[data-md-color-scheme="default"] {
+  --md-primary-fg-color: #08782d;
+}
+
+[data-md-color-scheme="slate"] {
+  --md-primary-fg-color: #075420;
+}
+
+/* mkdocstrings */
+div.doc-contents:not(.first) {
+  padding-left: 25px;
+  border-left: 4px solid rgba(230, 230, 230);
+  margin-bottom: 80px;
+}
+
+.md-typeset h2 {
+  font-weight: 400;
+}

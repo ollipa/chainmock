@@ -761,25 +761,26 @@ def mocker(
 ) -> Mock:
     """Main entrypoint for chainmock.
 
-    Chainmock functions differently depending on the given target:
+    # Partial mocking
+    If mocker is invoked with an object (eg. class, instance, module), the named
+    members (attributes) on the object (target) can be mocked or spied
+    individually. For example, by calling `mocker(SomeClass)` you are setting
+    the target to a class. The original object is not modified until you
+    explicitly spy or mock it's members.
 
-    **Partial mocking**: If mocker is invoked with an object (eg. class,
-    instance, module), the named members (attributes) on the object (target) can
-    be mocked or spied individually. For example, by calling `mocker(SomeClass)`
-    you are setting the target to a class. The original object is not modified
-    until you explicitly spy or mock it's members.
+    # Stubbing
+    If mocker is invoked without a target, a stub is created. For example, by
+    calling `mocker()`. The created stub doesn't have any methods or attributes
+    until you explicitly set them.
 
-    **Stubbing**: If mocker is invoked without a target, a stub is created.
-    For example, by calling `mocker()`. The created stub doesn't have any
-    methods or attributes until you explicitly set them.
-
-    **Patching**: If the given target is a string, the target is imported and
-    the specified object is replaced with a mock. The string should be in form
+    # Patching
+    If the given target is a string, the target is imported and the specified
+    object is replaced with a mock. The string should be in form
     'package.module.ClassName' and the target must be importable from the
     environment you are calling `mocker`. As an example,
     mocker('some_module.SomeClass') would replace the `SomeClass` class in the
-    module `some_module`. After patching the object, you can set assertions
-    and return values on the mock that replaced the object.
+    module `some_module`. After patching the object, you can set assertions and
+    return values on the mock that replaced the object.
 
     Patching is useful especially when you want to replace all the new instances
     of a class with a mock. Therefore if you patch a class, chainmock patches
