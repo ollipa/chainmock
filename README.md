@@ -20,16 +20,3 @@ Mocking library for Python and Pytest.
 ## Documentation
 
 https://chainmock.readthedocs.io/
-
-## TODO
-
-- Test with doctest
-- Add examples
-- Better type hint for side_effect value?
-- Test calling await functions with non-async functions and vice-versa
-- NonCallableMock for non-callable mocking?
-- Handle calling side_effect and return_value with spies
-- Implement match call args method
-- Test mocking/spying builtins
-- Create usage documentation
-- Fix links in API docs.

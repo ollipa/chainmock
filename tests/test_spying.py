@@ -1,5 +1,7 @@
 """Test spying functionality."""
 # pylint: disable=missing-docstring,no-self-use
+import re
+
 from chainmock import mocker
 from chainmock._api import State
 from chainmock.mock import call
@@ -280,7 +282,9 @@ class TestSpying:  # pylint: disable=too-many-public-methods
 
         instance = FooClass()
         mocker(instance).spy("method").called_once_with(1, "foo")
-        with assert_raises(TypeError, "method() takes 3 positional arguments but 4 were given"):
+        with assert_raises(
+            TypeError, re.compile(r".*method\(\) takes 3 positional arguments but 4 were given")
+        ):
             instance.method(2, 1, "foo")  # type: ignore
         with assert_raises(
             AssertionError,
