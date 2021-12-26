@@ -498,3 +498,44 @@ class TestSpying:  # pylint: disable=too-many-public-methods
             "Actual: static_method_with_args(4)",
         ):
             State.teardown()
+
+    def test_spy_class_and_instance(self) -> None:
+        instance = SomeClass()
+        mocker(SomeClass).spy("instance_method").called_twice()
+        SomeClass().instance_method()
+        mocker(instance).spy("instance_method").called_once()
+        instance.instance_method()
+        State.teardown()
+
+        mocker(SomeClass).spy("instance_method").called_twice()
+        SomeClass().instance_method()
+        instance = SomeClass()
+        mocker(instance).spy("instance_method").called_once()
+        instance.instance_method()
+        State.teardown()
+
+        instance = SomeClass()
+        mocker(instance).spy("instance_method").called_once()
+        instance.instance_method()
+        mocker(SomeClass).spy("instance_method").called_once()
+        SomeClass().instance_method()
+        State.teardown()
+
+    def test_spy_class_and_derived_class(self) -> None:
+        mocker(SomeClass).spy("instance_method").called_twice()
+        SomeClass().instance_method()
+        mocker(DerivedClass).spy("instance_method").called_once()
+        DerivedClass().instance_method()
+        State.teardown()
+
+        mocker(SomeClass).spy("instance_method").called_twice()
+        SomeClass().instance_method()
+        mocker(DerivedClass).spy("instance_method").called_once()
+        DerivedClass().instance_method()
+        State.teardown()
+
+        mocker(DerivedClass).spy("instance_method").called_once()
+        DerivedClass().instance_method()
+        mocker(SomeClass).spy("instance_method").called_once()
+        SomeClass().instance_method()
+        State.teardown()
