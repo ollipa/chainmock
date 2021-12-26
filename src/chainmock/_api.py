@@ -1,4 +1,5 @@
 """Chainmock API implementation."""
+# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import functools
@@ -38,7 +39,16 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.Mock.return_value`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.return_value
+        [unittest.mock.Mock.return_value](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.return_value)
+
+        Examples:
+            Mock the return value of method `brew`:
+
+            >>> mocker(Teapot).mock("brew").return_value("mocked")
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().brew()
+            'mocked'
 
         Args:
             value: Return value to set to the mocked call.
@@ -53,8 +63,9 @@ class Assert:  # pylint: disable=too-many-public-methods
         """Set a side effect that will occur when the mocked attribute is
         called.
 
-        If you pass in a function it will be called with same arguments as the
-        mock.
+        Side effect can be a function to call, an iterable or an exception
+        (class or instance) to be raised. If you pass in a function it will be
+        called with same arguments as the mock.
 
         If you pass in an iterable, it is used to retrieve an iterator which
         must yield a value on every call. This value can either be an exception
@@ -64,7 +75,38 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.Mock.side_effect`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.side_effect
+        [unittest.mock.Mock.side_effect](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.side_effect)
+
+        Examples:
+            Raise an exception when the method `brew` is called:
+
+            >>> mocker(Teapot).mock("brew").side_effect(Exception("No tea!"))
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().brew()
+            Traceback (most recent call last):
+              ...
+            Exception: No tea!
+
+            Replace method `fill` with another function:
+
+            >>> mocker(teapot).mock("fill").side_effect(lambda x: x + 1)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.fill(1)
+            2
+
+            Use a list to return a sequence of values:
+
+            >>> mocker(teapot).mock("pour").side_effect([2, 1, Exception("empty")])
+            <chainmock._api.Assert object at ...>
+            >>> teapot.pour()
+            2
+            >>> teapot.pour()
+            1
+            >>> teapot.pour()
+            Traceback (most recent call last):
+              ...
+            Exception: empty
 
         Args:
             value: Function to be called when the mock is called, an iterable or
@@ -77,12 +119,18 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def called_last_with(self, *args: Any, **kwargs: Any) -> Assert:
-        """Assert that the last call was made with the specified arguments.
+        """Assert that the _most recent call_ was made with the specified arguments.
 
         Wrapper for `unittest.mock.Mock.assert_called_with`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_with
+        [unittest.mock.Mock.assert_called_with](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_with)
+
+        Examples:
+            >>> mocker(Teapot).mock("add_tea").called_last_with("green", loose=True)
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("green", loose=True)
 
         Args:
             *args: Expected positional arguments.
@@ -97,12 +145,18 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def awaited_last_with(self, *args: Any, **kwargs: Any) -> Assert:
-        """Assert that the last await was with the specified arguments.
+        """Assert that the _most recent await_ was with the specified arguments.
 
         Wrapper for `unittest.mock.AsyncMock.assert_awaited_with`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_with
+        [unittest.mock.AsyncMock.assert_awaited_with](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_with)
+
+        Examples:
+            >>> mocker(teapot).mock("timer").awaited_last_with(minutes=10)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(minutes=10))
 
         Args:
             *args: Expected positional arguments.
@@ -123,7 +177,13 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.Mock.assert_called_once_with`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_once_with
+        [unittest.mock.Mock.assert_called_once_with](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_once_with)
+
+        Examples:
+            >>> mocker(Teapot).mock("add_tea").called_once_with("puehr")
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("puehr")
 
         Args:
             *args: Expected positional arguments.
@@ -144,7 +204,13 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.AsyncMock.assert_awaited_once_with`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_once_with
+        [unittest.mock.AsyncMock.assert_awaited_once_with](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_once_with)
+
+        Examples:
+            >>> mocker(teapot).mock("timer").called_once_with(5)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(5))
 
         Args:
             *args: Expected positional arguments.
@@ -167,7 +233,14 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.Mock.assert_any_call`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_any_call
+        [unittest.mock.Mock.assert_any_call](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_any_call)
+
+        Examples:
+            >>> mocker(Teapot).mock("add_tea").any_call_with("black")
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("oolong")
+            >>> Teapot().add_tea("black")
 
         Args:
             *args: Expected positional arguments.
@@ -188,7 +261,14 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.AsyncMock.assert_any_await`.
 
         For more details see:
+        [unittest.mock.AsyncMock.assert_any_await]
         https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_any_await
+
+        Examples:
+            >>> mocker(teapot).mock("timer").any_call_with(5)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(5))
+            >>> asyncio.run(teapot.timer(3))
 
         Args:
             *args: Expected positional arguments.
@@ -213,7 +293,15 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.Mock.assert_has_calls`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_has_calls
+        [unittest.mock.Mock.assert_has_calls](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_has_calls)
+
+        Examples:
+            >>> from chainmock.mock import call
+            >>> mocker(Teapot).mock("add_tea").has_calls([call("oolong"), call("black")])
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("oolong")
+            >>> Teapot().add_tea("black")
 
         Args:
             calls: Expected calls. You can import the call type from
@@ -240,7 +328,15 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.AsyncMock.assert_has_awaits`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_has_awaits
+        [unittest.mock.AsyncMock.assert_has_awaits](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_has_awaits)
+
+        Examples:
+            >>> from chainmock.mock import call
+            >>> mocker(teapot).mock("timer").has_awaits([call(5), call(3)])
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(5))
+            >>> asyncio.run(teapot.timer(3))
 
         Args:
             calls: Expected calls. You can import the call type from
@@ -262,7 +358,12 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.Mock.assert_not_called`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_not_called
+        [unittest.mock.Mock.assert_not_called](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_not_called)
+
+        Examples:
+            >>> mocker(Teapot).mock("pour").not_called()
+            <chainmock._api.Assert object at ...>
 
         Returns:
             Assert instance so that calls can be chained.
@@ -276,7 +377,12 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.AsyncMock.assert_not_awaited`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_not_awaited
+        [unittest.mock.AsyncMock.assert_not_awaited](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_not_awaited)
+
+        Examples:
+            >>> mocker(Teapot).mock("timer").not_awaited()
+            <chainmock._api.Assert object at ...>
 
         Returns:
             Assert instance so that calls can be chained.
@@ -290,7 +396,13 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.Mock.assert_called`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called
+        [unittest.mock.Mock.assert_called](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called)
+
+        Examples:
+            >>> mocker(Teapot).mock("pour").called()
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().pour()
 
         Returns:
             Assert instance so that calls can be chained.
@@ -304,7 +416,13 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.AsyncMock.assert_awaited`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited
+        [unittest.mock.AsyncMock.assert_awaited](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited)
+
+        Examples:
+            >>> mocker(Teapot).mock("timer").awaited()
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(Teapot().timer())
 
         Returns:
             Assert instance so that calls can be chained.
@@ -318,7 +436,13 @@ class Assert:  # pylint: disable=too-many-public-methods
         Provides similar functionality to `unittest.mock.Mock.assert_called_once`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_once
+        [unittest.mock.Mock.assert_called_once](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.Mock.assert_called_once)
+
+        Examples:
+            >>> mocker(Teapot).mock("boil").called_once()
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().boil()
 
         Returns:
             Assert instance so that calls can be chained.
@@ -332,7 +456,13 @@ class Assert:  # pylint: disable=too-many-public-methods
         Provides similar functionality to `unittest.mock.AsyncMock.assert_awaited_once`.
 
         For more details see:
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_once
+        [unittest.mock.AsyncMock.assert_awaited_once](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_awaited_once)
+
+        Examples:
+            >>> mocker(Teapot).mock("open").awaited_once()
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(Teapot().open())
 
         Returns:
             Assert instance so that calls can be chained.
@@ -343,6 +473,12 @@ class Assert:  # pylint: disable=too-many-public-methods
     def called_twice(self) -> Assert:
         """Assert that the mock was called exactly twice.
 
+        Examples:
+            >>> mocker(teapot).mock("pour").called_twice()
+            <chainmock._api.Assert object at ...>
+            >>> teapot.pour()
+            >>> teapot.pour()
+
         Returns:
             Assert instance so that calls can be chained.
         """
@@ -351,6 +487,12 @@ class Assert:  # pylint: disable=too-many-public-methods
 
     def awaited_twice(self) -> Assert:
         """Assert that the mock was awaited exactly twice.
+
+        Examples:
+            >>> mocker(teapot).mock("timer").awaited_twice()
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(1))
+            >>> asyncio.run(teapot.timer(2))
 
         Returns:
             Assert instance so that calls can be chained.
@@ -361,6 +503,13 @@ class Assert:  # pylint: disable=too-many-public-methods
     def call_count(self, call_count: int) -> Assert:
         """Assert that the mock was called the specified number of times.
 
+        Examples:
+            >>> mocker(teapot).mock("pour").call_count(3)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.pour()
+            >>> teapot.pour()
+            >>> teapot.pour()
+
         Args:
             call_count: Expected call count.
 
@@ -370,8 +519,43 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(functools.partial(self._assert_call_count, call_count))
         return self
 
+    def await_count(self, await_count: int) -> Assert:
+        """Assert that the mock was awaited the specified number of times.
+
+        Examples:
+            >>> mocker(teapot).mock("open").await_count(3)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.open())
+
+        Args:
+            await_count: Expected await count.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(functools.partial(self._assert_await_count, await_count))
+        return self
+
     def call_count_at_least(self, call_count: int) -> Assert:
         """Assert that the mock was called _at least_ the specified number of times.
+
+        Examples:
+            Assert that the method `pour` was called at least once:
+
+            >>> mocker(teapot).mock("pour").call_count_at_least(1)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.pour()
+            >>> teapot.pour()
+
+            Assert that the method `pour` was called at least once but not more
+            than twice:
+
+            >>> mocker(teapot).mock("pour").call_count_at_least(1).call_count_at_most(2)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.pour()
+            >>> teapot.pour()
 
         Args:
             call_count: Expected call count.
@@ -382,8 +566,54 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(functools.partial(self._assert_call_count, call_count, "at least"))
         return self
 
+    def await_count_at_least(self, await_count: int) -> Assert:
+        """Assert that the mock was awaited _at least_ the specified number of times.
+
+        Examples:
+            Assert that the method `open` was awaited at least once:
+
+            >>> mocker(teapot).mock("open").await_count_at_least(1)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.open())
+
+            Assert that the method `open` was awaited at least once but not more
+            than twice:
+
+            >>> mocker(teapot).mock("open").await_count_at_least(1).await_count_at_most(2)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.open())
+
+        Args:
+            await_count: Expected await count.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(
+            functools.partial(self._assert_await_count, await_count, "at least")
+        )
+        return self
+
     def call_count_at_most(self, call_count: int) -> Assert:
         """Assert that the mock was called _at most_ the specified number of times.
+
+        Examples:
+            Assert that the method `pour` was called at most twice:
+
+            >>> mocker(teapot).mock("pour").call_count_at_most(2)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.pour()
+            >>> teapot.pour()
+
+            Assert that the method `pour` was called at most twice and at least
+            once:
+
+            >>> mocker(teapot).mock("pour").call_count_at_most(2).call_count_at_least(1)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.pour()
+            >>> teapot.pour()
 
         Args:
             call_count: Expected call count.
@@ -394,17 +624,55 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(functools.partial(self._assert_call_count, call_count, "at most"))
         return self
 
-    def awaited_times(self, await_count: int) -> Assert:
-        """Assert that the mock was awaited the specified number of times.
+    def await_count_at_most(self, await_count: int) -> Assert:
+        """Assert that the mock was awaited _at most_ the specified number of times.
+
+        Examples:
+            Assert that the method `open` was awaited at most twice:
+
+            >>> mocker(teapot).mock("open").await_count_at_most(2)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.open())
+
+            Assert that the method `pour` was awaited at most twice and at least
+            once:
+
+            >>> mocker(teapot).mock("open").await_count_at_most(2).await_count_at_least(1)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.open())
+
+        Args:
+            await_count: Expected await count.
 
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_await_count, await_count))
+        self._assertions.append(functools.partial(self._assert_await_count, await_count, "at most"))
         return self
 
     def self(self) -> Mock:
         """Return the mock associated with this assertion.
+
+        Examples:
+            Use `self` to return mock and add more assertions:
+
+            >>> mocked = mocker(Teapot).mock("fill").called_once().self()
+            >>> mocked.mock("boil").called_once()
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().fill()
+            >>> Teapot().boil()
+
+            Without `self` the above example can be written also like this:
+
+            >>> mocked = mocker(Teapot)
+            >>> mocked.mock("fill").called_once()
+            <chainmock._api.Assert object at ...>
+            >>> mocked.mock("boil").called_once()
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().fill()
+            >>> Teapot().boil()
 
         Returns:
             Mock instance associated with this assertion.
@@ -416,15 +684,23 @@ class Assert:  # pylint: disable=too-many-public-methods
             assertion = self._assertions.pop()
             assertion()
 
-    def _assert_await_count(self, await_count: int) -> None:
-        if not self._attr_mock.await_count == await_count:
-            msg = (
-                f"Expected '{self._name}' to have been awaited "
-                f"{self._format_call_count(await_count)}. "
-                f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
-                f"{self._awaits_repr()}"
-            )
-            raise AssertionError(msg)
+    def _assert_await_count(
+        self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
+    ) -> None:
+        if modifier is None and self._attr_mock.call_count == await_count:
+            return
+        if modifier == "at least" and self._attr_mock.call_count >= await_count:
+            return
+        if modifier == "at most" and self._attr_mock.call_count <= await_count:
+            return
+        modifier_str = f"{modifier} " if modifier else ""
+        msg = (
+            f"Expected '{self._name}' to have been awaited {modifier_str}"
+            f"{self._format_call_count(await_count)}. "
+            f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
+            f"{self._awaits_repr()}"
+        )
+        raise AssertionError(msg)
 
     def _assert_call_count(
         self, call_count: int, modifier: Optional[Literal["at least", "at most"]] = None

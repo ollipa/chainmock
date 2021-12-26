@@ -1,6 +1,7 @@
 
 color := $(shell tput setaf 2)
 off := $(shell tput sgr0)
+PYTHON := $(if $(shell command -v python3),python3,python)
 TARGETS = src tests
 
 .PHONY: all
@@ -10,7 +11,7 @@ all: lint test
 lint: isort black mypy pylint
 
 .PHONY: test
-test: install pytest
+test: install test
 
 .PHONY: install
 install:
@@ -23,12 +24,22 @@ else
 	pip install .
 endif
 
-.PHONY: pytest
-pytest:
+.PHONY: test
+test:
+	@printf '\n\n*****************\n'
+	@printf '$(color)Running doctest$(off)\n'
+	@printf '*****************\n'
+	coverage run --parallel-mode --source chainmock tests/test_doctest.py
+
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running pytest$(off)\n'
 	@printf '*****************\n'
-	coverage run --source chainmock -m pytest tests
+	coverage run --parallel-mode --source chainmock -m pytest tests
+
+	@printf '\n\n*****************\n'
+	@printf '$(color)Test coverage$(off)\n'
+	@printf '*****************\n'
+	coverage combine
 	coverage report --fail-under=100 --show-missing
 
 .PHONY: mypy

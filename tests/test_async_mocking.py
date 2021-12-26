@@ -211,23 +211,69 @@ class TestAsyncMocking:
             State.teardown()
 
     @pytest.mark.asyncio
-    async def test_mock_async_instance_method_awaited_times(self) -> None:
+    async def test_mock_async_instance_method_await_count(self) -> None:
         class FooClass:
             async def method(self) -> None:
                 pass
 
-        mocker(FooClass).mock("method").awaited_times(3)
+        mocker(FooClass).mock("method").await_count(3)
         await FooClass().method()
         await FooClass().method()
         await FooClass().method()
         State.teardown()
 
-        mocker(FooClass).mock("method").awaited_times(3)
+        mocker(FooClass).mock("method").await_count(3)
         await FooClass().method()
         await FooClass().method()
         with assert_raises(
             AssertionError,
             "Expected 'method' to have been awaited 3 times. "
             "Awaited twice.\nAwaits: [call(), call()].",
+        ):
+            State.teardown()
+
+    @pytest.mark.asyncio
+    async def test_mock_async_instance_method_await_count_at_least(self) -> None:
+        class FooClass:
+            async def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").await_count_at_least(3)
+        await FooClass().method()
+        await FooClass().method()
+        await FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").await_count_at_least(3)
+        await FooClass().method()
+        await FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been awaited at least 3 times. "
+            "Awaited twice.\nAwaits: [call(), call()].",
+        ):
+            State.teardown()
+
+    @pytest.mark.asyncio
+    async def test_mock_async_instance_method_await_count_at_most(self) -> None:
+        class FooClass:
+            async def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method").await_count_at_most(3)
+        await FooClass().method()
+        await FooClass().method()
+        await FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").await_count_at_most(3)
+        await FooClass().method()
+        await FooClass().method()
+        await FooClass().method()
+        await FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been awaited at most 3 times. "
+            "Awaited 4 times.\nAwaits: [call(), call(), call(), call()].",
         ):
             State.teardown()
