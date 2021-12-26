@@ -503,3 +503,23 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         common_proxy = Proxy(common)
         mocker(common_proxy).mock("some_function").return_value(3).called_once_with(1)
         assert common_proxy.some_function(1) == 3
+
+    def test_mock_private_instance_method(self) -> None:
+        # pylint: disable=protected-access
+        mocker(SomeClass).mock("_private").return_value("mocked").called_once()
+        assert SomeClass()._private() == "mocked"
+        State.teardown()
+        assert SomeClass()._private() == "private_value"
+
+    def test_mock_private_mangled_instance_method(self) -> None:
+        # pylint: disable=protected-access
+        mocker(SomeClass).mock("__very_private").return_value("mocked").called_once()
+        assert SomeClass()._SomeClass__very_private() == "mocked"  # type: ignore
+        State.teardown()
+        assert SomeClass()._SomeClass__very_private() == "very_private_value"  # type: ignore
+
+        instance = SomeClass()
+        mocker(instance).mock("__very_private").return_value("mocked").called_once()
+        assert instance._SomeClass__very_private() == "mocked"  # type: ignore
+        State.teardown()
+        assert instance._SomeClass__very_private() == "very_private_value"  # type: ignore

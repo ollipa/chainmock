@@ -496,6 +496,7 @@ class Mock:
             raise RuntimeError("Spying is not available for stubs. Call 'mock' instead.")
         if not name:
             raise ValueError("Attribute name cannot be empty.")
+        name = self.__remove_name_mangling(name)
         original = getattr(self._target, name)
         attr_mock = self.__get_patch_attr_mock(self._mock, name, create=True)
         parameters = tuple(inspect.signature(original).parameters.keys())
@@ -550,7 +551,7 @@ class Mock:
 
     def mock(self, name: str, create: bool = False) -> Assert:
         parts = name.split(".")
-        name = parts[0]
+        name = self.__remove_name_mangling(parts[0])
         parts = parts[1:]
         if not name:
             raise ValueError("Attribute name cannot be empty.")
@@ -564,6 +565,17 @@ class Mock:
         assertion.return_value(None)
         self._assertions.append(assertion)
         return assertion
+
+    def __remove_name_mangling(self, name: str) -> str:
+        """Get method the real method name if uses name mangling."""
+        if inspect.ismodule(self._target) or name.endswith("__") or not name.startswith("__"):
+            return name
+        if inspect.isclass(self._target):
+            class_name = self._target.__name__
+        else:
+            # Get class name from an instance
+            class_name = self._target.__class__.__name__
+        return f"_{class_name.lstrip('_')}__{name.lstrip('_')}"
 
     def __get_original(self, name: str, create: bool) -> Optional[Any]:
         try:

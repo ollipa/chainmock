@@ -4,10 +4,8 @@ Mocking library for Python and Pytest.
 
 ## TODO
 
-- Mocking mangled methods
 - Call at_least and at_most modifiers
 - Implement match call args method
-- Use autospec?
 - Update docstrings
 - Create documentation
 - Test with doctest

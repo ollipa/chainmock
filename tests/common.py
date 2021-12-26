@@ -9,6 +9,12 @@ class SomeClass:
     def __init__(self) -> None:
         self.attr = "instance_attr"
 
+    def _private(self) -> str:
+        return "private_value"
+
+    def __very_private(self) -> str:  # pylint: disable=unused-private-member
+        return "very_private_value"
+
     def instance_method(self) -> str:
         return self.attr
 
