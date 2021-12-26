@@ -4,7 +4,6 @@ Mocking library for Python and Pytest.
 
 ## TODO
 
-- Update docstrings
 - Create documentation
 - Test with doctest
 - Add examples
@@ -13,3 +12,4 @@ Mocking library for Python and Pytest.
 - NonCallableMock for non-callable mocking?
 - Handle calling side_effect and return_value with spies
 - Implement match call args method
+- Test mocking/spying builtins

@@ -13,6 +13,10 @@ def assert_raises(
     Args:
         expected_exception: Exception that is expected to be raised.
         match: String or regex pattern to match the error message against.
+
+    Raises:
+        AssertionError: Raised if the given exception or the message does not
+            match the raised exception.
     """
     try:
         yield

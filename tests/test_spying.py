@@ -14,6 +14,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         with assert_raises(RuntimeError, "Spying is not available for stubs. Call 'mock' instead."):
             mocker().spy("instance_method")
 
+    def test_spy_patched_object_should_fail(self) -> None:
+        with assert_raises(
+            RuntimeError, "Spying is not available for patched objects. Call 'mock' instead."
+        ):
+            mocker("tests.common.SomeClass").spy("instance_method")
+
     def test_spy_with_empty_attribute_name_should_fail(self) -> None:
         with assert_raises(ValueError, "Attribute name cannot be empty."):
             mocker(SomeClass).spy("")

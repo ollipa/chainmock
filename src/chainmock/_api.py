@@ -1,5 +1,4 @@
 """Chainmock API implementation."""
-# pylint: disable=missing-docstring
 from __future__ import annotations
 
 import functools
@@ -13,6 +12,13 @@ AsyncAndSyncMock = Union[umock.AsyncMock, umock.MagicMock]
 
 
 class Assert:  # pylint: disable=too-many-public-methods
+    """Assert allows creation of assertions for mocks.
+
+    The created assertions are automatically validated at the end of a test.
+
+    Assert should not be initialized directly. Use mocker function instead.
+    """
+
     def __init__(
         self, parent: Mock, attr_mock: AnyMock, name: str, _internal: bool = False
     ) -> None:
@@ -398,6 +404,11 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def self(self) -> Mock:
+        """Return the mock associated with this assertion.
+
+        Returns:
+            Mock instance associated with this assertion.
+        """
         return self._parent
 
     def _validate(self) -> None:
@@ -426,10 +437,10 @@ class Assert:  # pylint: disable=too-many-public-methods
             return
         modifier_str = f"{modifier} " if modifier else ""
         msg = (
-            f"Expected '{self._name}' to have been called {modifier_str}"
+            f"Expected '{self._name}' to have been called {modifier_str}"  # pylint:disable=protected-access
             f"{self._format_call_count(call_count)}. "
             f"Called {self._format_call_count(self._attr_mock.call_count)}."
-            f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
+            f"{self._attr_mock._calls_repr()}"
         )
         raise AssertionError(msg)
 
@@ -452,6 +463,11 @@ class Assert:  # pylint: disable=too-many-public-methods
 
 
 class State:
+    """State container for chainmock.
+
+    Used internally by chainmock to tear down mocks.
+    """
+
     MOCKS: Dict[Union[int, str], Mock] = {}
 
     @classmethod
@@ -462,6 +478,7 @@ class State:
         spec: Optional[Any] = None,
         patch_class: bool = False,
     ) -> Mock:
+        """Get existing mock or create a new one if the object has not been mocked yet."""
         key: Union[int, str]
         if isinstance(target, str):
             key = target
@@ -478,15 +495,18 @@ class State:
 
     @classmethod
     def reset_mocks(cls) -> None:
+        """Reset all mocks and return all mocked objects to their original state."""
         for mock in cls.MOCKS.values():
             mock._reset()  # pylint: disable=protected-access
 
     @classmethod
     def reset_state(cls) -> None:
+        """Reset chainmock state."""
         cls.MOCKS = {}
 
     @classmethod
     def validate_mocks(cls) -> None:
+        """Validate all stored mocks and their assertions."""
         mocks = cls.MOCKS
         cls.MOCKS = {}
         for mock in mocks.values():
@@ -494,11 +514,17 @@ class State:
 
     @classmethod
     def teardown(cls) -> None:
+        """Convinience method used in tests to reset and validate mocks."""
         cls.reset_mocks()
         cls.validate_mocks()
 
 
 class Mock:
+    """Mock allows mocking and spying mocked and patched objects.
+
+    Mock should not be initialized directly. Use mocker function instead.
+    """
+
     def __init__(
         self,
         target: Optional[Any] = None,
@@ -527,8 +553,26 @@ class Mock:
         self._patch_class: bool = patch_class
 
     def spy(self, name: str) -> Assert:
+        """Spy an attribute.
+
+        This wraps the given attribute so that functions or methods still return
+        their original values and work as if they were not mocked. With spies,
+        you can assert that a function or method was called without mocking it.
+
+        Args:
+            name: Attribute name to spy.
+
+        Returns:
+            Assert instance.
+
+        Raises:
+            ValueError: Raised if the given attribute name is empty.
+            RuntimeError: If trying to spy stubs or patched objects.
+        """
         if self._target is None:
             raise RuntimeError("Spying is not available for stubs. Call 'mock' instead.")
+        if self._patch is not None:
+            raise RuntimeError("Spying is not available for patched objects. Call 'mock' instead.")
         if not name:
             raise ValueError("Attribute name cannot be empty.")
         name = self.__remove_name_mangling(name)
@@ -585,6 +629,25 @@ class Mock:
             return False
 
     def mock(self, name: str, create: bool = False) -> Assert:
+        """Mock an attribute.
+
+        The given attribute is mocked and the mock catches all the calls to it.
+        If not return value is set, `None` is returned by default.
+
+        Args:
+            name: Attribute name to mock.
+            create: Force creation of the attribute if it does not exist. By
+                mocking non-existing attributes raises an AttributeError. If you
+                want force the creation and ignore the error, set this to True.
+                This can be useful for testing dynamic attributes set during
+                runtime.
+
+        Returns:
+            Assert instance.
+
+        Raises:
+            ValueError: Raised if the given attribute name is empty.
+        """
         parts = name.split(".")
         name = self.__remove_name_mangling(parts[0])
         parts = parts[1:]
@@ -690,12 +753,66 @@ class Mock:
 
 
 def mocker(
-    target: Optional[Any] = None,
+    target: Optional[Union[str, Any]] = None,
     *,
     spec: Optional[Any] = None,
     patch_class: bool = False,
     **kwargs: Any,
 ) -> Mock:
+    """Main entrypoint for chainmock.
+
+    Chainmock functions differently depending on the given target:
+
+    **Partial mocking**: If mocker is invoked with an object (eg. class,
+    instance, module), the named members (attributes) on the object (target) can
+    be mocked or spied individually. For example, by calling `mocker(SomeClass)`
+    you are setting the target to a class. The original object is not modified
+    until you explicitly spy or mock it's members.
+
+    **Stubbing**: If mocker is invoked without a target, a stub is created.
+    For example, by calling `mocker()`. The created stub doesn't have any
+    methods or attributes until you explicitly set them.
+
+    **Patching**: If the given target is a string, the target is imported and
+    the specified object is replaced with a mock. The string should be in form
+    'package.module.ClassName' and the target must be importable from the
+    environment you are calling `mocker`. As an example,
+    mocker('some_module.SomeClass') would replace the `SomeClass` class in the
+    module `some_module`. After patching the object, you can set assertions
+    and return values on the mock that replaced the object.
+
+    Patching is useful especially when you want to replace all the new instances
+    of a class with a mock. Therefore if you patch a class, chainmock patches
+    the class instances by default. If you wish to patch the class instead, set
+    `patch_class` argument to True. If you do not need to patch new instances of
+    a class, most use cases can be covered with partial mocking.
+
+    For more details about patching see:
+    https://docs.python.org/3/library/unittest.mock.html#patch
+
+    Args:
+        target: The target to mock or spy. By leaving out the target, a stub is
+            created. If the target is a string, the object in the given path is
+            mocked and if the target is any other object like class or module,
+            you can mock and spy individual functions and methods using the
+            returned mock instance.
+        spec: Spec acts as the specification for the created mock objects. It
+            can be either a list of strings or an existing object (a class or
+            instance). Accessing any attribute not in the given spec raise an
+            AttributeError. Spec can be useful if you want to create stubs with
+            a certain spec. Otherwise it is usually not needed because spec is
+            automatically set from the given target object.
+        patch_class: By default, patching an object (setting target to a string)
+            allows mocking attributes of the instance of a given target class.
+            If you want to mock the class itself, instead of it's instance, set
+            this to True. Note that it is usually easier to just use partial
+            mocking if you need to patch the class.
+        **kwargs: You can give arbitrary keyword arguments to quickly set mocked
+            properties on the created Mock instance.
+
+    Returns:
+        Mock instance.
+    """
     mock = State.get_or_create_mock(target, spec=spec, patch_class=patch_class)
     for name, value in kwargs.items():
         mock.mock(name).return_value(value)
