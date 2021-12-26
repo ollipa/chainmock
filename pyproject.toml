@@ -5,6 +5,7 @@ description = "Mocking library for Python and Pytest"
 authors = ["Olli Paakkunainen <olli@paakkunainen.fi>"]
 license = "MIT"
 repository = "https://github.com/ollipa/chainmock"
+documentation = "https://chainmock.readthedocs.io"
 readme = "README.md"
 keywords = ["testing", "mock", "mocking", "pytest"]
 classifiers = [
@@ -26,7 +27,6 @@ classifiers = [
 packages = [{ include = "chainmock", from = "src" }]
 
 [tool.poetry.urls]
-"Source Code" = "https://github.com/ollipa/chainmock"
 "Issue Tracker" = "https://github.com/ollipa/chainmock/issues"
 
 [tool.poetry.dependencies]
@@ -57,7 +57,8 @@ build-backend = "poetry.core.masonry.api"
 load-plugins = [
     "pylint.extensions.docparams",
     "pylint.extensions.docstyle",
-    "pylint.extensions.typing"]
+    "pylint.extensions.typing",
+]
 
 [tool.pylint.messages_control]
 disable = ["too-few-public-methods", "duplicate-code"]
