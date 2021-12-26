@@ -30,3 +30,4 @@ Mocking library for Python and Pytest.
   - method_calls?
   - mock_calls?
 - NonCallableMock for non-callable mocking?
+- Handle calling side_effect and return_value with spies

@@ -8,7 +8,7 @@ from .common import SomeClass
 from .utils import assert_raises
 
 
-class TestSpying:
+class TestSpying:  # pylint: disable=too-many-public-methods
     def test_spy_stub_should_fail(self) -> None:
         with assert_raises(RuntimeError, "Spying is not available for stubs. Call 'mock' instead."):
             mocker().spy("instance_method")
@@ -260,5 +260,25 @@ class TestSpying:
             "expected call not found.\n"
             "Expected: static_method_with_args(3)\n"
             "Actual: static_method_with_args(4)",
+        ):
+            State.teardown()
+
+    def test_spy_instance_call_instance_method_called_once_with_too_many_args(self) -> None:
+        # pylint: disable=too-many-function-args
+        class FooClass:
+            def method(self, arg1: int, arg2: str) -> str:
+                del arg1
+                del arg2
+                return "value"
+
+        instance = FooClass()
+        mocker(instance).spy("method").called_once_with(1, "foo")
+        with assert_raises(TypeError, "method() takes 3 positional arguments but 4 were given"):
+            instance.method(2, 1, "foo")  # type: ignore
+        with assert_raises(
+            AssertionError,
+            "expected call not found.\n"
+            "Expected: method(1, 'foo')\n"
+            "Actual: method(2, 1, 'foo')",
         ):
             State.teardown()

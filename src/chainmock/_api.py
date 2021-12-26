@@ -499,10 +499,12 @@ class Mock:
         original = getattr(self._target, name)
         attr_mock = getattr(self._mock, name)
         parameters = tuple(inspect.signature(original).parameters.keys())
+        is_class_method = isinstance(inspect.getattr_static(self._target, name), classmethod)
+        is_static_method = isinstance(inspect.getattr_static(self._target, name), staticmethod)
 
         def pass_through(*args: Any, **kwargs: Any) -> Any:
             has_self = len(parameters) > 0 and parameters[0] == "self"
-            skip_first = len(args) > len(parameters)
+            skip_first = len(args) > len(parameters) and (is_class_method or is_static_method)
             if has_self or skip_first:
                 attr_mock(*list(args)[1:], **kwargs)
             else:
