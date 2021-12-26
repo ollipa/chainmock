@@ -261,8 +261,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Wrapper for `unittest.mock.AsyncMock.assert_any_await`.
 
         For more details see:
-        [unittest.mock.AsyncMock.assert_any_await]
-        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_any_await
+        [unittest.mock.AsyncMock.assert_any_await](
+        https://docs.python.org/3/library/unittest.mock.html#unittest.mock.AsyncMock.assert_any_await)
 
         Examples:
             >>> mocker(teapot).mock("timer").any_call_with(5)
@@ -1065,7 +1065,8 @@ def mocker(
     a class, most use cases can be covered with partial mocking.
 
     For more details about patching see:
-    https://docs.python.org/3/library/unittest.mock.html#patch
+    [unittest.mock.html#patch](
+    https://docs.python.org/3/library/unittest.mock.html#patch)
 
     Args:
         target: The target to mock or spy. By leaving out the target, a stub is
