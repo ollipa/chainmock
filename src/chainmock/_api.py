@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import functools
 import inspect
+import itertools
 from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Type, Union
 from unittest import mock as umock
 from unittest.util import safe_repr
@@ -280,6 +281,41 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(
             functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
         )
+        return self
+
+    def any_call_has_args(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert any call to the mock has _at least_ the specified arguments.
+
+        The assert passes if any call has at least the given positional or
+        keyword arguments. This can be useful when you just one to match one
+        specific argument and do not care about the rest.
+
+        If you want all of the arguments to match, use `any_call_with` method
+        instead.
+
+        Examples:
+            Below assertion passes because `add_tea` was called with positional
+            argument `black`. Keyword argument `loose` is ignored.
+
+            >>> mocker(Teapot).mock("add_tea").any_call_has_args("black")
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("black", loose=False)
+
+            Below assertion passes because `add_tea` was called with keyword
+            argument `loose=True`. Positional argument is ignored.
+
+            >>> mocker(Teapot).mock("add_tea").any_call_has_args(loose=True)
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("oolong", loose=True)
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(functools.partial(self._assert_call_args_list, *args, **kwargs))
         return self
 
     def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
@@ -679,10 +715,50 @@ class Assert:  # pylint: disable=too-many-public-methods
         """
         return self._parent
 
-    def _validate(self) -> None:
-        while len(self._assertions) > 0:
-            assertion = self._assertions.pop()
-            assertion()
+    def _assert_call_count(
+        self, call_count: int, modifier: Optional[Literal["at least", "at most"]] = None
+    ) -> None:
+        if modifier is None and self._attr_mock.call_count == call_count:
+            return
+        if modifier == "at least" and self._attr_mock.call_count >= call_count:
+            return
+        if modifier == "at most" and self._attr_mock.call_count <= call_count:
+            return
+        modifier_str = f"{modifier} " if modifier else ""
+        msg = (
+            f"Expected '{self._name}' to have been called {modifier_str}"  # pylint:disable=protected-access
+            f"{self._format_call_count(call_count)}. "
+            f"Called {self._format_call_count(self._attr_mock.call_count)}."
+            f"{self._attr_mock._calls_repr()}"
+        )
+        raise AssertionError(msg)
+
+    def _assert_call_args_list(self, *args: Any, **kwargs: Any) -> None:
+        match = False
+        for call_args, call_kwargs in self._attr_mock.call_args_list:
+            arg_match = True
+            kwarg_match = True
+            for arg in args:
+                if arg not in call_args:
+                    arg_match = False
+                    break
+            if arg_match is False:
+                continue
+            for kwarg in kwargs.items():
+                if kwarg not in call_kwargs.items():
+                    kwarg_match = False
+                    break
+            if arg_match and kwarg_match:
+                match = True
+        if match is False:
+            format_args = (repr(arg) for arg in args)
+            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+            msg = (
+                f"No call includes arguments:\n"  # pylint:disable=protected-access
+                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
+                f"{self._attr_mock._calls_repr()}"
+            )
+            raise AssertionError(msg)
 
     def _assert_await_count(
         self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
@@ -702,24 +778,6 @@ class Assert:  # pylint: disable=too-many-public-methods
         )
         raise AssertionError(msg)
 
-    def _assert_call_count(
-        self, call_count: int, modifier: Optional[Literal["at least", "at most"]] = None
-    ) -> None:
-        if modifier is None and self._attr_mock.call_count == call_count:
-            return
-        if modifier == "at least" and self._attr_mock.call_count >= call_count:
-            return
-        if modifier == "at most" and self._attr_mock.call_count <= call_count:
-            return
-        modifier_str = f"{modifier} " if modifier else ""
-        msg = (
-            f"Expected '{self._name}' to have been called {modifier_str}"  # pylint:disable=protected-access
-            f"{self._format_call_count(call_count)}. "
-            f"Called {self._format_call_count(self._attr_mock.call_count)}."
-            f"{self._attr_mock._calls_repr()}"
-        )
-        raise AssertionError(msg)
-
     def _awaits_repr(self) -> str:
         """Renders self.mock_awaits as a string.
 
@@ -736,6 +794,11 @@ class Assert:  # pylint: disable=too-many-public-methods
         if call_count == 2:
             return "twice"
         return f"{call_count} times"
+
+    def _validate(self) -> None:
+        while len(self._assertions) > 0:
+            assertion = self._assertions.pop()
+            assertion()
 
 
 class State:
