@@ -284,7 +284,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def any_call_has_args(self, *args: Any, **kwargs: Any) -> Assert:
-        """Assert any call to the mock has _at least_ the specified arguments.
+        """Assert that any call has _at least_ the specified arguments.
 
         The assert passes if any call has at least the given positional or
         keyword arguments. This can be useful when you just one to match one
@@ -316,6 +316,41 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(functools.partial(self._assert_call_args_list, *args, **kwargs))
+        return self
+
+    def any_await_has_args(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that any await has _at least_ the specified arguments.
+
+        The assert passes if any await has at least the given positional or
+        keyword arguments. This can be useful when you just one to match one
+        specific argument and do not care about the rest.
+
+        If you want all of the arguments to match, use `any_await_with` method
+        instead.
+
+        Examples:
+            Below assertion passes because `timer` was awaited with positional
+            argument `5`. Keyword argument `seconds` is ignored.
+
+            >>> mocker(Teapot).mock("timer").any_await_has_args(5)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(Teapot().timer(5, seconds=15))
+
+            Below assertion passes because `timer` was awaited with keyword
+            argument `seconds=30`. Positional argument is ignored.
+
+            >>> mocker(Teapot).mock("timer").any_await_has_args(seconds=30)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(Teapot().timer(1, seconds=30))
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(functools.partial(self._assert_await_args_list, *args, **kwargs))
         return self
 
     def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
@@ -733,6 +768,24 @@ class Assert:  # pylint: disable=too-many-public-methods
         )
         raise AssertionError(msg)
 
+    def _assert_await_count(
+        self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
+    ) -> None:
+        if modifier is None and self._attr_mock.call_count == await_count:
+            return
+        if modifier == "at least" and self._attr_mock.call_count >= await_count:
+            return
+        if modifier == "at most" and self._attr_mock.call_count <= await_count:
+            return
+        modifier_str = f"{modifier} " if modifier else ""
+        msg = (
+            f"Expected '{self._name}' to have been awaited {modifier_str}"
+            f"{self._format_call_count(await_count)}. "
+            f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
+            f"{self._awaits_repr()}"
+        )
+        raise AssertionError(msg)
+
     def _assert_call_args_list(self, *args: Any, **kwargs: Any) -> None:
         match = False
         for call_args, call_kwargs in self._attr_mock.call_args_list:
@@ -760,23 +813,32 @@ class Assert:  # pylint: disable=too-many-public-methods
             )
             raise AssertionError(msg)
 
-    def _assert_await_count(
-        self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
-    ) -> None:
-        if modifier is None and self._attr_mock.call_count == await_count:
-            return
-        if modifier == "at least" and self._attr_mock.call_count >= await_count:
-            return
-        if modifier == "at most" and self._attr_mock.call_count <= await_count:
-            return
-        modifier_str = f"{modifier} " if modifier else ""
-        msg = (
-            f"Expected '{self._name}' to have been awaited {modifier_str}"
-            f"{self._format_call_count(await_count)}. "
-            f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
-            f"{self._awaits_repr()}"
-        )
-        raise AssertionError(msg)
+    def _assert_await_args_list(self, *args: Any, **kwargs: Any) -> None:
+        match = False
+        for await_args, await_kwargs in self._attr_mock.await_args_list:
+            arg_match = True
+            kwarg_match = True
+            for arg in args:
+                if arg not in await_args:
+                    arg_match = False
+                    break
+            if arg_match is False:
+                continue
+            for kwarg in kwargs.items():
+                if kwarg not in await_kwargs.items():
+                    kwarg_match = False
+                    break
+            if arg_match and kwarg_match:
+                match = True
+        if match is False:
+            format_args = (repr(arg) for arg in args)
+            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+            msg = (
+                f"No await includes arguments:\n"  # pylint:disable=protected-access
+                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
+                f"{self._awaits_repr()}"
+            )
+            raise AssertionError(msg)
 
     def _awaits_repr(self) -> str:
         """Renders self.mock_awaits as a string.

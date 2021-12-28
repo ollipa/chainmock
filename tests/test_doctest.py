@@ -28,8 +28,8 @@ class Teapot:
     async def open(self) -> None:
         pass
 
-    async def timer(self, minutes: int) -> int:
-        return minutes
+    async def timer(self, minutes: int, seconds: int = 0) -> int:
+        return minutes + seconds
 
 
 class TestDoctestTeardown:

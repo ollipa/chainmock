@@ -11,7 +11,7 @@ all: lint test
 lint: isort black mypy pylint
 
 .PHONY: test
-test: install test
+test: install coverage
 
 .PHONY: install
 install:
@@ -21,11 +21,14 @@ install:
 ifeq (${VIRTUAL_ENV},)
 	@printf 'Skipping install. VIRTUAL_ENV is not set.\n'
 else
-	pip install .
+	pip install --quiet .
 endif
 
-.PHONY: test
-test:
+.PHONY: coverage
+coverage:
+# Remove any leftover coverage files before running tests
+	@coverage combine --quiet > /dev/null || true
+
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running doctest$(off)\n'
 	@printf '*****************\n'
@@ -39,7 +42,7 @@ test:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Test coverage$(off)\n'
 	@printf '*****************\n'
-	coverage combine
+	@coverage combine --quiet
 	coverage report --fail-under=100 --show-missing
 
 .PHONY: mypy
