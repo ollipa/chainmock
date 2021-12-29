@@ -1,6 +1,6 @@
 """Test common functionality in Chainmock."""
 # pylint: disable=missing-docstring,no-self-use
-from chainmock import Assert, Mock, mocker
+from chainmock._api import Assert, Mock, State, mocker
 
 from .utils import assert_raises
 
@@ -18,3 +18,45 @@ class TestChainmock:
         ):
             mock = mocker()
             Assert(mock, mock._mock, "method")  # pylint: disable=protected-access
+
+    def test_mocker_should_cache_mocks(self) -> None:
+        class FooClass:
+            pass
+
+        mock1 = mocker(FooClass)
+        mock2 = mocker(FooClass)
+        assert mock1 is mock2
+
+        mock1 = mocker(FooClass())
+        mock2 = mocker(FooClass())
+        assert mock1 is not mock2
+
+        instance1 = FooClass()
+        instance2 = FooClass()
+        mock1 = mocker(instance1)
+        mock2 = mocker(instance2)
+        assert mock1 is not mock2
+
+        mock1 = mocker("tests.common.SomeClass")
+        mock2 = mocker("tests.common.SomeClass")
+        assert mock1 is mock2
+
+    def test_mocking_and_spying_same_attribute(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        mocker(FooClass).mock("method")
+        with assert_raises(
+            RuntimeError,
+            "Attribute 'method' has already been mocked. Can't spy a mocked attribute.",
+        ):
+            mocker(FooClass).spy("method")
+        State.teardown()
+
+        mocker(FooClass).spy("method")
+        with assert_raises(
+            RuntimeError, "Attribute 'method' has already been spied. Can't mock a spied attribute."
+        ):
+            mocker(FooClass).mock("method")
+        State.teardown()

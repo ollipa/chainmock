@@ -12,6 +12,11 @@ from .utils import assert_raises
 
 
 class TestSpying:  # pylint: disable=too-many-public-methods
+    def test_spy_should_cache_asserts(self) -> None:
+        assert1 = mocker(SomeClass).spy("instance_method")
+        assert2 = mocker(SomeClass).spy("instance_method")
+        assert assert1 is assert2
+
     def test_spy_stub_should_fail(self) -> None:
         with assert_raises(RuntimeError, "Spying is not available for stubs. Call 'mock' instead."):
             mocker().spy("instance_method")

@@ -28,6 +28,9 @@ class Teapot:
     async def open(self) -> None:
         pass
 
+    async def close(self) -> None:
+        pass
+
     async def timer(self, minutes: int, seconds: int = 0) -> int:
         return minutes + seconds
 
@@ -65,7 +68,12 @@ if __name__ == "__main__":
     )
     results2 = doctest.testmod(
         _api,
-        extraglobs={"Teapot": Teapot, "teapot": Teapot(), "asyncio": asyncio},
+        extraglobs={
+            "Teapot": Teapot,
+            "teapot": Teapot(),
+            "another_teapot": Teapot(),
+            "asyncio": asyncio,
+        },
         optionflags=doctest.ELLIPSIS,
     )
     if results1.failed or results2.failed:

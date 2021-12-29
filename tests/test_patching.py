@@ -43,6 +43,11 @@ class First:
 
 
 class TestPatching:
+    def test_patching_should_cache_asserts(self) -> None:
+        assert1 = mocker("tests.test_patching.PatchClass").mock("instance_method")
+        assert2 = mocker("tests.test_patching.PatchClass").mock("instance_method")
+        assert assert1 is assert2
+
     def test_patching_instance_method_return_value(self) -> None:
         mocker("tests.test_patching.PatchClass").mock("instance_method").return_value("mocked")
         assert PatchClass().instance_method() == "mocked"

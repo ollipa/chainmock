@@ -12,6 +12,11 @@ from .utils import assert_raises
 
 
 class TestMocking:  # pylint: disable=too-many-public-methods
+    def test_mock_should_cache_asserts(self) -> None:
+        assert1 = mocker(SomeClass).mock("instance_method")
+        assert2 = mocker(SomeClass).mock("instance_method")
+        assert assert1 is assert2
+
     def test_mock_module_function_return_value(self) -> None:
         mocker(common).mock("some_function").return_value("mocked").called_once()
         assert common.some_function("foo") == "mocked"

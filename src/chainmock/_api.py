@@ -22,7 +22,12 @@ class Assert:  # pylint: disable=too-many-public-methods
     """
 
     def __init__(
-        self, parent: Mock, attr_mock: AnyMock, name: str, _internal: bool = False
+        self,
+        parent: Mock,
+        attr_mock: AnyMock,
+        name: str,
+        kind: Literal["spy", "mock"] = "mock",
+        _internal: bool = False,
     ) -> None:
         if not _internal:
             raise RuntimeError(
@@ -32,6 +37,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._attr_mock = attr_mock
         self._name = name
         self._assertions: List[Callable[..., None]] = []
+        self._kind = kind
 
     def return_value(self, value: Any) -> Assert:
         """Set the value that will be returned when the mocked attribute is
@@ -620,13 +626,13 @@ class Assert:  # pylint: disable=too-many-public-methods
             >>> teapot.pour()
             >>> teapot.pour()
 
-            Assert that the method `pour` was called at least once but not more
+            Assert that the method `boil` was called at least once but not more
             than twice:
 
-            >>> mocker(teapot).mock("pour").call_count_at_least(1).call_count_at_most(2)
+            >>> mocker(teapot).mock("boil").call_count_at_least(1).call_count_at_most(2)
             <chainmock._api.Assert object at ...>
-            >>> teapot.pour()
-            >>> teapot.pour()
+            >>> teapot.boil()
+            >>> teapot.boil()
 
         Args:
             call_count: Expected call count.
@@ -648,13 +654,13 @@ class Assert:  # pylint: disable=too-many-public-methods
             >>> asyncio.run(teapot.open())
             >>> asyncio.run(teapot.open())
 
-            Assert that the method `open` was awaited at least once but not more
+            Assert that the method `close` was awaited at least once but not more
             than twice:
 
-            >>> mocker(teapot).mock("open").await_count_at_least(1).await_count_at_most(2)
+            >>> mocker(teapot).mock("close").await_count_at_least(1).await_count_at_most(2)
             <chainmock._api.Assert object at ...>
-            >>> asyncio.run(teapot.open())
-            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.close())
+            >>> asyncio.run(teapot.close())
 
         Args:
             await_count: Expected await count.
@@ -678,13 +684,13 @@ class Assert:  # pylint: disable=too-many-public-methods
             >>> teapot.pour()
             >>> teapot.pour()
 
-            Assert that the method `pour` was called at most twice and at least
+            Assert that the method `boil` was called at most twice and at least
             once:
 
-            >>> mocker(teapot).mock("pour").call_count_at_most(2).call_count_at_least(1)
+            >>> mocker(teapot).mock("boil").call_count_at_most(2).call_count_at_least(1)
             <chainmock._api.Assert object at ...>
-            >>> teapot.pour()
-            >>> teapot.pour()
+            >>> teapot.boil()
+            >>> teapot.boil()
 
         Args:
             call_count: Expected call count.
@@ -706,13 +712,13 @@ class Assert:  # pylint: disable=too-many-public-methods
             >>> asyncio.run(teapot.open())
             >>> asyncio.run(teapot.open())
 
-            Assert that the method `pour` was awaited at most twice and at least
+            Assert that the method `close` was awaited at most twice and at least
             once:
 
-            >>> mocker(teapot).mock("open").await_count_at_most(2).await_count_at_least(1)
+            >>> mocker(teapot).mock("close").await_count_at_most(2).await_count_at_least(1)
             <chainmock._api.Assert object at ...>
-            >>> asyncio.run(teapot.open())
-            >>> asyncio.run(teapot.open())
+            >>> asyncio.run(teapot.close())
+            >>> asyncio.run(teapot.close())
 
         Args:
             await_count: Expected await count.
@@ -729,21 +735,21 @@ class Assert:  # pylint: disable=too-many-public-methods
         Examples:
             Use `self` to return mock and add more assertions:
 
-            >>> mocked = mocker(Teapot).mock("fill").called_once().self()
+            >>> mocked = mocker(teapot).mock("fill").called_once().self()
             >>> mocked.mock("boil").called_once()
             <chainmock._api.Assert object at ...>
-            >>> Teapot().fill()
-            >>> Teapot().boil()
+            >>> teapot.fill()
+            >>> teapot.boil()
 
             Without `self` the above example can be written also like this:
 
-            >>> mocked = mocker(Teapot)
+            >>> mocked = mocker(another_teapot)
             >>> mocked.mock("fill").called_once()
             <chainmock._api.Assert object at ...>
             >>> mocked.mock("boil").called_once()
             <chainmock._api.Assert object at ...>
-            >>> Teapot().fill()
-            >>> Teapot().boil()
+            >>> another_teapot.fill()
+            >>> another_teapot.boil()
 
         Returns:
             Mock instance associated with this assertion.
@@ -947,7 +953,7 @@ class Mock:
         self._mock = (
             patch.start() if patch else umock.MagicMock(spec=spec if spec is not None else target)
         )
-        self._assertions: List[Assert] = []
+        self._assertions: Dict[str, Assert] = {}
         self._object_patches: List[
             umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
         ] = []
@@ -968,7 +974,8 @@ class Mock:
 
         Raises:
             ValueError: Raised if the given attribute name is empty.
-            RuntimeError: If trying to spy stubs or patched objects.
+            RuntimeError: If trying to spy stubs or patched objects. Also raised
+                if trying to spy a mocked attribute.
         """
         if self._target is None:
             raise RuntimeError("Spying is not available for stubs. Call 'mock' instead.")
@@ -976,12 +983,18 @@ class Mock:
             raise RuntimeError("Spying is not available for patched objects. Call 'mock' instead.")
         if not name:
             raise ValueError("Attribute name cannot be empty.")
-        name = self.__remove_name_mangling(name)
-        original = getattr(self._target, name)
-        attr_mock = self.__get_patch_attr_mock(self._mock, name, create=True)
+        if cached := self._assertions.get(name):
+            if cached._kind == "mock":  # pylint: disable=protected-access
+                raise RuntimeError(
+                    f"Attribute '{name}' has already been mocked. Can't spy a mocked attribute."
+                )
+            return cached
+        parsed_name = self.__remove_name_mangling(name)
+        original = getattr(self._target, parsed_name)
+        attr_mock = self.__get_patch_attr_mock(self._mock, parsed_name, create=True)
         parameters = tuple(inspect.signature(original).parameters.keys())
-        is_class_method = self.__get_method_type(name, classmethod)
-        is_static_method = self.__get_method_type(name, staticmethod)
+        is_class_method = self.__get_method_type(parsed_name, classmethod)
+        is_static_method = self.__get_method_type(parsed_name, staticmethod)
 
         def pass_through(*args: Any, **kwargs: Any) -> Any:
             has_self = len(parameters) > 0 and parameters[0] == "self"
@@ -1006,13 +1019,15 @@ class Mock:
             return await original(*args, **kwargs)
 
         if isinstance(attr_mock, umock.AsyncMock):
-            patch = umock.patch.object(self._target, name, new_callable=lambda: async_pass_through)
+            patch = umock.patch.object(
+                self._target, parsed_name, new_callable=lambda: async_pass_through
+            )
         else:
-            patch = umock.patch.object(self._target, name, new_callable=lambda: pass_through)
+            patch = umock.patch.object(self._target, parsed_name, new_callable=lambda: pass_through)
         patch.start()
         self._object_patches.append(patch)
-        assertion = Assert(self, attr_mock, name, _internal=True)
-        self._assertions.append(assertion)
+        assertion = Assert(self, attr_mock, parsed_name, kind="spy", _internal=True)
+        self._assertions[name] = assertion
         return assertion
 
     def __get_method_type(
@@ -1048,21 +1063,28 @@ class Mock:
 
         Raises:
             ValueError: Raised if the given attribute name is empty.
+            RuntimeError: If trying to mock a spied attribute.
         """
+        if cached := self._assertions.get(name):
+            if cached._kind == "spy":  # pylint: disable=protected-access
+                raise RuntimeError(
+                    f"Attribute '{name}' has already been spied. Can't mock a spied attribute."
+                )
+            return cached
         parts = name.split(".")
-        name = self.__remove_name_mangling(parts[0])
+        parsed_name = self.__remove_name_mangling(parts[0])
         parts = parts[1:]
-        if not name:
+        if not parsed_name:
             raise ValueError("Attribute name cannot be empty.")
         if self._target is None:
-            assertion = self.__stub_attribute(name, parts)
+            assertion = self.__stub_attribute(parsed_name, parts)
         elif self._patch is not None:
-            assertion = self.__patch_attribute(name, parts, create=create)
+            assertion = self.__patch_attribute(parsed_name, parts, create=create)
         else:
-            original = self.__get_original(name, create)
-            assertion = self.__mock_attribute(name, parts, original, create=create)
+            original = self.__get_original(parsed_name, create)
+            assertion = self.__mock_attribute(parsed_name, parts, original, create=create)
         assertion.return_value(None)
-        self._assertions.append(assertion)
+        self._assertions[name] = assertion
         return assertion
 
     def __remove_name_mangling(self, name: str) -> str:
@@ -1148,8 +1170,8 @@ class Mock:
             self._patch.stop()
 
     def _validate(self) -> None:
-        while len(self._assertions) > 0:
-            assertion = self._assertions.pop()
+        for key in list(self._assertions):
+            assertion = self._assertions.pop(key)
             assertion._validate()  # pylint: disable=protected-access
 
 
