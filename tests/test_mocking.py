@@ -299,27 +299,27 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         with assert_raises(AssertionError, "method('foo', arg2=4) call not found"):
             State.teardown()
 
-    def test_mock_instance_method_any_call_has_args(self) -> None:
+    def test_mock_instance_method_match_args_any_call(self) -> None:
         class FooClass:
             def method(self, arg1: str, arg2: int = 10) -> str:
                 return arg1 + str(arg2)
 
-        mocker(FooClass).mock("method").any_call_has_args("bar")
+        mocker(FooClass).mock("method").match_args_any_call("bar")
         FooClass().method("bar", arg2=2)
         FooClass().method("baz", arg2=3)
         State.teardown()
 
-        mocker(FooClass).mock("method").any_call_has_args(arg2=3)
+        mocker(FooClass).mock("method").match_args_any_call(arg2=3)
         FooClass().method("bar", arg2=2)
         FooClass().method("baz", arg2=3)
         State.teardown()
 
-        mocker(FooClass).mock("method").any_call_has_args("bar", arg2=2)
+        mocker(FooClass).mock("method").match_args_any_call("bar", arg2=2)
         FooClass().method("bar", arg2=2)
         FooClass().method("baz", arg2=3)
         State.teardown()
 
-        mocker(FooClass).mock("method").any_call_has_args("foo")
+        mocker(FooClass).mock("method").match_args_any_call("foo")
         FooClass().method("bar", arg2=2)
         FooClass().method("baz", arg2=3)
         with assert_raises(
@@ -330,7 +330,7 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-        mocker(FooClass).mock("method").any_call_has_args(arg2=1)
+        mocker(FooClass).mock("method").match_args_any_call(arg2=1)
         FooClass().method("bar", arg2=2)
         FooClass().method("baz", arg2=3)
         with assert_raises(
@@ -341,7 +341,7 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-        mocker(FooClass).mock("method").any_call_has_args("foo", arg2=1)
+        mocker(FooClass).mock("method").match_args_any_call("foo", arg2=1)
         FooClass().method("bar", arg2=2)
         FooClass().method("baz", arg2=3)
         with assert_raises(

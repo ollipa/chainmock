@@ -120,27 +120,27 @@ class TestAsyncMocking:
             State.teardown()
 
     @pytest.mark.asyncio
-    async def test_mock_instance_method_any_await_has_args(self) -> None:
+    async def test_mock_instance_method_match_args_any_await(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
                 return arg1 + str(arg2)
 
-        mocker(FooClass).mock("method").any_await_has_args("bar")
+        mocker(FooClass).mock("method").match_args_any_await("bar")
         await FooClass().method("bar", arg2=2)
         await FooClass().method("baz", arg2=3)
         State.teardown()
 
-        mocker(FooClass).mock("method").any_await_has_args(arg2=3)
+        mocker(FooClass).mock("method").match_args_any_await(arg2=3)
         await FooClass().method("bar", arg2=2)
         await FooClass().method("baz", arg2=3)
         State.teardown()
 
-        mocker(FooClass).mock("method").any_await_has_args("bar", arg2=2)
+        mocker(FooClass).mock("method").match_args_any_await("bar", arg2=2)
         await FooClass().method("bar", arg2=2)
         await FooClass().method("baz", arg2=3)
         State.teardown()
 
-        mocker(FooClass).mock("method").any_await_has_args("foo")
+        mocker(FooClass).mock("method").match_args_any_await("foo")
         await FooClass().method("bar", arg2=2)
         await FooClass().method("baz", arg2=3)
         with assert_raises(
@@ -151,7 +151,7 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-        mocker(FooClass).mock("method").any_await_has_args(arg2=1)
+        mocker(FooClass).mock("method").match_args_any_await(arg2=1)
         await FooClass().method("bar", arg2=2)
         await FooClass().method("baz", arg2=3)
         with assert_raises(
@@ -162,7 +162,7 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-        mocker(FooClass).mock("method").any_await_has_args("foo", arg2=1)
+        mocker(FooClass).mock("method").match_args_any_await("foo", arg2=1)
         await FooClass().method("bar", arg2=2)
         await FooClass().method("baz", arg2=3)
         with assert_raises(

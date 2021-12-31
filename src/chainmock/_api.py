@@ -289,7 +289,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         )
         return self
 
-    def any_call_has_args(self, *args: Any, **kwargs: Any) -> Assert:
+    def match_args_any_call(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that any call has _at least_ the specified arguments.
 
         The assert passes if any call has at least the given positional or
@@ -303,14 +303,14 @@ class Assert:  # pylint: disable=too-many-public-methods
             Below assertion passes because `add_tea` was called with positional
             argument `black`. Keyword argument `loose` is ignored.
 
-            >>> mocker(Teapot).mock("add_tea").any_call_has_args("black")
+            >>> mocker(Teapot).mock("add_tea").match_args_any_call("black")
             <chainmock._api.Assert object at ...>
             >>> Teapot().add_tea("black", loose=False)
 
             Below assertion passes because `add_tea` was called with keyword
             argument `loose=True`. Positional argument is ignored.
 
-            >>> mocker(Teapot).mock("add_tea").any_call_has_args(loose=True)
+            >>> mocker(Teapot).mock("add_tea").match_args_any_call(loose=True)
             <chainmock._api.Assert object at ...>
             >>> Teapot().add_tea("oolong", loose=True)
 
@@ -324,7 +324,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(functools.partial(self._assert_call_args_list, *args, **kwargs))
         return self
 
-    def any_await_has_args(self, *args: Any, **kwargs: Any) -> Assert:
+    def match_args_any_await(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that any await has _at least_ the specified arguments.
 
         The assert passes if any await has at least the given positional or
@@ -338,14 +338,14 @@ class Assert:  # pylint: disable=too-many-public-methods
             Below assertion passes because `timer` was awaited with positional
             argument `5`. Keyword argument `seconds` is ignored.
 
-            >>> mocker(Teapot).mock("timer").any_await_has_args(5)
+            >>> mocker(Teapot).mock("timer").match_args_any_await(5)
             <chainmock._api.Assert object at ...>
             >>> asyncio.run(Teapot().timer(5, seconds=15))
 
             Below assertion passes because `timer` was awaited with keyword
             argument `seconds=30`. Positional argument is ignored.
 
-            >>> mocker(Teapot).mock("timer").any_await_has_args(seconds=30)
+            >>> mocker(Teapot).mock("timer").match_args_any_await(seconds=30)
             <chainmock._api.Assert object at ...>
             >>> asyncio.run(Teapot().timer(1, seconds=30))
 
