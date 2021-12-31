@@ -352,6 +352,59 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
+    def test_mock_instance_method_match_args_last_call(self) -> None:
+        class FooClass:
+            def method(self, arg1: str, arg2: int = 10) -> str:
+                return arg1 + str(arg2)
+
+        mocker(FooClass).mock("method").match_args_last_call("baz")
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_call(arg2=3)
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_call("baz", arg2=3)
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_call("bar")
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        with assert_raises(
+            AssertionError,
+            "Last call does not include arguments:\n"
+            "Arguments: call('bar')\n"
+            "Calls: [call('bar', arg2=2), call('baz', arg2=3)].",
+        ):
+            State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_call(arg2=2)
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        with assert_raises(
+            AssertionError,
+            "Last call does not include arguments:\n"
+            "Arguments: call(arg2=2)\n"
+            "Calls: [call('bar', arg2=2), call('baz', arg2=3)].",
+        ):
+            State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_call("bar", arg2=2)
+        FooClass().method("bar", arg2=2)
+        FooClass().method("baz", arg2=3)
+        with assert_raises(
+            AssertionError,
+            "Last call does not include arguments:\n"
+            "Arguments: call('bar', arg2=2)\n"
+            "Calls: [call('bar', arg2=2), call('baz', arg2=3)].",
+        ):
+            State.teardown()
+
     def test_mock_instance_method_has_calls(self) -> None:
         class FooClass:
             def method(self, arg1: str, arg2: int = 10) -> str:

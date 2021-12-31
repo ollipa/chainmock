@@ -177,6 +177,82 @@ class Assert:  # pylint: disable=too-many-public-methods
         )
         return self
 
+    def match_args_last_call(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that the _most recent call_ has _at least_ the specified
+        arguments.
+
+        The assert passes if the last call has at least the given positional or
+        keyword arguments. This can be useful when you just one to match one
+        specific argument and do not care about the rest.
+
+        If you want all of the arguments to match, use `called_last_with` method
+        instead.
+
+        Examples:
+            Below assertion passes because `add_tea` was called with positional
+            argument `black`. Keyword argument `loose` is ignored.
+
+            >>> mocker(Teapot).mock("add_tea").match_args_last_call("black")
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("black", loose=False)
+
+            Below assertion passes because `add_tea` was called with keyword
+            argument `loose=True`. Positional argument is ignored.
+
+            >>> mocker(teapot).mock("add_tea").match_args_last_call(loose=True)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("oolong", loose=True)
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(
+            functools.partial(self._assert_call_args_list, True, *args, **kwargs)
+        )
+        return self
+
+    def match_args_last_await(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that the _most recent await_ has _at least_ the specified
+        arguments.
+
+        The assert passes if the last await has at least the given positional or
+        keyword arguments. This can be useful when you just one to match one
+        specific argument and do not care about the rest.
+
+        If you want all of the arguments to match, use `awaited_last_with` method
+        instead.
+
+        Examples:
+            Below assertion passes because `timer` was awaited with positional
+            argument `5`. Keyword argument `seconds` is ignored.
+
+            >>> mocker(Teapot).mock("timer").match_args_any_await(5)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(Teapot().timer(5, seconds=15))
+
+            Below assertion passes because `timer` was awaited with keyword
+            argument `seconds=30`. Positional argument is ignored.
+
+            >>> mocker(teapot).mock("timer").match_args_any_await(seconds=30)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(1, seconds=30))
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(
+            functools.partial(self._assert_await_args_list, True, *args, **kwargs)
+        )
+        return self
+
     def called_once_with(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that the mock was called exactly once and that call was with
         the specified arguments.
@@ -321,7 +397,9 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_call_args_list, *args, **kwargs))
+        self._assertions.append(
+            functools.partial(self._assert_call_args_list, False, *args, **kwargs)
+        )
         return self
 
     def match_args_any_await(self, *args: Any, **kwargs: Any) -> Assert:
@@ -356,7 +434,9 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_await_args_list, *args, **kwargs))
+        self._assertions.append(
+            functools.partial(self._assert_await_args_list, False, *args, **kwargs)
+        )
         return self
 
     def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
@@ -792,9 +872,13 @@ class Assert:  # pylint: disable=too-many-public-methods
         )
         raise AssertionError(msg)
 
-    def _assert_call_args_list(self, *args: Any, **kwargs: Any) -> None:
+    def _assert_call_args_list(self, last_call: bool, *args: Any, **kwargs: Any) -> None:
         match = False
-        for call_args, call_kwargs in self._attr_mock.call_args_list:
+        if last_call:
+            call_args_list = [self._attr_mock.call_args_list[-1]]
+        else:
+            call_args_list = self._attr_mock.call_args_list
+        for call_args, call_kwargs in call_args_list:
             arg_match = True
             kwarg_match = True
             for arg in args:
@@ -812,16 +896,24 @@ class Assert:  # pylint: disable=too-many-public-methods
         if match is False:
             format_args = (repr(arg) for arg in args)
             format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+            if last_call:
+                msg = "Last call does not include arguments"
+            else:
+                msg = "No call includes arguments"
             msg = (
-                f"No call includes arguments:\n"  # pylint:disable=protected-access
+                f"{msg}:\n"  # pylint:disable=protected-access
                 f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
                 f"{self._attr_mock._calls_repr()}"
             )
             raise AssertionError(msg)
 
-    def _assert_await_args_list(self, *args: Any, **kwargs: Any) -> None:
+    def _assert_await_args_list(self, last_await: bool, *args: Any, **kwargs: Any) -> None:
         match = False
-        for await_args, await_kwargs in self._attr_mock.await_args_list:
+        if last_await:
+            await_args_list = [self._attr_mock.await_args_list[-1]]
+        else:
+            await_args_list = self._attr_mock.await_args_list
+        for await_args, await_kwargs in await_args_list:
             arg_match = True
             kwarg_match = True
             for arg in args:
@@ -839,8 +931,12 @@ class Assert:  # pylint: disable=too-many-public-methods
         if match is False:
             format_args = (repr(arg) for arg in args)
             format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+            if last_await:
+                msg = "Last await does not include arguments"
+            else:
+                msg = "No await includes arguments"
             msg = (
-                f"No await includes arguments:\n"  # pylint:disable=protected-access
+                f"{msg}:\n"  # pylint:disable=protected-access
                 f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
                 f"{self._awaits_repr()}"
             )

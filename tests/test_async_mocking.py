@@ -174,6 +174,60 @@ class TestAsyncMocking:
             State.teardown()
 
     @pytest.mark.asyncio
+    async def test_mock_instance_method_match_args_last_await(self) -> None:
+        class FooClass:
+            async def method(self, arg1: str, arg2: int = 10) -> str:
+                return arg1 + str(arg2)
+
+        mocker(FooClass).mock("method").match_args_last_await("baz")
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("baz", arg2=3)
+        State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_await(arg2=3)
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("baz", arg2=3)
+        State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_await("baz", arg2=3)
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("baz", arg2=3)
+        State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_await("bar")
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("baz", arg2=3)
+        with assert_raises(
+            AssertionError,
+            "Last await does not include arguments:\n"
+            "Arguments: call('bar')\n"
+            "Awaits: [call('bar', arg2=2), call('baz', arg2=3)].",
+        ):
+            State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_await(arg2=2)
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("baz", arg2=3)
+        with assert_raises(
+            AssertionError,
+            "Last await does not include arguments:\n"
+            "Arguments: call(arg2=2)\n"
+            "Awaits: [call('bar', arg2=2), call('baz', arg2=3)].",
+        ):
+            State.teardown()
+
+        mocker(FooClass).mock("method").match_args_last_await("bar", arg2=2)
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("baz", arg2=3)
+        with assert_raises(
+            AssertionError,
+            "Last await does not include arguments:\n"
+            "Arguments: call('bar', arg2=2)\n"
+            "Awaits: [call('bar', arg2=2), call('baz', arg2=3)].",
+        ):
+            State.teardown()
+
+    @pytest.mark.asyncio
     async def test_mock_async_instance_method_has_awaits(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
