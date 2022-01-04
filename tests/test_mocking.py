@@ -4,7 +4,7 @@ from typing import Type
 
 from chainmock import mocker
 from chainmock._api import State
-from chainmock.mock import call
+from chainmock.mock import ANY_INT, ANY_STR, call
 
 from . import common
 from .common import DerivedClass, Proxy, SomeClass
@@ -267,6 +267,10 @@ class TestMocking:  # pylint: disable=too-many-public-methods
 
         mocker(FooClass).mock("method").called_last_with("foo", arg2=5)
         FooClass().method("foo", arg2=5)
+        State.teardown()
+
+        mocker(FooClass).mock("method").called_last_with(ANY_STR, arg2=ANY_INT)
+        FooClass().method("bar", arg2=42)
         State.teardown()
 
         mocker(FooClass).mock("method").called_last_with("foo", arg2=5)
