@@ -7,6 +7,11 @@ import sys
 from chainmock import _api
 
 
+class SomeClass:
+    def method(self) -> str:
+        return "some_value"
+
+
 class Teapot:
     def __init__(self) -> None:
         self._lid = "closed"

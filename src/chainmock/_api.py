@@ -1382,9 +1382,9 @@ def mocker(
         'boiling'
 
         >>> # Now let's try the same thing but also mock the boil call
-        >>> teapot = Teapot()
-        >>> mocker(teapot).mock("boil")
+        >>> mocker(Teapot).mock("boil")
         <chainmock._api.Assert object at ...>
+        >>> teapot = Teapot()
         >>> teapot.state
         'empty'
         >>> teapot.fill()  # fill still works because only boil method is mocked
@@ -1407,6 +1407,20 @@ def mocker(
         Traceback (most recent call last):
           ...
         RuntimeError: Oh no!
+
+        Replace all the instances of `SomeClass` with a mock by _patching_ it:
+
+        >>> class SomeClass:
+        ...    def method(self, arg):
+        ...        pass
+        ...
+        >>> mocked = mocker("__main__.SomeClass")
+        >>> # SomeClass instances are now replaced by a mock
+        >>> some_class = SomeClass()
+        >>> some_class.method("foo")
+        >>> # We can change return values, assert call counts or arguments
+        >>> mocked.mock("method").return_value("mocked")
+        <chainmock._api.Assert object at ...>
 
     Args:
         target: The target to mock or spy. By leaving out the target, a stub is
