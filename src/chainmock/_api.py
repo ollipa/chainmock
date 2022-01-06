@@ -815,6 +815,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Examples:
             Use `self` to return mock and add more assertions:
 
+            >>> teapot = Teapot()
             >>> mocked = mocker(teapot).mock("fill").called_once().self()
             >>> mocked.mock("boil").called_once()
             <chainmock._api.Assert object at ...>
@@ -823,13 +824,14 @@ class Assert:  # pylint: disable=too-many-public-methods
 
             Without `self` the above example can be written also like this:
 
-            >>> mocked = mocker(another_teapot)
+            >>> teapot = Teapot()
+            >>> mocked = mocker(teapot)
             >>> mocked.mock("fill").called_once()
             <chainmock._api.Assert object at ...>
             >>> mocked.mock("boil").called_once()
             <chainmock._api.Assert object at ...>
-            >>> another_teapot.fill()
-            >>> another_teapot.boil()
+            >>> teapot.fill()
+            >>> teapot.boil()
 
         Returns:
             Mock instance associated with this assertion.
@@ -1017,7 +1019,7 @@ class State:
 
     @classmethod
     def teardown(cls) -> None:
-        """Convinience method used in tests to reset and validate mocks."""
+        """Convenience method used in tests to reset and validate mocks."""
         cls.reset_mocks()
         cls.validate_mocks()
 
@@ -1061,6 +1063,27 @@ class Mock:
         This wraps the given attribute so that functions or methods still return
         their original values and work as if they were not mocked. With spies,
         you can assert that a function or method was called without mocking it.
+
+        Examples:
+            Assert that the method `add_tea` was called once:
+
+            >>> teapot = Teapot()
+            >>> teapot.add_tea("white tea")
+            'loose white tea'
+            >>> mocker(teapot).spy("add_tea").called_once()
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("white tea")
+            'loose white tea'
+
+            Assert that the method `add_tea` was called with specific arguments:
+
+            >>> teapot = Teapot()
+            >>> teapot.add_tea("white tea", loose=False)
+            'bagged white tea'
+            >>> mocker(teapot).spy("add_tea").called_last_with("green tea", loose=True)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("green tea", loose=True)
+            'loose green tea'
 
         Args:
             name: Attribute name to spy.
@@ -1145,6 +1168,39 @@ class Mock:
 
         The given attribute is mocked and the mock catches all the calls to it.
         If not return value is set, `None` is returned by default.
+
+        Examples:
+            Assert that the method `add_tea` was called once:
+
+            >>> teapot = Teapot()
+            >>> teapot.add_tea("white tea")
+            'loose white tea'
+            >>> mocker(teapot).mock("add_tea").called_once()
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("white tea")
+
+            Replace the return value of the `add_tea` method:
+
+            >>> teapot = Teapot()
+            >>> teapot.add_tea("green tea")
+            'loose green tea'
+            >>> mocker(teapot).mock("add_tea").return_value("mocked")
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("green tea")
+            'mocked'
+
+            Assert that the method `add_tea` was called with a specific argument
+            while also replacing the return value:
+
+            >>> teapot = Teapot()
+            >>> teapot.add_tea("white tea", loose=False)
+            'bagged white tea'
+            >>> mocker(teapot).mock("add_tea").match_args_last_call(
+            ...     "green tea"
+            ... ).return_value("mocked")
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("green tea", loose=True)
+            'mocked'
 
         Args:
             name: Attribute name to mock.

@@ -71,7 +71,6 @@ if __name__ == "__main__":
         extraglobs={
             "Teapot": Teapot,
             "teapot": Teapot(),
-            "another_teapot": Teapot(),
             "asyncio": asyncio,
         },
         optionflags=doctest.ELLIPSIS,
