@@ -1367,6 +1367,33 @@ def mocker(
     [unittest.mock.html#patch](
     https://docs.python.org/3/library/unittest.mock.html#patch)
 
+    Examples:
+        _Partially mock_ the `Teapot` class:
+
+        >>> # First let's fill a teapot and boil the water without mocking
+        >>> teapot = Teapot()
+        >>> teapot.state
+        'empty'
+        >>> teapot.fill()
+        >>> teapot.state
+        'full'
+        >>> teapot.boil()
+        >>> teapot.state
+        'boiling'
+
+        >>> # Now let's try the same thing but also mock the boil call
+        >>> teapot = Teapot()
+        >>> mocker(teapot).mock("boil")
+        <chainmock._api.Assert object at ...>
+        >>> teapot.state
+        'empty'
+        >>> teapot.fill()  # fill still works because only boil method is mocked
+        >>> teapot.state
+        'full'
+        >>> teapot.boil()  # state is not updated because boil method is mocked
+        >>> teapot.state
+        'full'
+
     Args:
         target: The target to mock or spy. By leaving out the target, a stub is
             created. If the target is a string, the object in the given path is

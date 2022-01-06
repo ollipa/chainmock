@@ -8,28 +8,38 @@ from chainmock import _api
 
 
 class Teapot:
+    def __init__(self) -> None:
+        self._lid = "closed"
+        self._state = "empty"
+
+    @property
+    def state(self) -> str:
+        return self._state
+
     def brew(self) -> None:
-        pass
+        self._state = "brewing"
 
     def fill(self) -> None:
-        pass
+        self._state = "full"
 
     def boil(self) -> None:
-        pass
+        self._state = "boiling"
 
     def pour(self) -> None:
-        pass
+        self._state = "empty"
 
     def add_tea(self, tea_type: str, loose: bool = True) -> str:
         if loose:
             return f"loose {tea_type}"
         return f"bagged {tea_type}"
 
-    async def open(self) -> None:
-        pass
+    async def open(self) -> str:
+        self._lid = "open"
+        return self._lid
 
-    async def close(self) -> None:
-        pass
+    async def close(self) -> str:
+        self._lid = "closed"
+        return self._lid
 
     async def timer(self, minutes: int, seconds: int = 0) -> int:
         return minutes + seconds
