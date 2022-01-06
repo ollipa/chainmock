@@ -1394,6 +1394,20 @@ def mocker(
         >>> teapot.state
         'full'
 
+        _Create a stub_ and attach methods to it:
+
+        >>> stub = mocker()
+        >>> stub.mock("my_method").return_value("It works!")
+        <chainmock._api.Assert object at ...>
+        >>> stub.mock("another_method").side_effect(RuntimeError("Oh no!"))
+        <chainmock._api.Assert object at ...>
+        >>> stub.my_method()
+        'It works!'
+        >>> stub.another_method()
+        Traceback (most recent call last):
+          ...
+        RuntimeError: Oh no!
+
     Args:
         target: The target to mock or spy. By leaving out the target, a stub is
             created. If the target is a string, the object in the given path is
