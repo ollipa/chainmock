@@ -1336,6 +1336,10 @@ def mocker(
 ) -> Mock:
     """Main entrypoint for chainmock.
 
+    Depending on the arguments you pass to `mocker` function, it provides
+    different functionality. Supported functionalities are partial mocking (and
+    spying), stubbing, and patching. See detailed explanations below.
+
     # Partial mocking
     If mocker is invoked with an object (eg. class, instance, module), the named
     members (attributes) on the object (target) can be mocked or spied
