@@ -60,3 +60,14 @@ class TestChainmock:
         ):
             mocker(FooClass).mock("method")
         State.teardown()
+
+    def test_get_mock(self) -> None:
+        class FooClass:
+            def method(self) -> None:
+                pass
+
+        instance = FooClass()
+        mock = mocker(instance).mock("method").get_mock()
+        mock.assert_not_called()
+        instance.method()
+        mock.assert_called_once()

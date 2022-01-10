@@ -39,6 +39,44 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions: List[Callable[..., None]] = []
         self._kind = kind
 
+    def get_mock(self) -> AnyMock:
+        """Return the unittest mock associated with this Assert object.
+
+        This method can be used if you want to access the underlying unittest
+        mock directly. Normally, there should not be a need for this, but you can
+        use this method if you prefer to call the assertion methods directly on
+        the unittest mock instead of using chainmock's methods.
+
+        One difference between calling assertion methods on the unittest mock
+        and chainmock is that unittest mock validates the assertions right
+        away whereas chainmock verifies the assertions after the test execution
+        during test teardown. Therefore, unittest mock allows making assertions
+        before the test execution. If you are not sure what this means, see the
+        examples section.
+
+        Examples:
+            Mock the `add_tea` method and call assertions directly on unittest
+            mock:
+
+            >>> teapot = Teapot()
+            >>> mock = mocker(teapot).mock("add_tea").get_mock()
+            >>> # Using get_mock allows making assertions before test teardown
+            >>> mock.assert_not_called()
+            >>> teapot.add_tea("green")
+            >>> mock.assert_called_once_with("green")
+
+            The above code can be written without calling `get_mock` as follows:
+
+            >>> teapot = Teapot()
+            >>> mocker(teapot).mock("add_tea").called_once_with("green")
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("green")
+
+        Returns:
+            Python unittest mock (`AsyncMock`, `MagicMock`, or `PropertyMock`).
+        """
+        return self._attr_mock
+
     def return_value(self, value: Any) -> Assert:
         """Set the value that will be returned when the mocked attribute is
         called.
