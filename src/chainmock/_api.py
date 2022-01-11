@@ -220,7 +220,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         arguments.
 
         The assert passes if the last call has at least the given positional or
-        keyword arguments. This can be useful when you just one to match one
+        keyword arguments. This can be useful when you want to match just one
         specific argument and do not care about the rest.
 
         If you want all of the arguments to match, use `called_last_with` method
@@ -258,7 +258,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         arguments.
 
         The assert passes if the last await has at least the given positional or
-        keyword arguments. This can be useful when you just one to match one
+        keyword arguments. This can be useful when you want to match just one
         specific argument and do not care about the rest.
 
         If you want all of the arguments to match, use `awaited_last_with` method
@@ -287,7 +287,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_await_args_list, True, *args, **kwargs)
+            functools.partial(self._assert_await_args_list, "last", *args, **kwargs)
         )
         return self
 
@@ -407,7 +407,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         """Assert that any call has _at least_ the specified arguments.
 
         The assert passes if any call has at least the given positional or
-        keyword arguments. This can be useful when you just one to match one
+        keyword arguments. This can be useful when you want to match just one
         specific argument and do not care about the rest.
 
         If you want all of the arguments to match, use `any_call_with` method
@@ -444,7 +444,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         """Assert that any await has _at least_ the specified arguments.
 
         The assert passes if any await has at least the given positional or
-        keyword arguments. This can be useful when you just one to match one
+        keyword arguments. This can be useful when you want to match just one
         specific argument and do not care about the rest.
 
         If you want all of the arguments to match, use `any_await_with` method
@@ -473,26 +473,40 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_await_args_list, False, *args, **kwargs)
+            functools.partial(self._assert_await_args_list, "any", *args, **kwargs)
         )
         return self
 
     def match_args_all_calls(self, *args: Any, **kwargs: Any) -> Assert:
-        """Assert that _all_ calls has _at least_ the specified arguments.
+        """Assert that _all_ calls have _at least_ the specified arguments.
 
         The assert passes if all calls have at least the given positional or
-        keyword arguments. This can be useful when you just one to match one
+        keyword arguments. This can be useful when you want to match just one
         specific argument and do not care about the rest.
 
         If you want all of the arguments to match, use `all_calls_with` method
         instead.
 
         Examples:
-            >>> mocker(Teapot).mock("add_tea").match_args_all_calls("oolong")
+            Below assertion passes because all calls to `add_tea` have
+            positional argument `oolong`. Keyword arguments are ignored.
+
+            >>> teapot = Teapot()
+            >>> mocker(teapot).mock("add_tea").match_args_all_calls("oolong")
             <chainmock._api.Assert object at ...>
-            >>> Teapot().add_tea("oolong")
-            >>> Teapot().add_tea("oolong")
-            >>> Teapot().add_tea("oolong")
+            >>> teapot.add_tea("oolong", loose=False)
+            >>> teapot.add_tea("oolong", loose=True)
+            >>> teapot.add_tea("oolong")
+
+            Below assertion passes because all calls to `add_tea` have keyword
+            argument `loose=True`. Positional arguments are ignored.
+
+            >>> teapot = Teapot()
+            >>> mocker(teapot).mock("add_tea").match_args_all_calls(loose=True)
+            <chainmock._api.Assert object at ...>
+            >>> teapot.add_tea("oolong", loose=True)
+            >>> teapot.add_tea("black", loose=True)
+            >>> teapot.add_tea("green", loose=True)
 
         Args:
             *args: Expected positional arguments.
@@ -503,6 +517,49 @@ class Assert:  # pylint: disable=too-many-public-methods
         """
         self._assertions.append(
             functools.partial(self._assert_call_args_list, "all", *args, **kwargs)
+        )
+        return self
+
+    def match_args_all_awaits(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that _all_ awaits have _at least_ the specified arguments.
+
+        The assert passes if all awaits have at least the given positional or
+        keyword arguments. This can be useful when you want to match just one
+        specific argument and do not care about the rest.
+
+        If you want all of the arguments to match, use `all_awaits_with` method
+        instead.
+
+        Examples:
+            Below assertion passes because all awaits to `timer` have positional
+            argument `5`. Keyword arguments `seconds` are ignored.
+
+            >>> teapot = Teapot()
+            >>> mocker(teapot).mock("timer").match_args_all_awaits(5)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(5, seconds=15))
+            >>> asyncio.run(teapot.timer(5, seconds=30))
+            >>> asyncio.run(teapot.timer(5))
+
+            Below assertion passes because all awaits to `timer` have keyword
+            argument `seconds=30`. Positional arguments are ignored.
+
+            >>> teapot = Teapot()
+            >>> mocker(teapot).mock("timer").match_args_all_awaits(seconds=30)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(1, seconds=30))
+            >>> asyncio.run(teapot.timer(5, seconds=30))
+            >>> asyncio.run(teapot.timer(10, seconds=30))
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(
+            functools.partial(self._assert_await_args_list, "all", *args, **kwargs)
         )
         return self
 
@@ -986,9 +1043,11 @@ class Assert:  # pylint: disable=too-many-public-methods
             )
             raise AssertionError(msg)
 
-    def _assert_await_args_list(self, last_await: bool, *args: Any, **kwargs: Any) -> None:
+    def _assert_await_args_list(  # pylint: disable=too-many-branches
+        self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
+    ) -> None:
         match = False
-        if last_await:
+        if modifier == "last":
             await_args_list = [self._attr_mock.await_args_list[-1]]
         else:
             await_args_list = self._attr_mock.await_args_list
@@ -1000,18 +1059,26 @@ class Assert:  # pylint: disable=too-many-public-methods
                     arg_match = False
                     break
             if arg_match is False:
-                continue
+                if modifier != "all":
+                    continue
+                match = False
+                break
             for kwarg in kwargs.items():
                 if kwarg not in await_kwargs.items():
                     kwarg_match = False
                     break
+            if kwarg_match is False and modifier == "all":
+                match = False
+                break
             if arg_match and kwarg_match:
                 match = True
         if match is False:
             format_args = (repr(arg) for arg in args)
             format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
-            if last_await:
+            if modifier == "last":
                 msg = "Last await does not include arguments"
+            elif modifier == "all":
+                msg = "All awaits do not contain the given arguments"
             else:
                 msg = "No await includes arguments"
             msg = (
