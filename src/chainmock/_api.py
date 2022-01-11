@@ -249,7 +249,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_call_args_list, True, *args, **kwargs)
+            functools.partial(self._assert_call_args_list, "last", *args, **kwargs)
         )
         return self
 
@@ -436,7 +436,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_call_args_list, False, *args, **kwargs)
+            functools.partial(self._assert_call_args_list, "any", *args, **kwargs)
         )
         return self
 
@@ -474,6 +474,35 @@ class Assert:  # pylint: disable=too-many-public-methods
         """
         self._assertions.append(
             functools.partial(self._assert_await_args_list, False, *args, **kwargs)
+        )
+        return self
+
+    def match_args_all_calls(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that _all_ calls has _at least_ the specified arguments.
+
+        The assert passes if all calls have at least the given positional or
+        keyword arguments. This can be useful when you just one to match one
+        specific argument and do not care about the rest.
+
+        If you want all of the arguments to match, use `all_calls_with` method
+        instead.
+
+        Examples:
+            >>> mocker(Teapot).mock("add_tea").match_args_all_calls("oolong")
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("oolong")
+            >>> Teapot().add_tea("oolong")
+            >>> Teapot().add_tea("oolong")
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(
+            functools.partial(self._assert_call_args_list, "all", *args, **kwargs)
         )
         return self
 
@@ -912,9 +941,11 @@ class Assert:  # pylint: disable=too-many-public-methods
         )
         raise AssertionError(msg)
 
-    def _assert_call_args_list(self, last_call: bool, *args: Any, **kwargs: Any) -> None:
+    def _assert_call_args_list(  # pylint: disable=too-many-branches
+        self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
+    ) -> None:
         match = False
-        if last_call:
+        if modifier == "last":
             call_args_list = [self._attr_mock.call_args_list[-1]]
         else:
             call_args_list = self._attr_mock.call_args_list
@@ -926,18 +957,26 @@ class Assert:  # pylint: disable=too-many-public-methods
                     arg_match = False
                     break
             if arg_match is False:
-                continue
+                if modifier != "all":
+                    continue
+                match = False
+                break
             for kwarg in kwargs.items():
                 if kwarg not in call_kwargs.items():
                     kwarg_match = False
                     break
+            if kwarg_match is False and modifier == "all":
+                match = False
+                break
             if arg_match and kwarg_match:
                 match = True
         if match is False:
             format_args = (repr(arg) for arg in args)
             format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
-            if last_call:
+            if modifier == "last":
                 msg = "Last call does not include arguments"
+            elif modifier == "all":
+                msg = "All calls do not contain the given arguments"
             else:
                 msg = "No call includes arguments"
             msg = (
