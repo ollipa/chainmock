@@ -425,6 +425,28 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(functools.partial(self._assert_all_calls_with, *args, **kwargs))
         return self
 
+    def all_awaits_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that _all_ awaits have the specified arguments.
+
+        The assert passes if _all_ awaits have been made with the given
+        arguments.
+
+        Examples:
+            >>> mocker(teapot).mock("timer").all_calls_with(5)
+            <chainmock._api.Assert object at ...>
+            >>> asyncio.run(teapot.timer(5))
+            >>> asyncio.run(teapot.timer(5))
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(functools.partial(self._assert_all_awaits_with, *args, **kwargs))
+        return self
+
     def match_args_any_call(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that any call has _at least_ the specified arguments.
 
@@ -1022,10 +1044,10 @@ class Assert:  # pylint: disable=too-many-public-methods
 
     def _assert_all_calls_with(self, *args: Any, **kwargs: Any) -> None:
         call_args_list = self._attr_mock.call_args_list
-        excepted_call = umock.call(*args, **kwargs)
+        expected_call = umock.call(*args, **kwargs)
         match = True
         for call in call_args_list:
-            if call != excepted_call:
+            if call != expected_call:
                 match = False
                 break
         if match is False:
@@ -1035,6 +1057,24 @@ class Assert:  # pylint: disable=too-many-public-methods
                 f"All calls have not been made with the given arguments:\n"  # pylint:disable=protected-access
                 f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
                 f"{self._attr_mock._calls_repr()}"
+            )
+            raise AssertionError(msg)
+
+    def _assert_all_awaits_with(self, *args: Any, **kwargs: Any) -> None:
+        await_args_list = self._attr_mock.await_args_list
+        expected_call = umock.call(*args, **kwargs)
+        match = True
+        for call in await_args_list:
+            if call != expected_call:
+                match = False
+                break
+        if match is False:
+            format_args = (repr(arg) for arg in args)
+            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+            msg = (
+                f"All awaits have not been made with the given arguments:\n"  # pylint:disable=protected-access
+                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
+                f"{self._awaits_repr()}"
             )
             raise AssertionError(msg)
 

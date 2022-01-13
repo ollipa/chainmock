@@ -120,6 +120,59 @@ class TestAsyncMocking:
             State.teardown()
 
     @pytest.mark.asyncio
+    async def test_mock_async_instance_method_all_awaits_with(self) -> None:
+        class FooClass:
+            async def method(self, arg1: str, arg2: int = 10) -> str:
+                return arg1 + str(arg2)
+
+        mocker(FooClass).mock("method").all_awaits_with("bar", arg2=2)
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("bar", arg2=2)
+        await FooClass().method("bar", arg2=2)
+        State.teardown()
+
+        # Extra argument
+        mocker(FooClass).mock("method").all_awaits_with("foo")
+        await FooClass().method("foo", arg2=2)
+        with assert_raises(
+            AssertionError,
+            (
+                "All awaits have not been made with the given arguments:\n"
+                "Arguments: call('foo')\n"
+                "Awaits: [call('foo', arg2=2)]."
+            ),
+        ):
+            State.teardown()
+
+        mocker(FooClass).mock("method").all_awaits_with("foo", arg2=4)
+        await FooClass().method("foo", arg2=4)
+        await FooClass().method("bar", arg2=4)
+        await FooClass().method("foo", arg2=4)
+        with assert_raises(
+            AssertionError,
+            (
+                "All awaits have not been made with the given arguments:\n"
+                "Arguments: call('foo', arg2=4)\n"
+                "Awaits: [call('foo', arg2=4), call('bar', arg2=4), call('foo', arg2=4)]."
+            ),
+        ):
+            State.teardown()
+
+        mocker(FooClass).mock("method").all_awaits_with("foo", arg2=4)
+        await FooClass().method("foo", arg2=4)
+        await FooClass().method("foo", arg2=2)
+        await FooClass().method("foo", arg2=4)
+        with assert_raises(
+            AssertionError,
+            (
+                "All awaits have not been made with the given arguments:\n"
+                "Arguments: call('foo', arg2=4)\n"
+                "Awaits: [call('foo', arg2=4), call('foo', arg2=2), call('foo', arg2=4)]."
+            ),
+        ):
+            State.teardown()
+
+    @pytest.mark.asyncio
     async def test_mock_instance_method_match_args_any_await(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
