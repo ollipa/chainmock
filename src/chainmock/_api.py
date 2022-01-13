@@ -249,7 +249,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_call_args_list, "last", *args, **kwargs)
+            functools.partial(self._assert_match_call_args, "last", *args, **kwargs)
         )
         return self
 
@@ -287,7 +287,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_await_args_list, "last", *args, **kwargs)
+            functools.partial(self._assert_match_await_args, "last", *args, **kwargs)
         )
         return self
 
@@ -480,7 +480,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_call_args_list, "any", *args, **kwargs)
+            functools.partial(self._assert_match_call_args, "any", *args, **kwargs)
         )
         return self
 
@@ -517,7 +517,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_await_args_list, "any", *args, **kwargs)
+            functools.partial(self._assert_match_await_args, "any", *args, **kwargs)
         )
         return self
 
@@ -560,7 +560,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_call_args_list, "all", *args, **kwargs)
+            functools.partial(self._assert_match_call_args, "all", *args, **kwargs)
         )
         return self
 
@@ -603,7 +603,7 @@ class Assert:  # pylint: disable=too-many-public-methods
             Assert instance so that calls can be chained.
         """
         self._assertions.append(
-            functools.partial(self._assert_await_args_list, "all", *args, **kwargs)
+            functools.partial(self._assert_match_await_args, "all", *args, **kwargs)
         )
         return self
 
@@ -1043,50 +1043,76 @@ class Assert:  # pylint: disable=too-many-public-methods
         raise AssertionError(msg)
 
     def _assert_all_calls_with(self, *args: Any, **kwargs: Any) -> None:
-        call_args_list = self._attr_mock.call_args_list
-        expected_call = umock.call(*args, **kwargs)
-        match = True
-        for call in call_args_list:
-            if call != expected_call:
-                match = False
-                break
-        if match is False:
-            format_args = (repr(arg) for arg in args)
-            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+        if not self._all_args_match(self._attr_mock.call_args_list, *args, **kwargs):
             msg = (
                 f"All calls have not been made with the given arguments:\n"  # pylint:disable=protected-access
-                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
+                f"{self._args_repr(*args, **kwargs)}"
                 f"{self._attr_mock._calls_repr()}"
             )
             raise AssertionError(msg)
 
     def _assert_all_awaits_with(self, *args: Any, **kwargs: Any) -> None:
-        await_args_list = self._attr_mock.await_args_list
-        expected_call = umock.call(*args, **kwargs)
-        match = True
-        for call in await_args_list:
-            if call != expected_call:
-                match = False
-                break
-        if match is False:
-            format_args = (repr(arg) for arg in args)
-            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+        if not self._all_args_match(self._attr_mock.await_args_list, *args, **kwargs):
             msg = (
-                f"All awaits have not been made with the given arguments:\n"  # pylint:disable=protected-access
-                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
+                f"All awaits have not been made with the given arguments:\n"
+                f"{self._args_repr(*args, **kwargs)}"
                 f"{self._awaits_repr()}"
             )
             raise AssertionError(msg)
 
-    def _assert_call_args_list(  # pylint: disable=too-many-branches
+    @staticmethod
+    def _all_args_match(args_list: umock._CallList, *args: Any, **kwargs: Any) -> bool:
+        expected_call = umock.call(*args, **kwargs)
+        for call in args_list:
+            if call != expected_call:
+                return False
+        return True
+
+    def _assert_match_call_args(  # pylint: disable=too-many-branches
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
     ) -> None:
+        if not self._assert_match_args(self._attr_mock.call_args_list, modifier, *args, **kwargs):
+            if modifier == "last":
+                msg = "Last call does not include arguments"
+            elif modifier == "all":
+                msg = "All calls do not contain the given arguments"
+            else:
+                msg = "No call includes arguments"
+            msg = (
+                f"{msg}:\n"  # pylint:disable=protected-access
+                f"{self._args_repr(*args, **kwargs)}"
+                f"{self._attr_mock._calls_repr()}"
+            )
+            raise AssertionError(msg)
+
+    def _assert_match_await_args(  # pylint: disable=too-many-branches
+        self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
+    ) -> None:
+        if not self._assert_match_args(self._attr_mock.await_args_list, modifier, *args, **kwargs):
+            if modifier == "last":
+                msg = "Last await does not include arguments"
+            elif modifier == "all":
+                msg = "All awaits do not contain the given arguments"
+            else:
+                msg = "No await includes arguments"
+            msg = (
+                f"{msg}:\n"  # pylint:disable=protected-access
+                f"{self._args_repr(*args, **kwargs)}"
+                f"{self._awaits_repr()}"
+            )
+            raise AssertionError(msg)
+
+    @staticmethod
+    def _assert_match_args(
+        args_list: umock._CallList,
+        modifier: Literal["all", "any", "last"],
+        *args: Any,
+        **kwargs: Any,
+    ) -> bool:
         match = False
         if modifier == "last":
-            call_args_list = [self._attr_mock.call_args_list[-1]]
-        else:
-            call_args_list = self._attr_mock.call_args_list
-        for call_args, call_kwargs in call_args_list:
+            args_list = umock._CallList([args_list[-1]])  # pylint:disable=protected-access
+        for call_args, call_kwargs in args_list:
             arg_match = True
             kwarg_match = True
             for arg in args:
@@ -1107,66 +1133,7 @@ class Assert:  # pylint: disable=too-many-public-methods
                 break
             if arg_match and kwarg_match:
                 match = True
-        if match is False:
-            format_args = (repr(arg) for arg in args)
-            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
-            if modifier == "last":
-                msg = "Last call does not include arguments"
-            elif modifier == "all":
-                msg = "All calls do not contain the given arguments"
-            else:
-                msg = "No call includes arguments"
-            msg = (
-                f"{msg}:\n"  # pylint:disable=protected-access
-                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
-                f"{self._attr_mock._calls_repr()}"
-            )
-            raise AssertionError(msg)
-
-    def _assert_await_args_list(  # pylint: disable=too-many-branches
-        self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
-    ) -> None:
-        match = False
-        if modifier == "last":
-            await_args_list = [self._attr_mock.await_args_list[-1]]
-        else:
-            await_args_list = self._attr_mock.await_args_list
-        for await_args, await_kwargs in await_args_list:
-            arg_match = True
-            kwarg_match = True
-            for arg in args:
-                if arg not in await_args:
-                    arg_match = False
-                    break
-            if arg_match is False:
-                if modifier != "all":
-                    continue
-                match = False
-                break
-            for kwarg in kwargs.items():
-                if kwarg not in await_kwargs.items():
-                    kwarg_match = False
-                    break
-            if kwarg_match is False and modifier == "all":
-                match = False
-                break
-            if arg_match and kwarg_match:
-                match = True
-        if match is False:
-            format_args = (repr(arg) for arg in args)
-            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
-            if modifier == "last":
-                msg = "Last await does not include arguments"
-            elif modifier == "all":
-                msg = "All awaits do not contain the given arguments"
-            else:
-                msg = "No await includes arguments"
-            msg = (
-                f"{msg}:\n"  # pylint:disable=protected-access
-                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
-                f"{self._awaits_repr()}"
-            )
-            raise AssertionError(msg)
+        return match
 
     def _awaits_repr(self) -> str:
         """Renders self.mock_awaits as a string.
@@ -1176,6 +1143,12 @@ class Assert:  # pylint: disable=too-many-public-methods
         if not self._attr_mock.await_args_list:
             return ""
         return f"\nAwaits: {safe_repr(self._attr_mock.await_args_list)}."
+
+    @staticmethod
+    def _args_repr(*args: Any, **kwargs: Any) -> str:
+        format_args = (repr(arg) for arg in args)
+        format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+        return f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
 
     @staticmethod
     def _format_call_count(call_count: int) -> str:
