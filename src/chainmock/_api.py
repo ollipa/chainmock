@@ -1027,11 +1027,11 @@ class Assert:  # pylint: disable=too-many-public-methods
     def _assert_await_count(
         self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
     ) -> None:
-        if modifier is None and self._attr_mock.call_count == await_count:
+        if modifier is None and self._attr_mock.await_count == await_count:
             return
-        if modifier == "at least" and self._attr_mock.call_count >= await_count:
+        if modifier == "at least" and self._attr_mock.await_count >= await_count:
             return
-        if modifier == "at most" and self._attr_mock.call_count <= await_count:
+        if modifier == "at most" and self._attr_mock.await_count <= await_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
         msg = (

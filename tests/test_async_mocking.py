@@ -437,6 +437,12 @@ class TestAsyncMocking:
         await FooClass().method()
         State.teardown()
 
+        mocker(FooClass).mock("method").call_count(3).await_count(2)
+        FooClass().method()
+        await FooClass().method()
+        await FooClass().method()
+        State.teardown()
+
         mocker(FooClass).mock("method").await_count(3)
         await FooClass().method()
         await FooClass().method()
@@ -459,6 +465,17 @@ class TestAsyncMocking:
         await FooClass().method()
         State.teardown()
 
+        mocker(FooClass).mock("method").call_count(3).await_count_at_least(3)
+        FooClass().method()
+        await FooClass().method()
+        await FooClass().method()
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been awaited at least 3 times. "
+            "Awaited twice.\nAwaits: [call(), call()].",
+        ):
+            State.teardown()
+
         mocker(FooClass).mock("method").await_count_at_least(3)
         await FooClass().method()
         await FooClass().method()
@@ -477,6 +494,12 @@ class TestAsyncMocking:
 
         mocker(FooClass).mock("method").await_count_at_most(3)
         await FooClass().method()
+        await FooClass().method()
+        await FooClass().method()
+        State.teardown()
+
+        mocker(FooClass).mock("method").call_count(3).await_count_at_most(2)
+        FooClass().method()
         await FooClass().method()
         await FooClass().method()
         State.teardown()
