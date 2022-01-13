@@ -1294,7 +1294,9 @@ class Mock:
         return assertion
 
     def __get_method_type(
-        self, name: str, method_type: Union[Type[classmethod], Type[staticmethod]]
+        self,
+        name: str,
+        method_type: Union[Type[classmethod], Type[staticmethod]],  # type: ignore # mypy bug?
     ) -> bool:
         try:
             return isinstance(inspect.getattr_static(self._target, name), method_type)
