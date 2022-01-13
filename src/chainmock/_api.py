@@ -346,7 +346,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def any_call_with(self, *args: Any, **kwargs: Any) -> Assert:
-        """Assert the mock has been called with the specified arguments.
+        """Assert that the mock has been called with the specified arguments.
 
         The assert passes if the mock has _ever_ been called with given
         arguments.
@@ -374,7 +374,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def any_await_with(self, *args: Any, **kwargs: Any) -> Assert:
-        """Assert the mock has been awaited with the specified arguments.
+        """Assert that the mock has been awaited with the specified arguments.
 
         The assert passes if the mock has _ever_ been awaited with given
         arguments.
@@ -401,6 +401,28 @@ class Assert:  # pylint: disable=too-many-public-methods
         self._assertions.append(
             functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
         )
+        return self
+
+    def all_calls_with(self, *args: Any, **kwargs: Any) -> Assert:
+        """Assert that _all_ calls have the specified arguments.
+
+        The assert passes if _all_ calls have been made with the given
+        arguments.
+
+        Examples:
+            >>> mocker(Teapot).mock("add_tea").all_calls_with("black")
+            <chainmock._api.Assert object at ...>
+            >>> Teapot().add_tea("black")
+            >>> Teapot().add_tea("black")
+
+        Args:
+            *args: Expected positional arguments.
+            **kwargs: Expected keyword arguments.
+
+        Returns:
+            Assert instance so that calls can be chained.
+        """
+        self._assertions.append(functools.partial(self._assert_all_calls_with, *args, **kwargs))
         return self
 
     def match_args_any_call(self, *args: Any, **kwargs: Any) -> Assert:
@@ -564,7 +586,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
-        """Assert the mock has been called with the specified calls.
+        """Assert that the mock has been called with the specified calls.
 
         If `any_order` is True then the calls can be in any order, but they must
         all be matched. If `any_order` is False (default) then the calls must be
@@ -599,7 +621,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         return self
 
     def has_awaits(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
-        """Assert the mock has been awaited with the specified calls.
+        """Assert that the mock has been awaited with the specified calls.
 
         If `any_order` is True then the calls can be in any order, but they must
         all be matched. If `any_order` is False (default) then the calls must be
@@ -997,6 +1019,24 @@ class Assert:  # pylint: disable=too-many-public-methods
             f"{self._awaits_repr()}"
         )
         raise AssertionError(msg)
+
+    def _assert_all_calls_with(self, *args: Any, **kwargs: Any) -> None:
+        call_args_list = self._attr_mock.call_args_list
+        excepted_call = umock.call(*args, **kwargs)
+        match = True
+        for call in call_args_list:
+            if call != excepted_call:
+                match = False
+                break
+        if match is False:
+            format_args = (repr(arg) for arg in args)
+            format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+            msg = (
+                f"All calls have not been made with the given arguments:\n"  # pylint:disable=protected-access
+                f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
+                f"{self._attr_mock._calls_repr()}"
+            )
+            raise AssertionError(msg)
 
     def _assert_call_args_list(  # pylint: disable=too-many-branches
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
