@@ -34,3 +34,25 @@ class TestStubbing:
         stub1 = mocker()
         stub2 = mocker()
         assert stub1 is not stub2
+
+    def test_stub_properties(self) -> None:
+        stub = mocker(some_property="foo")
+        assert stub.some_property() == "foo"  # type: ignore
+
+        stub = mocker(some_property="foo", spec=SomeClass)
+        assert stub.some_property == "foo"  # type: ignore
+
+    def test_stub_non_existing_attributes(self) -> None:
+        stub = mocker(spec=SomeClass)
+        stub.mock("unknown_attr", create=True)
+
+        with assert_raises(
+            AttributeError, "type object 'SomeClass' has no attribute 'unknown_attr'"
+        ):
+            mocker(unknown_attr="foo", spec=SomeClass)
+
+        with assert_raises(
+            AttributeError, "type object 'SomeClass' has no attribute 'unknown_attr'"
+        ):
+            stub = mocker(spec=SomeClass)
+            stub.mock("unknown_attr")

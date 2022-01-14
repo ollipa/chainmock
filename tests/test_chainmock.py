@@ -17,7 +17,7 @@ class TestChainmock:
             RuntimeError, "Assert should not be initialized directly. Use mocker function instead."
         ):
             mock = mocker()
-            Assert(mock, mock._mock, "method")  # pylint: disable=protected-access
+            Assert(mock, None, "method")
 
     def test_mocker_should_cache_mocks(self) -> None:
         class FooClass:

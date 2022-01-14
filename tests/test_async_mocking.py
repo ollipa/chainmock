@@ -438,10 +438,11 @@ class TestAsyncMocking:
         State.teardown()
 
         mocker(FooClass).mock("method").call_count(3).await_count(2)
-        FooClass().method()
+        coroutine = FooClass().method()
         await FooClass().method()
         await FooClass().method()
         State.teardown()
+        coroutine.close()  # close coroutine to avoid warnings
 
         mocker(FooClass).mock("method").await_count(3)
         await FooClass().method()
@@ -466,7 +467,7 @@ class TestAsyncMocking:
         State.teardown()
 
         mocker(FooClass).mock("method").call_count(3).await_count_at_least(3)
-        FooClass().method()
+        coroutine = FooClass().method()
         await FooClass().method()
         await FooClass().method()
         with assert_raises(
@@ -475,6 +476,7 @@ class TestAsyncMocking:
             "Awaited twice.\nAwaits: [call(), call()].",
         ):
             State.teardown()
+        coroutine.close()  # close coroutine to avoid warnings
 
         mocker(FooClass).mock("method").await_count_at_least(3)
         await FooClass().method()
@@ -499,10 +501,11 @@ class TestAsyncMocking:
         State.teardown()
 
         mocker(FooClass).mock("method").call_count(3).await_count_at_most(2)
-        FooClass().method()
+        coroutine = FooClass().method()
         await FooClass().method()
         await FooClass().method()
         State.teardown()
+        coroutine.close()  # close coroutine to avoid warnings
 
         mocker(FooClass).mock("method").await_count_at_most(3)
         await FooClass().method()

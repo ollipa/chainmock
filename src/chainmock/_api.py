@@ -1245,17 +1245,17 @@ class Mock:
             raise RuntimeError(
                 "Mock should not be initialized directly. Use mocker function instead."
             )
-        self._target = target
-        self._spec = spec
-        self._patch = patch
-        self._mock = (
+        self.__target = target
+        self.__spec = spec
+        self.__patch = patch
+        self.__mock = (
             patch.start() if patch else umock.MagicMock(spec=spec if spec is not None else target)
         )
-        self._assertions: Dict[str, Assert] = {}
-        self._object_patches: List[
+        self.__assertions: Dict[str, Assert] = {}
+        self.__object_patches: List[
             umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
         ] = []
-        self._patch_class: bool = patch_class
+        self.__patch_class: bool = patch_class
 
     def spy(self, name: str) -> Assert:
         """Spy an attribute.
@@ -1296,21 +1296,21 @@ class Mock:
             RuntimeError: If trying to spy stubs or patched objects. Also raised
                 if trying to spy a mocked attribute.
         """
-        if self._target is None:
+        if self.__target is None:
             raise RuntimeError("Spying is not available for stubs. Call 'mock' instead.")
-        if self._patch is not None:
+        if self.__patch is not None:
             raise RuntimeError("Spying is not available for patched objects. Call 'mock' instead.")
         if not name:
             raise ValueError("Attribute name cannot be empty.")
-        if cached := self._assertions.get(name):
+        if cached := self.__assertions.get(name):
             if cached._kind == "mock":  # pylint: disable=protected-access
                 raise RuntimeError(
                     f"Attribute '{name}' has already been mocked. Can't spy a mocked attribute."
                 )
             return cached
         parsed_name = self.__remove_name_mangling(name)
-        original = getattr(self._target, parsed_name)
-        attr_mock = self.__get_patch_attr_mock(self._mock, parsed_name, create=True)
+        original = getattr(self.__target, parsed_name)
+        attr_mock = self.__get_patch_attr_mock(self.__mock, parsed_name, create=True)
         parameters = tuple(inspect.signature(original).parameters.keys())
         is_class_method = self.__get_method_type(parsed_name, classmethod)
         is_static_method = self.__get_method_type(parsed_name, staticmethod)
@@ -1339,14 +1339,16 @@ class Mock:
 
         if isinstance(attr_mock, umock.AsyncMock):
             patch = umock.patch.object(
-                self._target, parsed_name, new_callable=lambda: async_pass_through
+                self.__target, parsed_name, new_callable=lambda: async_pass_through
             )
         else:
-            patch = umock.patch.object(self._target, parsed_name, new_callable=lambda: pass_through)
+            patch = umock.patch.object(
+                self.__target, parsed_name, new_callable=lambda: pass_through
+            )
         patch.start()
-        self._object_patches.append(patch)
+        self.__object_patches.append(patch)
         assertion = Assert(self, attr_mock, parsed_name, kind="spy", _internal=True)
-        self._assertions[name] = assertion
+        self.__assertions[name] = assertion
         return assertion
 
     def __get_method_type(
@@ -1355,11 +1357,11 @@ class Mock:
         method_type: Union[Type[classmethod], Type[staticmethod]],  # type: ignore # mypy bug?
     ) -> bool:
         try:
-            return isinstance(inspect.getattr_static(self._target, name), method_type)
+            return isinstance(inspect.getattr_static(self.__target, name), method_type)
         except AttributeError:
             # Inspecting proxied objects raises AttributeError
-            if hasattr(self._target, "__mro__"):
-                for cls in inspect.getmro(self._target):  # type: ignore
+            if hasattr(self.__target, "__mro__"):
+                for cls in inspect.getmro(self.__target):  # type: ignore
                     method = vars(cls).get(name)
                     if method is not None:
                         return isinstance(method, method_type)
@@ -1419,7 +1421,7 @@ class Mock:
             ValueError: Raised if the given attribute name is empty.
             RuntimeError: If trying to mock a spied attribute.
         """
-        if cached := self._assertions.get(name):
+        if cached := self.__assertions.get(name):
             if cached._kind == "spy":  # pylint: disable=protected-access
                 raise RuntimeError(
                     f"Attribute '{name}' has already been spied. Can't mock a spied attribute."
@@ -1430,41 +1432,40 @@ class Mock:
         parts = parts[1:]
         if not parsed_name:
             raise ValueError("Attribute name cannot be empty.")
-        if self._target is None:
-            assertion = self.__stub_attribute(parsed_name, parts)
-        elif self._patch is not None:
+        if self.__target is None:
+            assertion = self.__stub_attribute(parsed_name, parts, create=create)
+        elif self.__patch is not None:
             assertion = self.__patch_attribute(parsed_name, parts, create=create)
         else:
             original = self.__get_original(parsed_name, create)
             assertion = self.__mock_attribute(parsed_name, parts, original, create=create)
         assertion.return_value(None)
-        self._assertions[name] = assertion
+        self.__assertions[name] = assertion
         return assertion
 
     def __remove_name_mangling(self, name: str) -> str:
         """Get method the real method name if uses name mangling."""
-        if inspect.ismodule(self._target) or name.endswith("__") or not name.startswith("__"):
+        if inspect.ismodule(self.__target) or name.endswith("__") or not name.startswith("__"):
             return name
-        if inspect.isclass(self._target):
-            class_name = self._target.__name__
+        if inspect.isclass(self.__target):
+            class_name = self.__target.__name__
         else:
             # Get class name from an instance
-            class_name = self._target.__class__.__name__
+            class_name = self.__target.__class__.__name__
         return f"_{class_name.lstrip('_')}__{name.lstrip('_')}"
 
     def __get_original(self, name: str, create: bool) -> Optional[Any]:
         try:
-            return getattr(self._target, name)
+            return getattr(self.__target, name)
         except AttributeError:
             if create is True:
                 return None
             raise
 
-    def __stub_attribute(self, name: str, parts: List[str]) -> Assert:
+    def __stub_attribute(self, name: str, parts: List[str], *, create: bool) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
-        attr_mock = getattr(self._mock, name)
-        setattr(self, name, attr_mock)
+        attr_mock = self.__get_stub_attr_mock(name, create)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
@@ -1472,11 +1473,29 @@ class Mock:
             assertion = self.mock(".".join(parts))
         return assertion
 
+    def __get_stub_attr_mock(self, name: str, create: bool) -> AnyMock:
+        if self.__spec is not None:
+            try:
+                original = getattr(self.__spec, name)
+            except AttributeError:
+                if create is True:
+                    attr_mock = umock.MagicMock()
+                    setattr(self, name, attr_mock)
+                    return attr_mock
+                raise
+            if isinstance(original, property):
+                attr_mock = umock.PropertyMock()
+                setattr(type(self), name, attr_mock)
+                return attr_mock
+        attr_mock = getattr(self.__mock, name)
+        setattr(self, name, attr_mock)
+        return attr_mock
+
     def __patch_attribute(self, name: str, parts: List[str], *, create: bool) -> Assert:
-        if not self._patch_class and self._patch and inspect.isclass(self._patch.temp_original):
-            attr_mock: AnyMock = self.__get_patch_attr_mock(self._mock(), name, create)
+        if not self.__patch_class and self.__patch and inspect.isclass(self.__patch.temp_original):
+            attr_mock: AnyMock = self.__get_patch_attr_mock(self.__mock(), name, create)
         else:
-            attr_mock = self.__get_patch_attr_mock(self._mock, name, create)
+            attr_mock = self.__get_patch_attr_mock(self.__mock, name, create)
         setattr(self, name, attr_mock)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
@@ -1502,12 +1521,12 @@ class Mock:
     ) -> Assert:
         if original is not None and isinstance(original, property):
             patch = umock.patch.object(
-                self._target, name, new_callable=umock.PropertyMock, create=create
+                self.__target, name, new_callable=umock.PropertyMock, create=create
             )
         else:
-            patch = umock.patch.object(self._target, name, create=create)
+            patch = umock.patch.object(self.__target, name, create=create)
         attr_mock = patch.start()
-        self._object_patches.append(patch)
+        self.__object_patches.append(patch)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
@@ -1517,15 +1536,15 @@ class Mock:
         return assertion
 
     def _reset(self) -> None:
-        while len(self._object_patches) > 0:
-            patch = self._object_patches.pop()
+        while len(self.__object_patches) > 0:
+            patch = self.__object_patches.pop()
             patch.stop()
-        if self._patch is not None:
-            self._patch.stop()
+        if self.__patch is not None:
+            self.__patch.stop()
 
     def _validate(self) -> None:
-        for key in list(self._assertions):
-            assertion = self._assertions.pop(key)
+        for key in list(self.__assertions):
+            assertion = self.__assertions.pop(key)
             assertion._validate()  # pylint: disable=protected-access
 
 
@@ -1636,7 +1655,7 @@ def mocker(
             returned mock instance.
         spec: Spec acts as the specification for the created mock objects. It
             can be either a list of strings or an existing object (a class or
-            instance). Accessing any attribute not in the given spec raise an
+            instance). Accessing any attribute not in the given spec raises an
             AttributeError. Spec can be useful if you want to create stubs with
             a certain spec. Otherwise it is usually not needed because spec is
             automatically set from the given target object.
@@ -1646,7 +1665,7 @@ def mocker(
             this to True. Note that it is usually easier to just use partial
             mocking if you need to patch the class.
         **kwargs: You can give arbitrary keyword arguments to quickly set mocked
-            properties on the created Mock instance.
+            attributes and properties on the created Mock instance.
 
     Returns:
         Mock instance.
