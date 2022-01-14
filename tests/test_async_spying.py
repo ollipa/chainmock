@@ -1,7 +1,5 @@
 """Test spying functionality."""
 # pylint: disable=missing-docstring,no-self-use
-import pytest
-
 from chainmock import mocker
 from chainmock._api import State
 
@@ -11,14 +9,12 @@ from .utils import assert_raises
 
 
 class TestSpying:  # pylint: disable=too-many-public-methods
-    @pytest.mark.asyncio
     async def test_async_spy_function_called_once(self) -> None:
         mocker(common).spy("some_async_function").called_once()
         assert await common.some_async_function("foo") == "foo"
         State.teardown()
         assert await common.some_async_function("foo") == "foo"
 
-    @pytest.mark.asyncio
     async def test_async_spy_function_called_once_fail(self) -> None:
         mocker(common).spy("some_async_function").called_once()
         with assert_raises(
@@ -27,14 +23,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_function_called_once_with(self) -> None:
         mocker(common).spy("some_async_function").called_once_with("foo")
         assert await common.some_async_function("foo") == "foo"
         State.teardown()
         assert await common.some_async_function("foo") == "foo"
 
-    @pytest.mark.asyncio
     async def test_async_spy_function_called_once_with_fail(self) -> None:
         mocker(common).spy("some_async_function").called_once_with("foo")
         assert await common.some_async_function("bar") == "bar"
@@ -46,14 +40,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_instance_method_called_once(self) -> None:
         mocker(SomeClass).spy("async_instance_method").called_once()
         assert await SomeClass().async_instance_method() == "instance_attr"
         State.teardown()
         assert await SomeClass().async_instance_method() == "instance_attr"
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_instance_method_called_once_fail(self) -> None:
         mocker(SomeClass).spy("async_instance_method").called_once()
         with assert_raises(
@@ -62,14 +54,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_instance_method_called_once_with(self) -> None:
         mocker(SomeClass).spy("async_instance_method_with_args").called_once_with(1)
         assert await SomeClass().async_instance_method_with_args(1) == 1
         State.teardown()
         assert await SomeClass().async_instance_method_with_args(2) == 2
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_instance_method_called_once_with_fail(self) -> None:
         mocker(SomeClass).spy("async_instance_method_with_args").called_once_with(1)
         assert await SomeClass().async_instance_method_with_args(2) == 2
@@ -81,7 +71,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_instance_method_called_once(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_instance_method").called_once()
@@ -89,7 +78,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         State.teardown()
         assert await instance.async_instance_method() == "instance_attr"
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_instance_method_called_once_fail(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_instance_method").called_once()
@@ -99,7 +87,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_instance_method_called_once_with(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_instance_method_with_args").called_once_with(1)
@@ -107,7 +94,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         State.teardown()
         assert await instance.async_instance_method_with_args(2) == 2
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_instance_method_called_once_with_fail(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_instance_method_with_args").called_once_with(1)
@@ -120,14 +106,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_class_method_called_once(self) -> None:
         mocker(SomeClass).spy("async_class_method").called_once()
         assert await SomeClass.async_class_method() == "class_attr"
         State.teardown()
         assert await SomeClass.async_class_method() == "class_attr"
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_class_method_called_once_fail(self) -> None:
         mocker(SomeClass).spy("async_class_method").called_once()
         with assert_raises(
@@ -136,14 +120,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_class_method_called_once_with(self) -> None:
         mocker(SomeClass).spy("async_class_method_with_args").called_once_with(2)
         assert await SomeClass.async_class_method_with_args(2) == 2
         State.teardown()
         assert await SomeClass.async_class_method_with_args(2) == 2
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_class_method_called_once_with_fail(self) -> None:
         mocker(SomeClass).spy("async_class_method_with_args").called_once_with(2)
         assert await SomeClass.async_class_method_with_args(3) == 3
@@ -155,21 +137,18 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_class_method_on_instance_called_once(self) -> None:
         mocker(SomeClass).spy("async_class_method").called_once()
         assert await SomeClass().async_class_method() == "class_attr"
         State.teardown()
         assert await SomeClass().async_class_method() == "class_attr"
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_class_method_on_instance_called_once_with(self) -> None:
         mocker(SomeClass).spy("async_class_method_with_args").called_once_with(2)
         assert await SomeClass().async_class_method_with_args(2) == 2
         State.teardown()
         assert await SomeClass().async_class_method_with_args(2) == 2
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_class_method_called_once(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_class_method").called_once()
@@ -177,7 +156,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         State.teardown()
         assert await instance.async_class_method() == "class_attr"
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_class_method_called_once_fail(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_class_method").called_once()
@@ -187,7 +165,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_class_method_called_once_with(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_class_method_with_args").called_once_with(2)
@@ -195,7 +172,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         State.teardown()
         assert await instance.async_class_method_with_args(2) == 2
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_class_method_called_once_with_fail(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_class_method_with_args").called_once_with(2)
@@ -208,14 +184,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_static_method_called_once(self) -> None:
         mocker(SomeClass).spy("async_static_method").called_once()
         assert await SomeClass.async_static_method() == "static_value"
         State.teardown()
         assert await SomeClass.async_static_method() == "static_value"
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_static_method_called_once_fail(self) -> None:
         mocker(SomeClass).spy("async_static_method").called_once()
         with assert_raises(
@@ -224,14 +198,12 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_static_method_called_once_with(self) -> None:
         mocker(SomeClass).spy("async_static_method_with_args").called_once_with(3)
         assert await SomeClass.async_static_method_with_args(3) == 3
         State.teardown()
         assert await SomeClass.async_static_method_with_args(3) == 3
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_static_method_called_once_with_fail(self) -> None:
         mocker(SomeClass).spy("async_static_method_with_args").called_once_with(3)
         assert await SomeClass.async_static_method_with_args(4) == 4
@@ -243,21 +215,18 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_static_method_on_instance_called_once(self) -> None:
         mocker(SomeClass).spy("async_static_method").called_once()
         assert await SomeClass().async_static_method() == "static_value"
         State.teardown()
         assert await SomeClass().async_static_method() == "static_value"
 
-    @pytest.mark.asyncio
     async def test_async_spy_class_call_static_method_on_instance_called_once_with(self) -> None:
         mocker(SomeClass).spy("async_static_method_with_args").called_once_with(3)
         assert await SomeClass().async_static_method_with_args(3) == 3
         State.teardown()
         assert await SomeClass().async_static_method_with_args(3) == 3
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_static_method_called_once(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_static_method").called_once()
@@ -265,7 +234,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         State.teardown()
         assert await instance.async_static_method() == "static_value"
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_static_method_called_once_fail(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_static_method").called_once()
@@ -275,7 +243,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_static_method_called_once_with(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_static_method_with_args").called_once_with(3)
@@ -283,7 +250,6 @@ class TestSpying:  # pylint: disable=too-many-public-methods
         State.teardown()
         assert await instance.async_static_method_with_args(3) == 3
 
-    @pytest.mark.asyncio
     async def test_async_spy_instance_call_static_method_called_once_with_fail(self) -> None:
         instance = SomeClass()
         mocker(instance).spy("async_static_method_with_args").called_once_with(3)

@@ -1,7 +1,5 @@
 """Test stubbing functionality."""
 # pylint: disable=missing-docstring,no-self-use
-import pytest
-
 from chainmock import Mock, mocker
 
 from .common import SomeClass
@@ -21,7 +19,6 @@ class TestStubbing:
         stub = mocker().mock("method.another_method").return_value("stubbed").self()
         assert stub.method().another_method() == "stubbed"  # type: ignore
 
-    @pytest.mark.asyncio
     async def test_async_stub(self) -> None:
         stub = mocker(spec=SomeClass).mock("async_instance_method").return_value("stubbed").self()
         assert await stub.async_instance_method() == "stubbed"  # type: ignore

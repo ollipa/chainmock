@@ -1,7 +1,5 @@
 """Test async mocking functionality."""
 # pylint: disable=missing-docstring,no-self-use
-import pytest
-
 from chainmock import mocker
 from chainmock._api import State
 from chainmock.mock import call
@@ -12,21 +10,18 @@ from .utils import assert_raises
 
 
 class TestAsyncMocking:
-    @pytest.mark.asyncio
     async def test_mock_async_function_return_value(self) -> None:
         mocker(common).mock("some_async_function").return_value("async_mocked")
         assert await common.some_async_function("foo") == "async_mocked"
         State.teardown()
         assert await common.some_async_function("foo") == "foo"
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_return_value(self) -> None:
         mocker(SomeClass).mock("async_instance_method").return_value("instance_mocked")
         assert await SomeClass().async_instance_method() == "instance_mocked"
         State.teardown()
         assert await SomeClass().async_instance_method() == "instance_attr"
 
-    @pytest.mark.asyncio
     async def test_mock_async_class_method_return_value(self) -> None:
         mocker(SomeClass).mock("async_class_method").return_value("class_mocked")
         assert await SomeClass.async_class_method() == "class_mocked"
@@ -35,7 +30,6 @@ class TestAsyncMocking:
         assert await SomeClass.async_class_method() == "class_attr"
         assert await SomeClass().async_class_method() == "class_attr"
 
-    @pytest.mark.asyncio
     async def test_mock_async_static_method_return_value(self) -> None:
         mocker(SomeClass).mock("async_static_method").return_value("static_mocked")
         assert await SomeClass.async_static_method() == "static_mocked"
@@ -44,7 +38,6 @@ class TestAsyncMocking:
         assert await SomeClass.async_static_method() == "static_value"
         assert await SomeClass().async_static_method() == "static_value"
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_awaited_last_with(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -66,7 +59,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_awaited_once_with(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -97,7 +89,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_any_await_with(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -119,7 +110,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_all_awaits_with(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -172,7 +162,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_instance_method_match_args_any_await(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -226,7 +215,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_instance_method_match_args_all_awaits(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -280,7 +268,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_instance_method_match_args_last_await(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -334,7 +321,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_has_awaits(self) -> None:
         class FooClass:
             async def method(self, arg1: str, arg2: int = 10) -> str:
@@ -358,7 +344,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_not_awaited(self) -> None:
         class FooClass:
             async def method(self) -> None:
@@ -375,7 +360,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_awaited(self) -> None:
         class FooClass:
             async def method(self) -> None:
@@ -390,7 +374,6 @@ class TestAsyncMocking:
         with assert_raises(AssertionError, "Expected method to have been awaited."):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_awaited_once(self) -> None:
         class FooClass:
             async def method(self) -> None:
@@ -406,7 +389,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_awaited_twice(self) -> None:
         class FooClass:
             async def method(self) -> None:
@@ -425,7 +407,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_await_count(self) -> None:
         class FooClass:
             async def method(self) -> None:
@@ -454,7 +435,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_await_count_at_least(self) -> None:
         class FooClass:
             async def method(self) -> None:
@@ -488,7 +468,6 @@ class TestAsyncMocking:
         ):
             State.teardown()
 
-    @pytest.mark.asyncio
     async def test_mock_async_instance_method_await_count_at_most(self) -> None:
         class FooClass:
             async def method(self) -> None:
