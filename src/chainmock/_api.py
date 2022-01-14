@@ -1181,6 +1181,9 @@ class State:
         patch_class: bool = False,
     ) -> Mock:
         """Get existing mock or create a new one if the object has not been mocked yet."""
+        if target is None:
+            # Do not cache stubs
+            return Mock(target, spec=spec, _internal=True)
         key: Union[int, str]
         if isinstance(target, str):
             key = target

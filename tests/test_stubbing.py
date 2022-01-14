@@ -29,3 +29,8 @@ class TestStubbing:
         assert await stub.async_class_method() == "stubbed"  # type: ignore
         stub = mocker(spec=SomeClass).mock("async_static_method").return_value("stubbed").self()
         assert await stub.async_static_method() == "stubbed"  # type: ignore
+
+    def test_stubs_are_not_cached(self) -> None:
+        stub1 = mocker()
+        stub2 = mocker()
+        assert stub1 is not stub2
