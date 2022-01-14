@@ -2,7 +2,7 @@
 # pylint: disable=missing-docstring,no-self-use
 import pytest
 
-from chainmock import mocker
+from chainmock import Mock, mocker
 
 from .common import SomeClass
 from .utils import assert_raises
@@ -41,6 +41,12 @@ class TestStubbing:
 
         stub = mocker(some_property="foo", spec=SomeClass)
         assert stub.some_property == "foo"  # type: ignore
+
+    def test_stub_properties_not_attached_to_mock_class(self) -> None:
+        """Intermediary class should be used to attach properties."""
+        stub = mocker(some_property="foo", spec=SomeClass)
+        assert stub.some_property == "foo"  # type: ignore
+        assert not hasattr(Mock, "some_property")
 
     def test_stub_non_existing_attributes(self) -> None:
         stub = mocker(spec=SomeClass)
