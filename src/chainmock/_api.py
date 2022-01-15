@@ -1263,6 +1263,13 @@ class Mock:
         ] = []
         self.__patch_class: bool = patch_class
 
+    def __call__(self, *args: Any, **kwargs: Any) -> Mock:
+        """Return self when Mock is called directly.
+
+        This allows mocking methods that are properties but are also callable.
+        """
+        return self
+
     def spy(self, name: str) -> Assert:
         """Spy an attribute.
 

@@ -6,6 +6,10 @@ from .utils import assert_raises
 
 
 class TestChainmock:
+    def test_return_self_when_called(self) -> None:
+        stub = mocker()
+        assert stub() is stub
+
     def test_init_mock_directly_should_fail(self) -> None:
         with assert_raises(
             RuntimeError, "Mock should not be initialized directly. Use mocker function instead."
