@@ -33,10 +33,10 @@ class Assert:  # pylint: disable=too-many-public-methods
             raise RuntimeError(
                 "Assert should not be initialized directly. Use mocker function instead."
             )
-        self._parent = parent
-        self._attr_mock = attr_mock
-        self._name = name
-        self._assertions: List[Callable[..., None]] = []
+        self.__parent = parent
+        self.__attr_mock = attr_mock
+        self.__name = name
+        self.__assertions: List[Callable[..., None]] = []
         self._kind = kind
 
     def get_mock(self) -> AnyMock:
@@ -75,7 +75,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Python unittest mock (`AsyncMock`, `MagicMock`, or `PropertyMock`).
         """
-        return self._attr_mock
+        return self.__attr_mock
 
     def return_value(self, value: Any) -> Assert:
         """Set the value that will be returned when the mocked attribute is
@@ -101,7 +101,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._attr_mock.return_value = value
+        self.__attr_mock.return_value = value
         return self
 
     def side_effect(self, value: Any) -> Assert:
@@ -160,7 +160,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._attr_mock.side_effect = value
+        self.__attr_mock.side_effect = value
         return self
 
     def called_last_with(self, *args: Any, **kwargs: Any) -> Assert:
@@ -184,8 +184,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
-            functools.partial(self._attr_mock.assert_called_with, *args, **kwargs)
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_called_with, *args, **kwargs)
         )
         return self
 
@@ -210,8 +210,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
-            functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_awaited_with, *args, **kwargs)
         )
         return self
 
@@ -248,7 +248,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
+        self.__assertions.append(
             functools.partial(self._assert_match_call_args, "last", *args, **kwargs)
         )
         return self
@@ -286,7 +286,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
+        self.__assertions.append(
             functools.partial(self._assert_match_await_args, "last", *args, **kwargs)
         )
         return self
@@ -313,8 +313,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
-            functools.partial(self._attr_mock.assert_called_once_with, *args, **kwargs)
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_called_once_with, *args, **kwargs)
         )
         return self
 
@@ -340,8 +340,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
-            functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_awaited_once_with, *args, **kwargs)
         )
         return self
 
@@ -370,7 +370,9 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._attr_mock.assert_any_call, *args, **kwargs))
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_any_call, *args, **kwargs)
+        )
         return self
 
     def any_await_with(self, *args: Any, **kwargs: Any) -> Assert:
@@ -398,8 +400,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
-            functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_any_await, *args, **kwargs)
         )
         return self
 
@@ -422,7 +424,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_all_calls_with, *args, **kwargs))
+        self.__assertions.append(functools.partial(self._assert_all_calls_with, *args, **kwargs))
         return self
 
     def all_awaits_with(self, *args: Any, **kwargs: Any) -> Assert:
@@ -444,7 +446,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_all_awaits_with, *args, **kwargs))
+        self.__assertions.append(functools.partial(self._assert_all_awaits_with, *args, **kwargs))
         return self
 
     def match_args_any_call(self, *args: Any, **kwargs: Any) -> Assert:
@@ -479,7 +481,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
+        self.__assertions.append(
             functools.partial(self._assert_match_call_args, "any", *args, **kwargs)
         )
         return self
@@ -516,7 +518,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
+        self.__assertions.append(
             functools.partial(self._assert_match_await_args, "any", *args, **kwargs)
         )
         return self
@@ -559,7 +561,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
+        self.__assertions.append(
             functools.partial(self._assert_match_call_args, "all", *args, **kwargs)
         )
         return self
@@ -602,7 +604,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
+        self.__assertions.append(
             functools.partial(self._assert_match_await_args, "all", *args, **kwargs)
         )
         return self
@@ -637,8 +639,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
-            functools.partial(self._attr_mock.assert_has_calls, calls, any_order)
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_has_calls, calls, any_order)
         )
         return self
 
@@ -672,8 +674,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
-            functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)
+        self.__assertions.append(
+            functools.partial(self.__attr_mock.assert_has_awaits, calls, any_order)
         )
         return self
 
@@ -693,7 +695,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._attr_mock.assert_not_called))
+        self.__assertions.append(functools.partial(self.__attr_mock.assert_not_called))
         return self
 
     def not_awaited(self) -> Assert:
@@ -712,7 +714,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._attr_mock.assert_not_awaited))
+        self.__assertions.append(functools.partial(self.__attr_mock.assert_not_awaited))
         return self
 
     def called(self) -> Assert:
@@ -732,7 +734,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._attr_mock.assert_called))
+        self.__assertions.append(functools.partial(self.__attr_mock.assert_called))
         return self
 
     def awaited(self) -> Assert:
@@ -752,7 +754,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._attr_mock.assert_awaited))
+        self.__assertions.append(functools.partial(self.__attr_mock.assert_awaited))
         return self
 
     def called_once(self) -> Assert:
@@ -772,7 +774,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_call_count, 1))
+        self.__assertions.append(functools.partial(self._assert_call_count, 1))
         return self
 
     def awaited_once(self) -> Assert:
@@ -792,7 +794,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_await_count, 1))
+        self.__assertions.append(functools.partial(self._assert_await_count, 1))
         return self
 
     def called_twice(self) -> Assert:
@@ -807,7 +809,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_call_count, 2))
+        self.__assertions.append(functools.partial(self._assert_call_count, 2))
         return self
 
     def awaited_twice(self) -> Assert:
@@ -822,7 +824,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_await_count, 2))
+        self.__assertions.append(functools.partial(self._assert_await_count, 2))
         return self
 
     def call_count(self, call_count: int) -> Assert:
@@ -841,7 +843,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_call_count, call_count))
+        self.__assertions.append(functools.partial(self._assert_call_count, call_count))
         return self
 
     def await_count(self, await_count: int) -> Assert:
@@ -860,7 +862,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_await_count, await_count))
+        self.__assertions.append(functools.partial(self._assert_await_count, await_count))
         return self
 
     def call_count_at_least(self, call_count: int) -> Assert:
@@ -888,7 +890,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_call_count, call_count, "at least"))
+        self.__assertions.append(functools.partial(self._assert_call_count, call_count, "at least"))
         return self
 
     def await_count_at_least(self, await_count: int) -> Assert:
@@ -916,7 +918,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(
+        self.__assertions.append(
             functools.partial(self._assert_await_count, await_count, "at least")
         )
         return self
@@ -946,7 +948,7 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_call_count, call_count, "at most"))
+        self.__assertions.append(functools.partial(self._assert_call_count, call_count, "at most"))
         return self
 
     def await_count_at_most(self, await_count: int) -> Assert:
@@ -974,7 +976,9 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Assert instance so that calls can be chained.
         """
-        self._assertions.append(functools.partial(self._assert_await_count, await_count, "at most"))
+        self.__assertions.append(
+            functools.partial(self._assert_await_count, await_count, "at most")
+        )
         return self
 
     def self(self) -> Mock:
@@ -1004,55 +1008,55 @@ class Assert:  # pylint: disable=too-many-public-methods
         Returns:
             Mock instance associated with this assertion.
         """
-        return self._parent
+        return self.__parent
 
     def _assert_call_count(
         self, call_count: int, modifier: Optional[Literal["at least", "at most"]] = None
     ) -> None:
-        if modifier is None and self._attr_mock.call_count == call_count:
+        if modifier is None and self.__attr_mock.call_count == call_count:
             return
-        if modifier == "at least" and self._attr_mock.call_count >= call_count:
+        if modifier == "at least" and self.__attr_mock.call_count >= call_count:
             return
-        if modifier == "at most" and self._attr_mock.call_count <= call_count:
+        if modifier == "at most" and self.__attr_mock.call_count <= call_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
         msg = (
-            f"Expected '{self._name}' to have been called {modifier_str}"  # pylint:disable=protected-access
+            f"Expected '{self.__name}' to have been called {modifier_str}"  # pylint:disable=protected-access
             f"{self._format_call_count(call_count)}. "
-            f"Called {self._format_call_count(self._attr_mock.call_count)}."
-            f"{self._attr_mock._calls_repr()}"
+            f"Called {self._format_call_count(self.__attr_mock.call_count)}."
+            f"{self.__attr_mock._calls_repr()}"
         )
         raise AssertionError(msg)
 
     def _assert_await_count(
         self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
     ) -> None:
-        if modifier is None and self._attr_mock.await_count == await_count:
+        if modifier is None and self.__attr_mock.await_count == await_count:
             return
-        if modifier == "at least" and self._attr_mock.await_count >= await_count:
+        if modifier == "at least" and self.__attr_mock.await_count >= await_count:
             return
-        if modifier == "at most" and self._attr_mock.await_count <= await_count:
+        if modifier == "at most" and self.__attr_mock.await_count <= await_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
         msg = (
-            f"Expected '{self._name}' to have been awaited {modifier_str}"
+            f"Expected '{self.__name}' to have been awaited {modifier_str}"
             f"{self._format_call_count(await_count)}. "
-            f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
+            f"Awaited {self._format_call_count(self.__attr_mock.await_count)}."
             f"{self._awaits_repr()}"
         )
         raise AssertionError(msg)
 
     def _assert_all_calls_with(self, *args: Any, **kwargs: Any) -> None:
-        if not self._all_args_match(self._attr_mock.call_args_list, *args, **kwargs):
+        if not self._all_args_match(self.__attr_mock.call_args_list, *args, **kwargs):
             msg = (
                 f"All calls have not been made with the given arguments:\n"  # pylint:disable=protected-access
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self._attr_mock._calls_repr()}"
+                f"{self.__attr_mock._calls_repr()}"
             )
             raise AssertionError(msg)
 
     def _assert_all_awaits_with(self, *args: Any, **kwargs: Any) -> None:
-        if not self._all_args_match(self._attr_mock.await_args_list, *args, **kwargs):
+        if not self._all_args_match(self.__attr_mock.await_args_list, *args, **kwargs):
             msg = (
                 f"All awaits have not been made with the given arguments:\n"
                 f"{self._args_repr(*args, **kwargs)}"
@@ -1071,7 +1075,7 @@ class Assert:  # pylint: disable=too-many-public-methods
     def _assert_match_call_args(  # pylint: disable=too-many-branches
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
     ) -> None:
-        if not self._assert_match_args(self._attr_mock.call_args_list, modifier, *args, **kwargs):
+        if not self._assert_match_args(self.__attr_mock.call_args_list, modifier, *args, **kwargs):
             if modifier == "last":
                 msg = "Last call does not include arguments"
             elif modifier == "all":
@@ -1081,14 +1085,14 @@ class Assert:  # pylint: disable=too-many-public-methods
             msg = (
                 f"{msg}:\n"  # pylint:disable=protected-access
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self._attr_mock._calls_repr()}"
+                f"{self.__attr_mock._calls_repr()}"
             )
             raise AssertionError(msg)
 
     def _assert_match_await_args(  # pylint: disable=too-many-branches
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
     ) -> None:
-        if not self._assert_match_args(self._attr_mock.await_args_list, modifier, *args, **kwargs):
+        if not self._assert_match_args(self.__attr_mock.await_args_list, modifier, *args, **kwargs):
             if modifier == "last":
                 msg = "Last await does not include arguments"
             elif modifier == "all":
@@ -1140,9 +1144,9 @@ class Assert:  # pylint: disable=too-many-public-methods
 
         Provides similar functionality to `unittest.mock.NonCallableMock._calls_repr`.
         """
-        if not self._attr_mock.await_args_list:
+        if not self.__attr_mock.await_args_list:
             return ""
-        return f"\nAwaits: {safe_repr(self._attr_mock.await_args_list)}."
+        return f"\nAwaits: {safe_repr(self.__attr_mock.await_args_list)}."
 
     @staticmethod
     def _args_repr(*args: Any, **kwargs: Any) -> str:
@@ -1159,8 +1163,8 @@ class Assert:  # pylint: disable=too-many-public-methods
         return f"{call_count} times"
 
     def _validate(self) -> None:
-        while len(self._assertions) > 0:
-            assertion = self._assertions.pop()
+        while len(self.__assertions) > 0:
+            assertion = self.__assertions.pop()
             assertion()
 
 
