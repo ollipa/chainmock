@@ -17,6 +17,9 @@ class PatchClass:
     def instance_method(self) -> str:
         return self.attr
 
+    def instance_method_with_args(self, arg1: int) -> int:
+        return arg1
+
     @classmethod
     def class_method(cls) -> str:
         return cls.ATTR
@@ -24,6 +27,10 @@ class PatchClass:
     @staticmethod
     def static_method() -> str:
         return "static_value"
+
+    @property
+    def some_property(self) -> str:
+        return self.attr
 
 
 class Third:
@@ -102,3 +109,60 @@ class TestPatching:
 
         with assert_raises(AttributeError, "Mock object has no attribute 'foo_method'"):
             mocker("tests.test_patching.PatchClass").mock("foo_method", create=False)
+
+    def test_patching_call_count(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("instance_method").called_once().return_value("mocked")
+        assert PatchClass().instance_method() == "mocked"
+
+    def test_patching_call_count_fail(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("instance_method").called_twice().return_value("mocked")
+        assert PatchClass().instance_method() == "mocked"
+        with assert_raises(
+            AssertionError,
+            "Expected 'instance_method' to have been called twice. Called once.\nCalls: [call()].",
+        ):
+            State.teardown()
+
+    def test_patching_with_args(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("instance_method_with_args").called_once_with(1).return_value(2)
+        assert PatchClass().instance_method_with_args(1) == 2
+
+    def test_patching_with_args_fail(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("instance_method_with_args").called_once_with(1).return_value(2)
+        assert PatchClass().instance_method_with_args(2) == 2
+        with assert_raises(
+            AssertionError,
+            (
+                "expected call not found.\nExpected: instance_method_with_args(1)\n"
+                "Actual: instance_method_with_args(2)"
+            ),
+        ):
+            State.teardown()
+
+    def test_patching_property(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("some_property").called_once().return_value("mocked")
+        assert PatchClass().some_property == "mocked"
+        State.teardown()
+        assert PatchClass().some_property == "instance_attr"
+
+    def test_patching_force_property(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("instance_method", force_property=True).called_once().return_value("mocked")
+        # pylint: disable=comparison-with-callable
+        assert PatchClass().instance_method == "mocked"  # type: ignore
+        State.teardown()
+        assert PatchClass().instance_method() == "instance_attr"
+
+    def test_patching_create_unknown_property(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("unknown_property", force_property=True, create=True).return_value("mocked")
+        # pylint: disable=no-member
+        assert PatchClass().unknown_property == "mocked"  # type: ignore
+        assert hasattr(PatchClass(), "unknown_property")
+        State.teardown()
+        assert not hasattr(PatchClass(), "unknown_property")

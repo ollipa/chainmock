@@ -1,6 +1,6 @@
 """Test stubbing functionality."""
 # pylint: disable=missing-docstring,no-self-use
-from chainmock import Mock, mocker
+from chainmock._api import Mock, State, mocker
 
 from .common import SomeClass
 from .utils import assert_raises
@@ -8,8 +8,26 @@ from .utils import assert_raises
 
 class TestStubbing:
     def test_stubbing(self) -> None:
-        stub = mocker().mock("method").return_value("stubbed").self()
+        stub = mocker().mock("method").called_once_with("foo").return_value("stubbed").self()
+        assert stub.method("foo") == "stubbed"  # type: ignore
+
+    def test_stubbing_arguments_fail(self) -> None:
+        stub = mocker().mock("method").called_once_with("foo").return_value("stubbed").self()
+        assert stub.method("bar") == "stubbed"  # type: ignore
+        with assert_raises(
+            AssertionError,
+            "expected call not found.\nExpected: method('foo')\nActual: method('bar')",
+        ):
+            State.teardown()
+
+    def test_stubbing_call_count_fail(self) -> None:
+        stub = mocker().mock("method").called_twice().return_value("stubbed").self()
         assert stub.method() == "stubbed"  # type: ignore
+        with assert_raises(
+            AssertionError,
+            "Expected 'method' to have been called twice. Called once.\nCalls: [call()].",
+        ):
+            State.teardown()
 
     def test_stubbing_internal_attribute(self) -> None:
         with assert_raises(ValueError, "Cannot replace Mock internal attribute _reset"):
@@ -32,12 +50,46 @@ class TestStubbing:
         stub2 = mocker()
         assert stub1 is not stub2
 
-    def test_stub_properties(self) -> None:
-        stub = mocker(some_property="foo")
-        assert stub.some_property() == "foo"  # type: ignore
-
-        stub = mocker(some_property="foo", spec=SomeClass)
+    def test_stub_kwargs_without_spec(self) -> None:
+        """Kwargs are converted to properties if there is no spec."""
+        stub = mocker(some_property="foo", instance_method="bar")
         assert stub.some_property == "foo"  # type: ignore
+        assert stub.instance_method == "bar"  # type: ignore
+
+    def test_stub_kwargs_with_spec(self) -> None:
+        """Spec is inspected and kwargs should use the correct mock type."""
+        stub = mocker(some_property="foo", instance_method="bar", spec=SomeClass)
+        assert stub.some_property == "foo"  # type: ignore
+        assert stub.instance_method() == "bar"  # type: ignore
+
+    def test_stub_property_without_spec(self) -> None:
+        stub = mocker()
+        stub.mock("some_property", force_property=True).called_once().return_value("foo")
+        assert stub.some_property == "foo"  # type: ignore
+        stub.mock("some_method", force_property=False).called_once_with("bar").return_value("baz")
+        assert stub.some_method("bar") == "baz"  # type: ignore
+
+    def test_stub_property_with_spec(self) -> None:
+        stub = mocker(spec=SomeClass)
+        stub.mock("some_property").called_once().return_value("foo")
+        assert stub.some_property == "foo"  # type: ignore
+        stub.mock("instance_method").called_once_with("bar").return_value("baz")
+        assert stub.instance_method("bar") == "baz"  # type: ignore
+
+    def test_stub_property_with_spec_force_property(self) -> None:
+        stub = mocker(spec=SomeClass)
+        stub.mock("instance_method", force_property=True).called_once().return_value("foo")
+        assert stub.instance_method == "foo"  # type: ignore
+
+    def test_stub_property_call_count_fail(self) -> None:
+        stub = mocker(spec=SomeClass)
+        stub.mock("some_property").called_twice().return_value("foo")
+        assert stub.some_property == "foo"  # type: ignore
+        with assert_raises(
+            AssertionError,
+            "Expected 'some_property' to have been called twice. Called once.\nCalls: [call()].",
+        ):
+            State.teardown()
 
     def test_stub_properties_not_attached_to_mock_class(self) -> None:
         """Intermediary class should be used to attach properties."""
@@ -47,7 +99,10 @@ class TestStubbing:
 
     def test_stub_non_existing_attributes(self) -> None:
         stub = mocker(spec=SomeClass)
-        stub.mock("unknown_attr", create=True)
+        stub.mock("unknown_attr", create=True).return_value("foo")
+        assert stub.unknown_attr() == "foo"  # type: ignore
+        stub.mock("unknown_property", create=True, force_property=True).return_value("bar")
+        assert stub.unknown_property == "bar"  # type: ignore
 
         with assert_raises(
             AttributeError, "type object 'SomeClass' has no attribute 'unknown_attr'"

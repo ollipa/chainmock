@@ -1183,7 +1183,9 @@ class State:
         """Get existing mock or create a new one if the object has not been mocked yet."""
         if target is None:  # Do not cache stubs
             Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
-            return Stub(target, spec=spec, _internal=True)  # type: ignore
+            stub = Stub(target, spec=spec, _internal=True)
+            cls.MOCKS[id(stub)] = stub
+            return stub  # type: ignore
         key: Union[int, str]
         if isinstance(target, str):
             key = target
@@ -1310,7 +1312,9 @@ class Mock:
             return cached
         parsed_name = self.__remove_name_mangling(name)
         original = getattr(self.__target, parsed_name)
-        attr_mock = self.__get_patch_attr_mock(self.__mock, parsed_name, create=True)
+        attr_mock = self.__get_patch_attr_mock(
+            self.__mock, parsed_name, create=True, force_property=False
+        )
         parameters = tuple(inspect.signature(original).parameters.keys())
         is_class_method = self.__get_method_type(parsed_name, classmethod)
         is_static_method = self.__get_method_type(parsed_name, staticmethod)
@@ -1367,7 +1371,7 @@ class Mock:
                         return isinstance(method, method_type)
             return False
 
-    def mock(self, name: str, create: bool = False) -> Assert:
+    def mock(self, name: str, *, create: bool = False, force_property: bool = False) -> Assert:
         """Mock an attribute.
 
         The given attribute is mocked and the mock catches all the calls to it.
@@ -1413,6 +1417,10 @@ class Mock:
                 want force the creation and ignore the error, set this to True.
                 This can be useful for testing dynamic attributes set during
                 runtime.
+            force_property: Force the mock to be a PropertyMock. This can be
+                used to create properties on stubs or force the mock to be a
+                PropertyMock if the automatic attribute type detection from spec
+                does not work.
 
         Returns:
             Assert instance.
@@ -1433,12 +1441,18 @@ class Mock:
         if not parsed_name:
             raise ValueError("Attribute name cannot be empty.")
         if self.__target is None:
-            assertion = self.__stub_attribute(parsed_name, parts, create=create)
+            assertion = self.__stub_attribute(
+                parsed_name, parts, create=create, force_property=force_property
+            )
         elif self.__patch is not None:
-            assertion = self.__patch_attribute(parsed_name, parts, create=create)
+            assertion = self.__patch_attribute(
+                parsed_name, parts, create=create, force_property=force_property
+            )
         else:
             original = self.__get_original(parsed_name, create)
-            assertion = self.__mock_attribute(parsed_name, parts, original, create=create)
+            assertion = self.__mock_attribute(
+                parsed_name, parts, original, create=create, force_property=force_property
+            )
         assertion.return_value(None)
         self.__assertions[name] = assertion
         return assertion
@@ -1462,10 +1476,12 @@ class Mock:
                 return None
             raise
 
-    def __stub_attribute(self, name: str, parts: List[str], *, create: bool) -> Assert:
+    def __stub_attribute(
+        self, name: str, parts: List[str], *, create: bool, force_property: bool
+    ) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
-        attr_mock = self.__get_stub_attr_mock(name, create)
+        attr_mock = self.__get_stub_attr_mock(name, create=create, force_property=force_property)
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
@@ -1473,30 +1489,42 @@ class Mock:
             assertion = self.mock(".".join(parts))
         return assertion
 
-    def __get_stub_attr_mock(self, name: str, create: bool) -> AnyMock:
+    def __get_stub_attr_mock(self, name: str, *, create: bool, force_property: bool) -> AnyMock:
         if self.__spec is not None:
             try:
                 original = getattr(self.__spec, name)
             except AttributeError:
                 if create is True:
+                    if force_property:
+                        return self.__get_stub_property_mock(name)
                     attr_mock = umock.MagicMock()
                     setattr(self, name, attr_mock)
                     return attr_mock
                 raise
             if isinstance(original, property):
-                attr_mock = umock.PropertyMock()
-                setattr(type(self), name, attr_mock)
-                return attr_mock
+                return self.__get_stub_property_mock(name)
+        if force_property:
+            return self.__get_stub_property_mock(name)
         attr_mock = getattr(self.__mock, name)
         setattr(self, name, attr_mock)
         return attr_mock
 
-    def __patch_attribute(self, name: str, parts: List[str], *, create: bool) -> Assert:
+    def __get_stub_property_mock(self, name: str) -> AnyMock:
+        attr_mock = umock.PropertyMock()
+        setattr(type(self), name, attr_mock)
+        return attr_mock
+
+    def __patch_attribute(
+        self, name: str, parts: List[str], *, create: bool, force_property: bool
+    ) -> Assert:
         if not self.__patch_class and self.__patch and inspect.isclass(self.__patch.temp_original):
-            attr_mock: AnyMock = self.__get_patch_attr_mock(self.__mock(), name, create)
+            attr_mock: AnyMock = self.__get_patch_attr_mock(
+                self.__mock(), name, create=create, force_property=force_property
+            )
         else:
-            attr_mock = self.__get_patch_attr_mock(self.__mock, name, create)
-        setattr(self, name, attr_mock)
+            attr_mock = self.__get_patch_attr_mock(
+                self.__mock, name, create=create, force_property=False
+            )
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
@@ -1505,21 +1533,43 @@ class Mock:
             assertion = stub.mock(".".join(parts))
         return assertion
 
-    @staticmethod
-    def __get_patch_attr_mock(mock: AnyMock, name: str, create: bool) -> AnyMock:
+    def __get_patch_attr_mock(
+        self, mock: AnyMock, name: str, *, create: bool, force_property: bool
+    ) -> AnyMock:
         try:
-            return getattr(mock, name)
+            attr_mock = getattr(mock, name)
         except AttributeError:
             if create is True:
+                if force_property:
+                    return self.__get_patch_property_mock(mock, name)
                 attr_mock = umock.MagicMock()
                 setattr(mock, name, attr_mock)
                 return attr_mock
             raise
+        if force_property or (
+            not self.__patch_class
+            and self.__patch
+            and isinstance(getattr(self.__patch.temp_original, name), property)
+        ):
+            return self.__get_patch_property_mock(mock, name)
+        return attr_mock
+
+    @staticmethod
+    def __get_patch_property_mock(mock: AnyMock, name: str) -> AnyMock:
+        attr_mock = umock.PropertyMock()
+        setattr(type(mock), name, attr_mock)
+        return attr_mock
 
     def __mock_attribute(
-        self, name: str, parts: List[str], original: Optional[Any], *, create: bool
+        self,
+        name: str,
+        parts: List[str],
+        original: Optional[Any],
+        *,
+        create: bool,
+        force_property: bool,
     ) -> Assert:
-        if original is not None and isinstance(original, property):
+        if force_property or (original is not None and isinstance(original, property)):
             patch = umock.patch.object(
                 self.__target, name, new_callable=umock.PropertyMock, create=create
             )
@@ -1672,5 +1722,7 @@ def mocker(
     """
     mock = State.get_or_create_mock(target, spec=spec, patch_class=patch_class)
     for name, value in kwargs.items():
-        mock.mock(name).return_value(value)
+        # Create kwargs as properties for stubs without a spec
+        force_property = target is None and spec is None
+        mock.mock(name, force_property=force_property).return_value(value)
     return mock

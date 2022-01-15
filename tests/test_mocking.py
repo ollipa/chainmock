@@ -43,6 +43,36 @@ class TestMocking:  # pylint: disable=too-many-public-methods
         State.teardown()
         assert SomeClass().some_property == "instance_attr"
 
+    def test_mock_property_call_count(self) -> None:
+        mocker(SomeClass).mock("some_property").called_once().return_value("propertymocked")
+        assert SomeClass().some_property == "propertymocked"
+
+    def test_mock_property_call_count_fail(self) -> None:
+        mocker(SomeClass).mock("some_property").called_twice().return_value("propertymocked")
+        assert SomeClass().some_property == "propertymocked"
+        with assert_raises(
+            AssertionError,
+            "Expected 'some_property' to have been called twice. Called once.\nCalls: [call()].",
+        ):
+            State.teardown()
+
+    def test_mock_force_property(self) -> None:
+        mocker(SomeClass).mock("instance_method", force_property=True).called_once().return_value(
+            "mocked"
+        )
+        # pylint: disable=comparison-with-callable
+        assert SomeClass().instance_method == "mocked"  # type: ignore
+
+    def test_mock_create_unknown_property(self) -> None:
+        mocker(SomeClass).mock("unknown_property", force_property=True, create=True).return_value(
+            "mocked"
+        )
+        # pylint: disable=no-member
+        assert SomeClass().unknown_property == "mocked"  # type: ignore
+        assert hasattr(SomeClass, "unknown_property")
+        State.teardown()
+        assert not hasattr(SomeClass, "unknown_property")
+
     def test_mock_and_set_properties_with_kwargs(self) -> None:
         mocker(SomeClass, some_property="foo", instance_method="bar")
         assert SomeClass().some_property == "foo"
