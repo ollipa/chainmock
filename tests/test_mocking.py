@@ -11,7 +11,7 @@ from .common import DerivedClass, Proxy, SomeClass
 from .utils import assert_raises
 
 
-class TestMocking:  # pylint: disable=too-many-public-methods
+class TestMocking:
     def test_mock_should_cache_asserts(self) -> None:
         assert1 = mocker(SomeClass).mock("instance_method")
         assert2 = mocker(SomeClass).mock("instance_method")

@@ -20,6 +20,9 @@ class PatchClass:
     def instance_method_with_args(self, arg1: int) -> int:
         return arg1
 
+    async def async_instance_method(self) -> str:
+        return self.attr
+
     @classmethod
     def class_method(cls) -> str:
         return cls.ATTR
@@ -166,3 +169,21 @@ class TestPatching:
         assert hasattr(PatchClass(), "unknown_property")
         State.teardown()
         assert not hasattr(PatchClass(), "unknown_property")
+
+    async def test_patching_async_method(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("async_instance_method").return_value("patched").called_once()
+        assert await PatchClass().async_instance_method() == "patched"
+
+    async def test_patching_force_async(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("instance_method", force_async=True).return_value("patched").called_once()
+        assert await PatchClass().instance_method() == "patched"  # type: ignore
+
+    async def test_patching_force_async_non_existing_attribute(self) -> None:
+        mocked = mocker("tests.test_patching.PatchClass")
+        mocked.mock("unknown_attr", create=True, force_async=True).return_value(
+            "patched"
+        ).called_once()
+        # pylint: disable=no-member
+        assert await PatchClass().unknown_attr() == "patched"  # type: ignore

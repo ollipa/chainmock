@@ -13,7 +13,7 @@ AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
 AsyncAndSyncMock = Union[umock.AsyncMock, umock.MagicMock]
 
 
-class Assert:  # pylint: disable=too-many-public-methods
+class Assert:
     """Assert allows creation of assertions for mocks.
 
     The created assertions are automatically validated at the end of a test.
@@ -1324,7 +1324,7 @@ class Mock:
         parsed_name = self.__remove_name_mangling(name)
         original = getattr(self.__target, parsed_name)
         attr_mock = self.__get_patch_attr_mock(
-            self.__mock, parsed_name, create=True, force_property=False
+            self.__mock, parsed_name, create=True, force_property=False, force_async=False
         )
         parameters = tuple(inspect.signature(original).parameters.keys())
         is_class_method = self.__get_method_type(parsed_name, classmethod)
@@ -1382,7 +1382,14 @@ class Mock:
                         return isinstance(method, method_type)
             return False
 
-    def mock(self, name: str, *, create: bool = False, force_property: bool = False) -> Assert:
+    def mock(
+        self,
+        name: str,
+        *,
+        create: bool = False,
+        force_property: bool = False,
+        force_async: bool = False,
+    ) -> Assert:
         """Mock an attribute.
 
         The given attribute is mocked and the mock catches all the calls to it.
@@ -1428,10 +1435,13 @@ class Mock:
                 want force the creation and ignore the error, set this to True.
                 This can be useful for testing dynamic attributes set during
                 runtime.
-            force_property: Force the mock to be a PropertyMock. This can be
+            force_property: Force the mock to be a `PropertyMock`. This can be
                 used to create properties on stubs or force the mock to be a
-                PropertyMock if the automatic attribute type detection from spec
-                does not work.
+                `PropertyMock` if the automatic detection from spec does not
+                work.
+            force_async: Force the mock to be a `AsyncMock`. This can be
+                used to create async methods on stubs or force the mock to be a
+                `AsyncMock` if the automatic detection from spec does not work.
 
         Returns:
             Assert instance.
@@ -1453,16 +1463,29 @@ class Mock:
             raise ValueError("Attribute name cannot be empty.")
         if self.__target is None:
             assertion = self.__stub_attribute(
-                parsed_name, parts, create=create, force_property=force_property
+                parsed_name,
+                parts,
+                create=create,
+                force_property=force_property,
+                force_async=force_async,
             )
         elif self.__patch is not None:
             assertion = self.__patch_attribute(
-                parsed_name, parts, create=create, force_property=force_property
+                parsed_name,
+                parts,
+                create=create,
+                force_property=force_property,
+                force_async=force_async,
             )
         else:
             original = self.__get_original(parsed_name, create)
             assertion = self.__mock_attribute(
-                parsed_name, parts, original, create=create, force_property=force_property
+                parsed_name,
+                parts,
+                original,
+                create=create,
+                force_property=force_property,
+                force_async=force_async,
             )
         assertion.return_value(None)
         self.__assertions[name] = assertion
@@ -1488,11 +1511,13 @@ class Mock:
             raise
 
     def __stub_attribute(
-        self, name: str, parts: List[str], *, create: bool, force_property: bool
+        self, name: str, parts: List[str], *, create: bool, force_property: bool, force_async: bool
     ) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
-        attr_mock = self.__get_stub_attr_mock(name, create=create, force_property=force_property)
+        attr_mock = self.__get_stub_attr_mock(
+            name, create=create, force_property=force_property, force_async=force_async
+        )
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
@@ -1500,7 +1525,9 @@ class Mock:
             assertion = self.mock(".".join(parts))
         return assertion
 
-    def __get_stub_attr_mock(self, name: str, *, create: bool, force_property: bool) -> AnyMock:
+    def __get_stub_attr_mock(
+        self, name: str, *, create: bool, force_property: bool, force_async: bool
+    ) -> AnyMock:
         if self.__spec is not None:
             try:
                 original = getattr(self.__spec, name)
@@ -1508,7 +1535,7 @@ class Mock:
                 if create is True:
                     if force_property:
                         return self.__get_stub_property_mock(name)
-                    attr_mock = umock.MagicMock()
+                    attr_mock = umock.AsyncMock() if force_async else umock.MagicMock()
                     setattr(self, name, attr_mock)
                     return attr_mock
                 raise
@@ -1516,7 +1543,10 @@ class Mock:
                 return self.__get_stub_property_mock(name)
         if force_property:
             return self.__get_stub_property_mock(name)
-        attr_mock = getattr(self.__mock, name)
+        if force_async:
+            attr_mock = umock.AsyncMock()
+        else:
+            attr_mock = getattr(self.__mock, name)
         setattr(self, name, attr_mock)
         return attr_mock
 
@@ -1526,15 +1556,19 @@ class Mock:
         return attr_mock
 
     def __patch_attribute(
-        self, name: str, parts: List[str], *, create: bool, force_property: bool
+        self, name: str, parts: List[str], *, create: bool, force_property: bool, force_async: bool
     ) -> Assert:
         if not self.__patch_class and self.__patch and inspect.isclass(self.__patch.temp_original):
             attr_mock: AnyMock = self.__get_patch_attr_mock(
-                self.__mock(), name, create=create, force_property=force_property
+                self.__mock(),
+                name,
+                create=create,
+                force_property=force_property,
+                force_async=force_async,
             )
         else:
             attr_mock = self.__get_patch_attr_mock(
-                self.__mock, name, create=create, force_property=False
+                self.__mock, name, create=create, force_property=False, force_async=force_async
             )
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
@@ -1545,7 +1579,7 @@ class Mock:
         return assertion
 
     def __get_patch_attr_mock(
-        self, mock: AnyMock, name: str, *, create: bool, force_property: bool
+        self, mock: AnyMock, name: str, *, create: bool, force_property: bool, force_async: bool
     ) -> AnyMock:
         try:
             attr_mock = getattr(mock, name)
@@ -1553,7 +1587,7 @@ class Mock:
             if create is True:
                 if force_property:
                     return self.__get_patch_property_mock(mock, name)
-                attr_mock = umock.MagicMock()
+                attr_mock = umock.AsyncMock() if force_async else umock.MagicMock()
                 setattr(mock, name, attr_mock)
                 return attr_mock
             raise
@@ -1563,6 +1597,9 @@ class Mock:
             and isinstance(getattr(self.__patch.temp_original, name), property)
         ):
             return self.__get_patch_property_mock(mock, name)
+        if force_async:
+            attr_mock = umock.AsyncMock()
+            setattr(mock, name, attr_mock)
         return attr_mock
 
     @staticmethod
@@ -1579,13 +1616,14 @@ class Mock:
         *,
         create: bool,
         force_property: bool,
+        force_async: bool,
     ) -> Assert:
+        new_callable = None
         if force_property or (original is not None and isinstance(original, property)):
-            patch = umock.patch.object(
-                self.__target, name, new_callable=umock.PropertyMock, create=create
-            )
-        else:
-            patch = umock.patch.object(self.__target, name, create=create)
+            new_callable = umock.PropertyMock
+        elif force_async:
+            new_callable = umock.AsyncMock
+        patch = umock.patch.object(self.__target, name, new_callable=new_callable, create=create)
         attr_mock = patch.start()
         self.__object_patches.append(patch)
         assertion = Assert(self, attr_mock, name, _internal=True)

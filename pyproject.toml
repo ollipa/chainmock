@@ -62,7 +62,11 @@ load-plugins = [
 ]
 
 [tool.pylint.messages_control]
-disable = ["too-few-public-methods", "duplicate-code"]
+disable = [
+    "too-few-public-methods",
+    "too-many-public-methods",
+    "duplicate-code",
+]
 
 [tool.pylint.format]
 max-line-length = "100"

@@ -11,7 +11,7 @@ from .common import DerivedClass, Proxy, SomeClass
 from .utils import assert_raises
 
 
-class TestSpying:  # pylint: disable=too-many-public-methods
+class TestSpying:
     def test_spy_should_cache_asserts(self) -> None:
         assert1 = mocker(SomeClass).spy("instance_method")
         assert2 = mocker(SomeClass).spy("instance_method")

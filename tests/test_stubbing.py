@@ -37,13 +37,30 @@ class TestStubbing:
         stub = mocker().mock("method.another_method").return_value("stubbed").self()
         assert stub.method().another_method() == "stubbed"  # type: ignore
 
-    async def test_async_stub(self) -> None:
+    async def test_stub_async_method(self) -> None:
         stub = mocker(spec=SomeClass).mock("async_instance_method").return_value("stubbed").self()
         assert await stub.async_instance_method() == "stubbed"  # type: ignore
         stub = mocker(spec=SomeClass).mock("async_class_method").return_value("stubbed").self()
         assert await stub.async_class_method() == "stubbed"  # type: ignore
         stub = mocker(spec=SomeClass).mock("async_static_method").return_value("stubbed").self()
         assert await stub.async_static_method() == "stubbed"  # type: ignore
+
+    async def test_stub_force_async(self) -> None:
+        stub = mocker(spec=SomeClass)
+        stub.mock("instance_method", force_async=True).return_value("stubbed").called_once()
+        assert await stub.instance_method() == "stubbed"  # type: ignore
+
+    async def test_stub_force_async_no_spec(self) -> None:
+        stub = mocker()
+        stub.mock("some_method", force_async=True).return_value("stubbed").called_once()
+        assert await stub.some_method() == "stubbed"  # type: ignore
+
+    async def test_stub_force_async_non_existing_attribute(self) -> None:
+        stub = mocker(spec=SomeClass)
+        stub.mock("unknown_attr", create=True, force_async=True).return_value(
+            "stubbed"
+        ).called_once()
+        assert await stub.unknown_attr() == "stubbed"  # type: ignore
 
     def test_stubs_are_not_cached(self) -> None:
         stub1 = mocker()

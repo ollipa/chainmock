@@ -497,3 +497,16 @@ class TestAsyncMocking:
             "Awaited 4 times.\nAwaits: [call(), call(), call(), call()].",
         ):
             State.teardown()
+
+    async def test_mock_force_async(self) -> None:
+        mocked = mocker(SomeClass)
+        mocked.mock("instance_method", force_async=True).return_value("mocked").called_once()
+        assert await SomeClass().instance_method() == "mocked"  # type: ignore
+
+    async def test_mock_force_async_non_existing_attribute(self) -> None:
+        mocked = mocker(SomeClass)
+        mocked.mock("unknown_attr", create=True, force_async=True).return_value(
+            "mocked"
+        ).called_once()
+        # pylint: disable=no-member
+        assert await SomeClass().unknown_attr() == "mocked"  # type: ignore
