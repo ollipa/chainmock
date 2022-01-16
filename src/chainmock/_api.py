@@ -1332,9 +1332,7 @@ class Mock:
             return cached
         parsed_name = self.__remove_name_mangling(name)
         original = getattr(self.__target, parsed_name)
-        attr_mock = self.__get_patch_attr_mock(
-            self.__mock, parsed_name, create=True, force_property=False, force_async=False
-        )
+        attr_mock = umock.MagicMock(name=parsed_name)
         parameters = tuple(inspect.signature(original).parameters.keys())
         is_class_method = self.__get_method_type(parsed_name, classmethod)
         is_static_method = self.__get_method_type(parsed_name, staticmethod)
@@ -1350,25 +1348,7 @@ class Mock:
                 args = tuple(list(args)[1:])
             return original(*args, **kwargs)
 
-        async def async_pass_through(*args: Any, **kwargs: Any) -> Any:
-            has_self = len(parameters) > 0 and parameters[0] == "self"
-            skip_first = len(args) > len(parameters) and (is_class_method or is_static_method)
-            mock_args = list(args)
-            if has_self or skip_first:
-                mock_args = mock_args[1:]
-            await attr_mock(*mock_args, **kwargs)
-            if skip_first:
-                args = tuple(list(args)[1:])
-            return await original(*args, **kwargs)
-
-        if isinstance(attr_mock, umock.AsyncMock):
-            patch = umock.patch.object(
-                self.__target, parsed_name, new_callable=lambda: async_pass_through
-            )
-        else:
-            patch = umock.patch.object(
-                self.__target, parsed_name, new_callable=lambda: pass_through
-            )
+        patch = umock.patch.object(self.__target, parsed_name, new=pass_through)
         patch.start()
         self.__object_patches.append(patch)
         assertion = Assert(self, attr_mock, parsed_name, kind="spy", _internal=True)

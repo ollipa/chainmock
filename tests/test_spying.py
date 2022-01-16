@@ -621,3 +621,22 @@ class TestSpying:
         assert instance._SomeClass__very_private() == "very_private_value"  # type: ignore
         State.teardown()
         assert instance._SomeClass__very_private() == "very_private_value"  # type: ignore
+
+    def test_spy_init_method(self) -> None:
+        class FooClass:
+            def __init__(self, arg: str) -> None:
+                self.arg = arg
+
+            def reset_mock(self, arg: str) -> str:
+                return arg
+
+        mocker(FooClass).spy("__init__").called_once_with("foo")
+        FooClass("foo")
+        State.teardown()
+        FooClass("foo")
+
+        # Test spying unittest.Mock internal method
+        mocker(FooClass).spy("reset_mock").called_once_with("bar")
+        assert FooClass("foo").reset_mock("bar") == "bar"
+        State.teardown()
+        assert FooClass("foo").reset_mock("bar") == "bar"
