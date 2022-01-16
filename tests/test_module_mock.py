@@ -2,14 +2,20 @@
 # pylint: disable=missing-docstring,no-self-use
 from chainmock import mock
 
+from .common import SomeClass
+
 
 class TestMockModule:
-    def test_any_type(self) -> None:
-        ANY_STR = mock._ANY_TYPE(str)  # pylint: disable=protected-access, invalid-name
+    def test_anyof(self) -> None:
+        ANY_STR = mock.AnyOf(str)  # pylint: disable=invalid-name
         assert ANY_STR == "foo"
         assert ANY_STR == "bar"
         assert ANY_STR != 123
         assert repr(ANY_STR) == "<ANY_STR>"
+
+    def test_anyof_with_class(self) -> None:
+        ANY_SOMECLASS = mock.AnyOf(SomeClass)  # pylint: disable=invalid-name
+        assert ANY_SOMECLASS == SomeClass()
 
     def test_any_types(self) -> None:
         assert {

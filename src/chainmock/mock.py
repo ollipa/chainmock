@@ -32,6 +32,7 @@ __all__ = [
     "ANY_TUPLE",
     "DEFAULT",
     "FILTER_DIR",
+    "AnyOf",
     "AsyncMock",
     "MagicMock",
     "Mock",
@@ -47,7 +48,7 @@ __all__ = [
 ]
 
 
-class _ANY_TYPE:  # pylint: disable=invalid-name
+class AnyOf:  # pylint: disable=invalid-name
     """A helper object that compares equal to any given type."""
 
     def __init__(self, kind: Type[Any]) -> None:
@@ -63,13 +64,13 @@ class _ANY_TYPE:  # pylint: disable=invalid-name
         return f"<ANY_{self._kind.__name__.upper()}>"
 
 
-ANY_BOOL = _ANY_TYPE(bool)
-ANY_BYTES = _ANY_TYPE(bytes)
-ANY_COMPLEX = _ANY_TYPE(complex)
-ANY_DICT = _ANY_TYPE(dict)
-ANY_FLOAT = _ANY_TYPE(float)
-ANY_INT = _ANY_TYPE(int)
-ANY_LIST = _ANY_TYPE(list)
-ANY_SET = _ANY_TYPE(set)
-ANY_STR = _ANY_TYPE(str)
-ANY_TUPLE = _ANY_TYPE(tuple)
+ANY_BOOL = AnyOf(bool)
+ANY_BYTES = AnyOf(bytes)
+ANY_COMPLEX = AnyOf(complex)
+ANY_DICT = AnyOf(dict)
+ANY_FLOAT = AnyOf(float)
+ANY_INT = AnyOf(int)
+ANY_LIST = AnyOf(list)
+ANY_SET = AnyOf(set)
+ANY_STR = AnyOf(str)
+ANY_TUPLE = AnyOf(tuple)
