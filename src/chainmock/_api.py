@@ -26,7 +26,9 @@ class Assert:
         parent: Mock,
         attr_mock: AnyMock,
         name: str,
+        *,
         kind: Literal["spy", "mock"] = "mock",
+        patch: Optional[umock._patch[Any]] = None,  # pylint: disable=unsubscriptable-object
         _internal: bool = False,
     ) -> None:
         if not _internal:
@@ -37,6 +39,7 @@ class Assert:
         self.__attr_mock = attr_mock
         self.__name = name
         self.__assertions: List[Callable[..., None]] = []
+        self.__patch = patch
         self._kind = kind
 
     def get_mock(self) -> AnyMock:
@@ -101,6 +104,12 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
+        if isinstance(self.__attr_mock, umock.NonCallableMagicMock) and self.__patch is not None:
+            # Support mocking module attributes/variables
+            self.__patch.stop()
+            self.__patch.new = value
+            self.__patch.start()
+            return self
         self.__attr_mock.return_value = value
         return self
 
@@ -1259,7 +1268,7 @@ class Mock:
         )
         self.__assertions: Dict[str, Assert] = {}
         self.__object_patches: List[
-            umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
+            umock._patch[Any]  # pylint: disable=unsubscriptable-object
         ] = []
         self.__patch_class: bool = patch_class
 
@@ -1618,15 +1627,25 @@ class Mock:
         force_property: bool,
         force_async: bool,
     ) -> Assert:
-        new_callable = None
-        if force_property or (original is not None and isinstance(original, property)):
-            new_callable = umock.PropertyMock
-        elif force_async:
-            new_callable = umock.AsyncMock
-        patch = umock.patch.object(self.__target, name, new_callable=new_callable, create=create)
-        attr_mock = patch.start()
-        self.__object_patches.append(patch)
-        assertion = Assert(self, attr_mock, name, _internal=True)
+        patch: umock._patch[Any]  # pylint: disable=unsubscriptable-object
+        if inspect.ismodule(self.__target) and not callable(original):
+            # Support mocking module attributes/variables
+            patch = umock.patch.object(self.__target, name, new=None, create=create)
+            patch.start()
+            self.__object_patches.append(patch)
+            attr_mock = umock.NonCallableMagicMock()
+        else:
+            new_callable = None
+            if force_property or (original is not None and isinstance(original, property)):
+                new_callable = umock.PropertyMock
+            elif force_async:
+                new_callable = umock.AsyncMock
+            patch = umock.patch.object(
+                self.__target, name, new_callable=new_callable, create=create
+            )
+            attr_mock = patch.start()
+            self.__object_patches.append(patch)
+        assertion = Assert(self, attr_mock, name, patch=patch, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
             stub = Mock(_internal=True)

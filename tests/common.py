@@ -2,6 +2,8 @@
 # pylint: disable=missing-docstring,no-self-use
 from typing import Any
 
+GLOBAL_VARIABLE = "global_value"
+
 
 class SomeClass:
     ATTR = "class_attr"

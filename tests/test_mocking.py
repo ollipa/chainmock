@@ -866,3 +866,9 @@ class TestMocking:
         assert instance._SomeClass__very_private() == "mocked"  # type: ignore
         State.teardown()
         assert instance._SomeClass__very_private() == "very_private_value"  # type: ignore
+
+    def test_mock_global_module_variable(self) -> None:
+        mocker(common).mock("GLOBAL_VARIABLE").return_value("mocked")
+        assert common.GLOBAL_VARIABLE == "mocked"
+        State.teardown()
+        assert common.GLOBAL_VARIABLE == "global_value"
