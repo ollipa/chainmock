@@ -74,7 +74,7 @@ class TestMocking:
         assert not hasattr(SomeClass, "unknown_property")
 
     def test_mock_and_set_properties_with_kwargs(self) -> None:
-        mocker(SomeClass, some_property="foo", instance_method="bar")
+        mocker(SomeClass, some_property="foo", instance_method=lambda: "bar")
         assert SomeClass().some_property == "foo"
         assert SomeClass().instance_method() == "bar"
         State.teardown()

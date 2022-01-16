@@ -68,14 +68,12 @@ class TestStubbing:
         assert stub1 is not stub2
 
     def test_stub_kwargs_without_spec(self) -> None:
-        """Kwargs are converted to properties if there is no spec."""
         stub = mocker(some_property="foo", instance_method="bar")
         assert stub.some_property == "foo"  # type: ignore
         assert stub.instance_method == "bar"  # type: ignore
 
     def test_stub_kwargs_with_spec(self) -> None:
-        """Spec is inspected and kwargs should use the correct mock type."""
-        stub = mocker(some_property="foo", instance_method="bar", spec=SomeClass)
+        stub = mocker(some_property="foo", instance_method=lambda: "bar", spec=SomeClass)
         assert stub.some_property == "foo"  # type: ignore
         assert stub.instance_method() == "bar"  # type: ignore
 

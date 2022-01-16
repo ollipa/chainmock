@@ -1783,14 +1783,12 @@ def mocker(
             this to True. Note that it is usually easier to just use partial
             mocking if you need to patch the class.
         **kwargs: You can give arbitrary keyword arguments to quickly set mocked
-            attributes and properties on the created Mock instance.
+            attributes and properties.
 
     Returns:
         Mock instance.
     """
     mock = State.get_or_create_mock(target, spec=spec, patch_class=patch_class)
     for name, value in kwargs.items():
-        # Create kwargs as properties for stubs without a spec
-        force_property = target is None and spec is None
-        mock.mock(name, force_property=force_property).return_value(value)
+        mock.mock(name, force_property=True).return_value(value)
     return mock
