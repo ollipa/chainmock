@@ -635,6 +635,14 @@ class TestSpying:
         State.teardown()
         FooClass("foo")
 
+        mocker(FooClass).spy("__init__").called_once_with("foo")
+        FooClass("bar")
+        with assert_raises(
+            AssertionError,
+            "expected call not found.\nExpected: __init__('foo')\nActual: __init__('bar')",
+        ):
+            State.teardown()
+
         # Test spying unittest.Mock internal method
         mocker(FooClass).spy("reset_mock").called_once_with("bar")
         assert FooClass("foo").reset_mock("bar") == "bar"
