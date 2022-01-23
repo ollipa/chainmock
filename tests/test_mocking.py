@@ -889,3 +889,14 @@ class TestMocking:
         assert common.GLOBAL_VARIABLE == "mocked"
         State.teardown()
         assert common.GLOBAL_VARIABLE == "global_value"
+
+    def test_mock_call_method(self) -> None:
+        class FooClass:
+            def __call__(self) -> str:
+                return "called"
+
+        instance = FooClass()
+        mocker(FooClass).mock("__call__").return_value("mocked").called_once()
+        assert instance() == "mocked"
+        State.teardown()
+        assert instance() == "called"
