@@ -1,5 +1,7 @@
 """Test async mocking functionality."""
 # pylint: disable=missing-docstring,no-self-use
+from typing import Type
+
 from chainmock import mocker
 from chainmock._api import State
 from chainmock.mock import call
@@ -510,3 +512,26 @@ class TestAsyncMocking:
         ).called_once()
         # pylint: disable=no-member
         assert await SomeClass().unknown_attr() == "mocked"  # type: ignore
+
+    async def test_mock_async_chained_methods(self) -> None:
+        class Third:
+            @classmethod
+            async def method(cls) -> str:
+                return "value"
+
+        class Second:
+            def get_third(self) -> Type[Third]:
+                return Third
+
+        class First:
+            def get_second(self) -> Second:
+                return Second()
+
+        assert await First().get_second().get_third().method() == "value"
+
+        mocker(First).mock("get_second.get_third.method", force_async=True).return_value(
+            "mock_chain"
+        )
+        assert await First().get_second().get_third().method() == "mock_chain"
+        State.teardown()
+        assert await First().get_second().get_third().method() == "value"

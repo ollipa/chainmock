@@ -164,7 +164,7 @@ class TestMocking:
         assert FooClass().method() == "value"
         assert instance.method() == "value"
 
-    def test_mock_chaining_methods(self) -> None:
+    def test_mock_chained_methods(self) -> None:
         class Third:
             @classmethod
             def method(cls) -> str:
@@ -184,6 +184,23 @@ class TestMocking:
         assert First().get_second().get_third().method() == "mock_chain"
         State.teardown()
         assert First().get_second().get_third().method() == "value"
+
+    def test_mock_chained_property(self) -> None:
+        class Second:
+            @property
+            def prop(self) -> str:
+                return "value"
+
+        class First:
+            def get_prop(self) -> Second:
+                return Second()
+
+        assert First().get_prop().prop == "value"
+
+        mocker(First).mock("get_prop.prop", force_property=True).return_value("mock_prop")
+        assert First().get_prop().prop == "mock_prop"
+        State.teardown()
+        assert First().get_prop().prop == "value"
 
     def test_mock_instance_method_on_derived_class(self) -> None:
         mocker(DerivedClass).mock("instance_method").return_value("foo").called_once()

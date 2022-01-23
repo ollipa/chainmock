@@ -1505,13 +1505,20 @@ class Mock:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
         attr_mock = self.__get_stub_attr_mock(
-            name, create=create, force_property=force_property, force_async=force_async
+            name,
+            create=create,
+            force_property=force_property if not parts else False,
+            force_async=force_async if not parts else False,
         )
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
             assertion.return_value(self)
-            assertion = self.mock(".".join(parts))
+            assertion = self.mock(
+                ".".join(parts),
+                force_property=force_property,
+                force_async=force_async,
+            )
         return assertion
 
     def __get_stub_attr_mock(
@@ -1552,19 +1559,28 @@ class Mock:
                 self.__mock(),
                 name,
                 create=create,
-                force_property=force_property,
-                force_async=force_async,
+                force_property=force_property if not parts else False,
+                force_async=force_async if not parts else False,
             )
         else:
             attr_mock = self.__get_patch_attr_mock(
-                self.__mock, name, create=create, force_property=False, force_async=force_async
+                self.__mock,
+                name,
+                create=create,
+                force_property=False,
+                force_async=force_async if not parts else False,
             )
         assertion = Assert(self, attr_mock, name, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
-            stub = Mock(_internal=True)
+            Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
+            stub = Stub(_internal=True)
             assertion.return_value(stub)
-            assertion = stub.mock(".".join(parts))
+            assertion = stub.mock(
+                ".".join(parts),
+                force_property=force_property,
+                force_async=force_async,
+            )
         return assertion
 
     def __get_patch_attr_mock(
@@ -1616,9 +1632,13 @@ class Mock:
             attr_mock = umock.NonCallableMagicMock()
         else:
             new_callable = None
-            if force_property or (original is not None and isinstance(original, property)):
+            if (
+                not parts
+                and force_property
+                or (original is not None and isinstance(original, property))
+            ):
                 new_callable = umock.PropertyMock
-            elif force_async:
+            elif not parts and force_async:
                 new_callable = umock.AsyncMock
             patch = umock.patch.object(
                 self.__target, name, new_callable=new_callable, create=create
@@ -1628,9 +1648,14 @@ class Mock:
         assertion = Assert(self, attr_mock, name, patch=patch, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
-            stub = Mock(_internal=True)
+            Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
+            stub = Stub(_internal=True)
             assertion.return_value(stub)
-            assertion = stub.mock(".".join(parts))
+            assertion = stub.mock(
+                ".".join(parts),
+                force_property=force_property,
+                force_async=force_async,
+            )
         return assertion
 
     def _reset(self) -> None:

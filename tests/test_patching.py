@@ -41,10 +41,18 @@ class Third:
     def method(cls) -> str:
         return "value"
 
+    @classmethod
+    async def async_method(cls) -> str:
+        return "value"
+
 
 class Second:
     def get_third(self) -> Type[Third]:
         return Third
+
+    @property
+    def prop(self) -> str:
+        return "value"
 
 
 class First:
@@ -92,13 +100,29 @@ class TestPatching:
         State.teardown()
         assert PatchClass().static_method() == "static_value"
 
-    def test_patching_chaining_methods(self) -> None:
+    def test_patching_chained_methods(self) -> None:
         mocker("tests.test_patching.First").mock("get_second.get_third.method").return_value(
             "mock_chain"
         )
         assert First().get_second().get_third().method() == "mock_chain"
         State.teardown()
         assert First().get_second().get_third().method() == "value"
+
+    def test_patching_chained_property(self) -> None:
+        mocker("tests.test_patching.First").mock(
+            "get_second.prop", force_property=True
+        ).return_value("mock_chain")
+        assert First().get_second().prop == "mock_chain"
+        State.teardown()
+        assert First().get_second().prop == "value"
+
+    async def test_patching_chained_async_methods(self) -> None:
+        mocker("tests.test_patching.First").mock(
+            "get_second.get_third.async_method", force_async=True
+        ).return_value("mock_chain")
+        assert await First().get_second().get_third().async_method() == "mock_chain"
+        State.teardown()
+        assert await First().get_second().get_third().async_method() == "value"
 
     def test_patch_non_existing_attribute(self) -> None:
         # pylint: disable=no-member
