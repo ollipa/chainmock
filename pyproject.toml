@@ -33,6 +33,7 @@ packages = [{ include = "chainmock", from = "src" }]
 [tool.poetry.dependencies]
 python = "^3.8"
 pytest = ">= 6.0.0"
+typing-extensions = ">=3.10.0; python_version<'3.10'"
 
 [tool.poetry.dev-dependencies]
 mypy = "*"
@@ -60,6 +61,7 @@ load-plugins = [
     "pylint.extensions.docstyle",
     "pylint.extensions.typing",
 ]
+good-names = ["fn", "T", "P"]
 
 [tool.pylint.messages_control]
 disable = [

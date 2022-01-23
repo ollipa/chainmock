@@ -5,12 +5,40 @@ from __future__ import annotations
 import functools
 import inspect
 import itertools
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Type, Union
+import sys
+from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Type, TypeVar, Union
 from unittest import mock as umock
 from unittest.util import safe_repr
 
+if sys.version_info >= (3, 10):
+    from typing import ParamSpec
+else:
+    from typing_extensions import ParamSpec
+
 AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
 AsyncAndSyncMock = Union[umock.AsyncMock, umock.MagicMock]
+
+T = TypeVar("T")
+P = ParamSpec("P")
+
+
+def only_async(fn: Callable[P, T]) -> Callable[P, T]:
+    """Wrapper for async assertions that throws an exception if they are called
+    when the mock is not an AsyncMock.
+    """
+    # pylint: disable=protected-access
+
+    @functools.wraps(fn)
+    def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
+        self: Assert = args[0]  # type: ignore
+        if not isinstance(self._attr_mock, umock.AsyncMock):
+            raise AttributeError(
+                f"{self._attr_mock.__class__.__name__} does not have '{fn.__name__}' method. "
+                f"You can use 'force_async' parameter to force the mock to be an AsyncMock."
+            )
+        return fn(*args, **kwargs)
+
+    return wrapper
 
 
 class Assert:
@@ -36,7 +64,7 @@ class Assert:
                 "Assert should not be initialized directly. Use mocker function instead."
             )
         self.__parent = parent
-        self.__attr_mock = attr_mock
+        self._attr_mock = attr_mock
         self.__name = name
         self.__assertions: List[Callable[..., None]] = []
         self.__patch = patch
@@ -78,7 +106,7 @@ class Assert:
         Returns:
             Python unittest mock (`AsyncMock`, `MagicMock`, or `PropertyMock`).
         """
-        return self.__attr_mock
+        return self._attr_mock
 
     def return_value(self, value: Any) -> Assert:
         """Set the value that will be returned when the mocked attribute is
@@ -104,13 +132,13 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        if isinstance(self.__attr_mock, umock.NonCallableMagicMock) and self.__patch is not None:
+        if isinstance(self._attr_mock, umock.NonCallableMagicMock) and self.__patch is not None:
             # Support mocking module attributes/variables
             self.__patch.stop()
             self.__patch.new = value
             self.__patch.start()
             return self
-        self.__attr_mock.return_value = value
+        self._attr_mock.return_value = value
         return self
 
     def side_effect(self, value: Any) -> Assert:
@@ -169,7 +197,7 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        self.__attr_mock.side_effect = value
+        self._attr_mock.side_effect = value
         return self
 
     def called_last_with(self, *args: Any, **kwargs: Any) -> Assert:
@@ -194,10 +222,11 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_called_with, *args, **kwargs)
+            functools.partial(self._attr_mock.assert_called_with, *args, **kwargs)
         )
         return self
 
+    @only_async
     def awaited_last_with(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that the _most recent await_ was with the specified arguments.
 
@@ -220,7 +249,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_awaited_with, *args, **kwargs)
+            functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)
         )
         return self
 
@@ -262,6 +291,7 @@ class Assert:
         )
         return self
 
+    @only_async
     def match_args_last_await(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that the _most recent await_ has _at least_ the specified
         arguments.
@@ -323,10 +353,11 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_called_once_with, *args, **kwargs)
+            functools.partial(self._attr_mock.assert_called_once_with, *args, **kwargs)
         )
         return self
 
+    @only_async
     def awaited_once_with(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that the mock was awaited exactly once with the specified
         arguments.
@@ -350,7 +381,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_awaited_once_with, *args, **kwargs)
+            functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)
         )
         return self
 
@@ -380,10 +411,11 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_any_call, *args, **kwargs)
+            functools.partial(self._attr_mock.assert_any_call, *args, **kwargs)
         )
         return self
 
+    @only_async
     def any_await_with(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that the mock has been awaited with the specified arguments.
 
@@ -410,7 +442,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_any_await, *args, **kwargs)
+            functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
         )
         return self
 
@@ -436,6 +468,7 @@ class Assert:
         self.__assertions.append(functools.partial(self._assert_all_calls_with, *args, **kwargs))
         return self
 
+    @only_async
     def all_awaits_with(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that _all_ awaits have the specified arguments.
 
@@ -495,6 +528,7 @@ class Assert:
         )
         return self
 
+    @only_async
     def match_args_any_await(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that any await has _at least_ the specified arguments.
 
@@ -575,6 +609,7 @@ class Assert:
         )
         return self
 
+    @only_async
     def match_args_all_awaits(self, *args: Any, **kwargs: Any) -> Assert:
         """Assert that _all_ awaits have _at least_ the specified arguments.
 
@@ -649,10 +684,11 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_has_calls, calls, any_order)
+            functools.partial(self._attr_mock.assert_has_calls, calls, any_order)
         )
         return self
 
+    @only_async
     def has_awaits(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
         """Assert that the mock has been awaited with the specified calls.
 
@@ -684,7 +720,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self.__attr_mock.assert_has_awaits, calls, any_order)
+            functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)
         )
         return self
 
@@ -704,9 +740,10 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        self.__assertions.append(functools.partial(self.__attr_mock.assert_not_called))
+        self.__assertions.append(functools.partial(self._attr_mock.assert_not_called))
         return self
 
+    @only_async
     def not_awaited(self) -> Assert:
         """Assert that the mock was never awaited.
 
@@ -723,7 +760,7 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        self.__assertions.append(functools.partial(self.__attr_mock.assert_not_awaited))
+        self.__assertions.append(functools.partial(self._attr_mock.assert_not_awaited))
         return self
 
     def called(self) -> Assert:
@@ -743,9 +780,10 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        self.__assertions.append(functools.partial(self.__attr_mock.assert_called))
+        self.__assertions.append(functools.partial(self._attr_mock.assert_called))
         return self
 
+    @only_async
     def awaited(self) -> Assert:
         """Assert that the mock was awaited at least once.
 
@@ -763,7 +801,7 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        self.__assertions.append(functools.partial(self.__attr_mock.assert_awaited))
+        self.__assertions.append(functools.partial(self._attr_mock.assert_awaited))
         return self
 
     def called_once(self) -> Assert:
@@ -786,6 +824,7 @@ class Assert:
         self.__assertions.append(functools.partial(self._assert_call_count, 1))
         return self
 
+    @only_async
     def awaited_once(self) -> Assert:
         """Assert that the mock was awaited exactly once.
 
@@ -821,6 +860,7 @@ class Assert:
         self.__assertions.append(functools.partial(self._assert_call_count, 2))
         return self
 
+    @only_async
     def awaited_twice(self) -> Assert:
         """Assert that the mock was awaited exactly twice.
 
@@ -855,6 +895,7 @@ class Assert:
         self.__assertions.append(functools.partial(self._assert_call_count, call_count))
         return self
 
+    @only_async
     def await_count(self, await_count: int) -> Assert:
         """Assert that the mock was awaited the specified number of times.
 
@@ -902,6 +943,7 @@ class Assert:
         self.__assertions.append(functools.partial(self._assert_call_count, call_count, "at least"))
         return self
 
+    @only_async
     def await_count_at_least(self, await_count: int) -> Assert:
         """Assert that the mock was awaited _at least_ the specified number of times.
 
@@ -960,6 +1002,7 @@ class Assert:
         self.__assertions.append(functools.partial(self._assert_call_count, call_count, "at most"))
         return self
 
+    @only_async
     def await_count_at_most(self, await_count: int) -> Assert:
         """Assert that the mock was awaited _at most_ the specified number of times.
 
@@ -1022,50 +1065,50 @@ class Assert:
     def _assert_call_count(
         self, call_count: int, modifier: Optional[Literal["at least", "at most"]] = None
     ) -> None:
-        if modifier is None and self.__attr_mock.call_count == call_count:
+        if modifier is None and self._attr_mock.call_count == call_count:
             return
-        if modifier == "at least" and self.__attr_mock.call_count >= call_count:
+        if modifier == "at least" and self._attr_mock.call_count >= call_count:
             return
-        if modifier == "at most" and self.__attr_mock.call_count <= call_count:
+        if modifier == "at most" and self._attr_mock.call_count <= call_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
         msg = (
             f"Expected '{self.__name}' to have been called {modifier_str}"  # pylint:disable=protected-access
             f"{self._format_call_count(call_count)}. "
-            f"Called {self._format_call_count(self.__attr_mock.call_count)}."
-            f"{self.__attr_mock._calls_repr()}"
+            f"Called {self._format_call_count(self._attr_mock.call_count)}."
+            f"{self._attr_mock._calls_repr()}"
         )
         raise AssertionError(msg)
 
     def _assert_await_count(
         self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
     ) -> None:
-        if modifier is None and self.__attr_mock.await_count == await_count:
+        if modifier is None and self._attr_mock.await_count == await_count:
             return
-        if modifier == "at least" and self.__attr_mock.await_count >= await_count:
+        if modifier == "at least" and self._attr_mock.await_count >= await_count:
             return
-        if modifier == "at most" and self.__attr_mock.await_count <= await_count:
+        if modifier == "at most" and self._attr_mock.await_count <= await_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
         msg = (
             f"Expected '{self.__name}' to have been awaited {modifier_str}"
             f"{self._format_call_count(await_count)}. "
-            f"Awaited {self._format_call_count(self.__attr_mock.await_count)}."
+            f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
             f"{self._awaits_repr()}"
         )
         raise AssertionError(msg)
 
     def _assert_all_calls_with(self, *args: Any, **kwargs: Any) -> None:
-        if not self._all_args_match(self.__attr_mock.call_args_list, *args, **kwargs):
+        if not self._all_args_match(self._attr_mock.call_args_list, *args, **kwargs):
             msg = (
                 f"All calls have not been made with the given arguments:\n"  # pylint:disable=protected-access
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self.__attr_mock._calls_repr()}"
+                f"{self._attr_mock._calls_repr()}"
             )
             raise AssertionError(msg)
 
     def _assert_all_awaits_with(self, *args: Any, **kwargs: Any) -> None:
-        if not self._all_args_match(self.__attr_mock.await_args_list, *args, **kwargs):
+        if not self._all_args_match(self._attr_mock.await_args_list, *args, **kwargs):
             msg = (
                 f"All awaits have not been made with the given arguments:\n"
                 f"{self._args_repr(*args, **kwargs)}"
@@ -1084,7 +1127,7 @@ class Assert:
     def _assert_match_call_args(  # pylint: disable=too-many-branches
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
     ) -> None:
-        if not self._assert_match_args(self.__attr_mock.call_args_list, modifier, *args, **kwargs):
+        if not self._assert_match_args(self._attr_mock.call_args_list, modifier, *args, **kwargs):
             if modifier == "last":
                 msg = "Last call does not include arguments"
             elif modifier == "all":
@@ -1094,14 +1137,14 @@ class Assert:
             msg = (
                 f"{msg}:\n"  # pylint:disable=protected-access
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self.__attr_mock._calls_repr()}"
+                f"{self._attr_mock._calls_repr()}"
             )
             raise AssertionError(msg)
 
     def _assert_match_await_args(  # pylint: disable=too-many-branches
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
     ) -> None:
-        if not self._assert_match_args(self.__attr_mock.await_args_list, modifier, *args, **kwargs):
+        if not self._assert_match_args(self._attr_mock.await_args_list, modifier, *args, **kwargs):
             if modifier == "last":
                 msg = "Last await does not include arguments"
             elif modifier == "all":
@@ -1153,9 +1196,9 @@ class Assert:
 
         Provides similar functionality to `unittest.mock.NonCallableMock._calls_repr`.
         """
-        if not self.__attr_mock.await_args_list:
+        if not self._attr_mock.await_args_list:
             return ""
-        return f"\nAwaits: {safe_repr(self.__attr_mock.await_args_list)}."
+        return f"\nAwaits: {safe_repr(self._attr_mock.await_args_list)}."
 
     @staticmethod
     def _args_repr(*args: Any, **kwargs: Any) -> str:
