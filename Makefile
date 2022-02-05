@@ -72,3 +72,7 @@ pylint:
 	@printf '$(color)Running pylint$(off)\n'
 	@printf '*****************\n'
 	pylint ${TARGETS}
+
+.PHONY: docs-requirements
+docs-requirements:
+	poetry export --without-hashes --dev -f requirements.txt --output docs/requirements.txt

@@ -11,7 +11,7 @@ from unittest import mock as umock
 from unittest.util import safe_repr
 
 if sys.version_info >= (3, 10):
-    from typing import ParamSpec
+    from typing import ParamSpec  # pragma: no cover
 else:
     from typing_extensions import ParamSpec
 
