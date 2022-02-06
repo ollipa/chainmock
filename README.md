@@ -47,7 +47,7 @@ supports and adds some convenient extra functionality.
   or to replace real objects.
 - **Async support**: Chainmock supports mocking and spying _async_ functions and
   methods. Most of the time it also automatically recognizes when async mocking
-  should be used so is not any harded than mocking sync code.
+  should be used so it is not any harder than mocking sync code.
 - **Fully type annotated**: The whole codebase is fully type annotated so
   Chainmock works well with editor auto completion and static analysis tools.
 - Works with **Python 3.8+ and PyPy3**.
@@ -100,7 +100,7 @@ To create a stub object, just call `mocker` function without any arguments.
 stub = mocker().mock("my_method").return_value("it works!").self()
 assert stub.my_method() == "it works!"
 
-# You can give keyword arguments the mocker function to quickly set properties
+# You can give keyword arguments to the mocker function to quickly set properties
 stub = mocker(my_property=10)
 assert stub.my_property == 10
 ```
