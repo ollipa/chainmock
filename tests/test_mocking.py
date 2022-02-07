@@ -54,7 +54,8 @@ class TestMocking:
         assert SomeClass().some_property == "propertymocked"
         with assert_raises(
             AssertionError,
-            "Expected 'some_property' to have been called twice. Called once.\nCalls: [call()].",
+            "Expected 'SomeClass.some_property' to have been called twice. "
+            "Called once.\nCalls: [call()].",
         ):
             State.teardown()
 
@@ -127,8 +128,8 @@ class TestMocking:
             AssertionError,
             (
                 "expected call not found.\n"
-                "Expected: instance_method_with_args(10)\n"
-                "Actual: instance_method_with_args(5)"
+                "Expected: SomeClass.instance_method_with_args(10)\n"
+                "Actual: SomeClass.instance_method_with_args(5)"
             ),
         ):
             State.teardown()
@@ -137,7 +138,7 @@ class TestMocking:
         mocker(SomeClass).mock("instance_method_with_args").return_value(1).called_once_with(10)
         with assert_raises(
             AssertionError,
-            "Expected 'instance_method_with_args' to be called once. Called 0 times.",
+            "Expected 'SomeClass.instance_method_with_args' to be called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -328,8 +329,8 @@ class TestMocking:
             AssertionError,
             (
                 "expected call not found.\n"
-                "Expected: method('foo', arg2=5)\n"
-                "Actual: method('foo', arg2=10)"
+                "Expected: FooClass.method('foo', arg2=5)\n"
+                "Actual: FooClass.method('foo', arg2=10)"
             ),
         ):
             State.teardown()
@@ -349,7 +350,7 @@ class TestMocking:
         FooClass().method("foo", arg2=1)
         FooClass().method("bar", arg2=2)
         FooClass().method("baz", arg2=3)
-        with assert_raises(AssertionError, "method('foo', arg2=4) call not found"):
+        with assert_raises(AssertionError, "FooClass.method('foo', arg2=4) call not found"):
             State.teardown()
 
     def test_mock_instance_method_all_calls_with(self) -> None:
@@ -594,7 +595,7 @@ class TestMocking:
         FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to not have been called. Called 1 times.\nCalls: [call()].",
+            "Expected 'FooClass.method' to not have been called. Called 1 times.\nCalls: [call()].",
         ):
             State.teardown()
 
@@ -609,7 +610,7 @@ class TestMocking:
         State.teardown()
 
         mocker(FooClass).mock("method").called()
-        with assert_raises(AssertionError, "Expected 'method' to have been called."):
+        with assert_raises(AssertionError, "Expected 'FooClass.method' to have been called."):
             State.teardown()
 
     def test_mock_instance_method_called_once(self) -> None:
@@ -623,7 +624,7 @@ class TestMocking:
 
         mocker(FooClass).mock("method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'method' to have been called once. Called 0 times."
+            AssertionError, "Expected 'FooClass.method' to have been called once. Called 0 times."
         ):
             State.teardown()
 
@@ -641,7 +642,7 @@ class TestMocking:
         FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been called twice. Called once.\nCalls: [call()].",
+            "Expected 'FooClass.method' to have been called twice. Called once.\nCalls: [call()].",
         ):
             State.teardown()
 
@@ -661,7 +662,7 @@ class TestMocking:
         FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been called 3 times. "
+            "Expected 'FooClass.method' to have been called 3 times. "
             "Called twice.\nCalls: [call(), call()].",
         ):
             State.teardown()
@@ -689,7 +690,7 @@ class TestMocking:
         FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been called at least 3 times. "
+            "Expected 'FooClass.method' to have been called at least 3 times. "
             "Called twice.\nCalls: [call(), call()].",
         ):
             State.teardown()
@@ -717,7 +718,7 @@ class TestMocking:
         FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been called at most 3 times. "
+            "Expected 'FooClass.method' to have been called at most 3 times. "
             "Called 4 times.\nCalls: [call(), call(), call(), call()].",
         ):
             State.teardown()
@@ -731,7 +732,7 @@ class TestMocking:
         FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been called at least twice. "
+            "Expected 'FooClass.method' to have been called at least twice. "
             "Called once.\nCalls: [call()].",
         ):
             State.teardown()
@@ -754,7 +755,7 @@ class TestMocking:
         FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been called at most 3 times. "
+            "Expected 'FooClass.method' to have been called at most 3 times. "
             "Called 4 times.\nCalls: [call(), call(), call(), call()].",
         ):
             State.teardown()

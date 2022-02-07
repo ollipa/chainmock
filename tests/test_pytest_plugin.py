@@ -51,7 +51,7 @@ def test_teardown_on_chainmock_failure(testdir: Any) -> None:
     result = testdir.runpytest("-p", "no:asyncio")
     result.assert_outcomes(passed=1, failed=1)
     result.stdout.re_match_lines(
-        [r".+AssertionError: Expected 'method' to have been called twice. Called once."]
+        [r".+AssertionError: Expected 'FooClass.method' to have been called twice. Called once."]
     )
 
 
@@ -81,4 +81,4 @@ def test_teardown_on_other_failure(testdir: Any) -> None:
     )
     result = testdir.runpytest("-p", "no:asyncio")
     result.assert_outcomes(passed=1, failed=1)
-    result.stdout.no_re_match_line(r".+AssertionError: Expected 'method'")
+    result.stdout.no_re_match_line(r".+AssertionError: Expected 'FooClass.method'")

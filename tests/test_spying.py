@@ -40,7 +40,8 @@ class TestSpying:
     def test_spy_function_called_once_fail(self) -> None:
         mocker(common).spy("some_function").called_once()
         with assert_raises(
-            AssertionError, "Expected 'some_function' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'tests.common.some_function' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -56,8 +57,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: some_function('foo')\n"
-            "Actual: some_function('bar')",
+            "Expected: tests.common.some_function('foo')\n"
+            "Actual: tests.common.some_function('bar')",
         ):
             State.teardown()
 
@@ -70,7 +71,8 @@ class TestSpying:
     def test_spy_class_call_instance_method_called_once_fail(self) -> None:
         mocker(SomeClass).spy("instance_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'instance_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'SomeClass.instance_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -86,8 +88,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: instance_method_with_args(1)\n"
-            "Actual: instance_method_with_args(2)",
+            "Expected: SomeClass.instance_method_with_args(1)\n"
+            "Actual: SomeClass.instance_method_with_args(2)",
         ):
             State.teardown()
 
@@ -102,7 +104,8 @@ class TestSpying:
         instance = SomeClass()
         mocker(instance).spy("instance_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'instance_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'SomeClass.instance_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -120,8 +123,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: instance_method_with_args(1)\n"
-            "Actual: instance_method_with_args(2)",
+            "Expected: SomeClass.instance_method_with_args(1)\n"
+            "Actual: SomeClass.instance_method_with_args(2)",
         ):
             State.teardown()
 
@@ -134,7 +137,8 @@ class TestSpying:
     def test_spy_class_call_class_method_called_once_fail(self) -> None:
         mocker(SomeClass).spy("class_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'class_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'SomeClass.class_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -150,8 +154,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: class_method_with_args(2)\n"
-            "Actual: class_method_with_args(3)",
+            "Expected: SomeClass.class_method_with_args(2)\n"
+            "Actual: SomeClass.class_method_with_args(3)",
         ):
             State.teardown()
 
@@ -178,7 +182,8 @@ class TestSpying:
         instance = SomeClass()
         mocker(instance).spy("class_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'class_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'SomeClass.class_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -196,8 +201,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: class_method_with_args(2)\n"
-            "Actual: class_method_with_args(3)",
+            "Expected: SomeClass.class_method_with_args(2)\n"
+            "Actual: SomeClass.class_method_with_args(3)",
         ):
             State.teardown()
 
@@ -210,7 +215,8 @@ class TestSpying:
     def test_spy_class_call_static_method_called_once_fail(self) -> None:
         mocker(SomeClass).spy("static_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'static_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'SomeClass.static_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -226,8 +232,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: static_method_with_args(3)\n"
-            "Actual: static_method_with_args(4)",
+            "Expected: SomeClass.static_method_with_args(3)\n"
+            "Actual: SomeClass.static_method_with_args(4)",
         ):
             State.teardown()
 
@@ -254,7 +260,8 @@ class TestSpying:
         instance = SomeClass()
         mocker(instance).spy("static_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'static_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'SomeClass.static_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -272,8 +279,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: static_method_with_args(3)\n"
-            "Actual: static_method_with_args(4)",
+            "Expected: SomeClass.static_method_with_args(3)\n"
+            "Actual: SomeClass.static_method_with_args(4)",
         ):
             State.teardown()
 
@@ -294,8 +301,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: method(1, 'foo')\n"
-            "Actual: method(2, 1, 'foo')",
+            "Expected: FooClass.method(1, 'foo')\n"
+            "Actual: FooClass.method(2, 1, 'foo')",
         ):
             State.teardown()
 
@@ -308,7 +315,8 @@ class TestSpying:
     def test_spy_derived_class_call_instance_method_called_once_fail(self) -> None:
         mocker(DerivedClass).spy("instance_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'instance_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'DerivedClass.instance_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -324,8 +332,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: instance_method_with_args(1)\n"
-            "Actual: instance_method_with_args(2)",
+            "Expected: DerivedClass.instance_method_with_args(1)\n"
+            "Actual: DerivedClass.instance_method_with_args(2)",
         ):
             State.teardown()
 
@@ -340,7 +348,8 @@ class TestSpying:
         instance = DerivedClass()
         mocker(instance).spy("instance_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'instance_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'DerivedClass.instance_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -358,8 +367,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: instance_method_with_args(1)\n"
-            "Actual: instance_method_with_args(2)",
+            "Expected: DerivedClass.instance_method_with_args(1)\n"
+            "Actual: DerivedClass.instance_method_with_args(2)",
         ):
             State.teardown()
 
@@ -372,7 +381,8 @@ class TestSpying:
     def test_spy_derived_class_call_class_method_called_once_fail(self) -> None:
         mocker(DerivedClass).spy("class_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'class_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'DerivedClass.class_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -388,8 +398,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: class_method_with_args(2)\n"
-            "Actual: class_method_with_args(3)",
+            "Expected: DerivedClass.class_method_with_args(2)\n"
+            "Actual: DerivedClass.class_method_with_args(3)",
         ):
             State.teardown()
 
@@ -416,7 +426,8 @@ class TestSpying:
         instance = DerivedClass()
         mocker(instance).spy("class_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'class_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'DerivedClass.class_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -434,8 +445,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: class_method_with_args(2)\n"
-            "Actual: class_method_with_args(3)",
+            "Expected: DerivedClass.class_method_with_args(2)\n"
+            "Actual: DerivedClass.class_method_with_args(3)",
         ):
             State.teardown()
 
@@ -448,7 +459,8 @@ class TestSpying:
     def test_spy_derived_class_call_static_method_called_once_fail(self) -> None:
         mocker(DerivedClass).spy("static_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'static_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'DerivedClass.static_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -464,8 +476,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: static_method_with_args(3)\n"
-            "Actual: static_method_with_args(4)",
+            "Expected: DerivedClass.static_method_with_args(3)\n"
+            "Actual: DerivedClass.static_method_with_args(4)",
         ):
             State.teardown()
 
@@ -492,7 +504,8 @@ class TestSpying:
         instance = DerivedClass()
         mocker(instance).spy("static_method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'static_method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'DerivedClass.static_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -510,8 +523,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: static_method_with_args(3)\n"
-            "Actual: static_method_with_args(4)",
+            "Expected: DerivedClass.static_method_with_args(3)\n"
+            "Actual: DerivedClass.static_method_with_args(4)",
         ):
             State.teardown()
 
@@ -639,7 +652,9 @@ class TestSpying:
         FooClass("bar")
         with assert_raises(
             AssertionError,
-            "expected call not found.\nExpected: __init__('foo')\nActual: __init__('bar')",
+            "expected call not found.\n"
+            "Expected: FooClass.__init__('foo')\n"
+            "Actual: FooClass.__init__('bar')",
         ):
             State.teardown()
 

@@ -16,7 +16,7 @@ class TestStubbing:
         assert stub.method("bar") == "stubbed"  # type: ignore
         with assert_raises(
             AssertionError,
-            "expected call not found.\nExpected: method('foo')\nActual: method('bar')",
+            "expected call not found.\nExpected: Stub.method('foo')\nActual: Stub.method('bar')",
         ):
             State.teardown()
 
@@ -25,7 +25,7 @@ class TestStubbing:
         assert stub.method() == "stubbed"  # type: ignore
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been called twice. Called once.\nCalls: [call()].",
+            "Expected 'Stub.method' to have been called twice. Called once.\nCalls: [call()].",
         ):
             State.teardown()
 
@@ -102,7 +102,8 @@ class TestStubbing:
         assert stub.some_property == "foo"  # type: ignore
         with assert_raises(
             AssertionError,
-            "Expected 'some_property' to have been called twice. Called once.\nCalls: [call()].",
+            "Expected 'Stub.some_property' to have been called twice. Called once.\n"
+            "Calls: [call()].",
         ):
             State.teardown()
 

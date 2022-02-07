@@ -53,7 +53,6 @@ class Assert:
         self,
         parent: Mock,
         attr_mock: AnyMock,
-        name: str,
         *,
         kind: Literal["spy", "mock"] = "mock",
         patch: Optional[umock._patch[Any]] = None,  # pylint: disable=unsubscriptable-object
@@ -65,7 +64,6 @@ class Assert:
             )
         self.__parent = parent
         self._attr_mock = attr_mock
-        self.__name = name
         self.__assertions: List[Callable[..., None]] = []
         self.__patch = patch
         self._kind = kind
@@ -1072,8 +1070,9 @@ class Assert:
         if modifier == "at most" and self._attr_mock.call_count <= call_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
+        name = self._attr_mock._mock_name or "mock"  # pylint:disable=protected-access
         msg = (
-            f"Expected '{self.__name}' to have been called {modifier_str}"  # pylint:disable=protected-access
+            f"Expected '{name}' to have been called {modifier_str}"  # pylint:disable=protected-access
             f"{self._format_call_count(call_count)}. "
             f"Called {self._format_call_count(self._attr_mock.call_count)}."
             f"{self._attr_mock._calls_repr()}"
@@ -1090,8 +1089,9 @@ class Assert:
         if modifier == "at most" and self._attr_mock.await_count <= await_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
+        name = self._attr_mock._mock_name or "mock"  # pylint:disable=protected-access
         msg = (
-            f"Expected '{self.__name}' to have been awaited {modifier_str}"
+            f"Expected '{name}' to have been awaited {modifier_str}"
             f"{self._format_call_count(await_count)}. "
             f"Awaited {self._format_call_count(self._attr_mock.await_count)}."
             f"{self._awaits_repr()}"
@@ -1375,7 +1375,7 @@ class Mock:
             return cached
         parsed_name = self.__remove_name_mangling(name)
         original = getattr(self.__target, parsed_name)
-        attr_mock = umock.MagicMock(name=parsed_name)
+        attr_mock = umock.MagicMock(name=self.__format_mock_name(name))
         parameters = tuple(inspect.signature(original).parameters.keys())
         is_class_method = self.__get_method_type(parsed_name, classmethod)
         is_static_method = self.__get_method_type(parsed_name, staticmethod)
@@ -1394,7 +1394,7 @@ class Mock:
         patch = umock.patch.object(self.__target, parsed_name, new=pass_through)
         patch.start()
         self.__object_patches.append(patch)
-        assertion = Assert(self, attr_mock, parsed_name, kind="spy", _internal=True)
+        assertion = Assert(self, attr_mock, kind="spy", _internal=True)
         self.__assertions[name] = assertion
         return assertion
 
@@ -1553,7 +1553,8 @@ class Mock:
             force_property=force_property if not parts else False,
             force_async=force_async if not parts else False,
         )
-        assertion = Assert(self, attr_mock, name, _internal=True)
+        attr_mock._mock_name = f"Stub.{name}"  # pylint: disable=protected-access
+        assertion = Assert(self, attr_mock, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
             assertion.return_value(self)
@@ -1613,7 +1614,7 @@ class Mock:
                 force_property=False,
                 force_async=force_async if not parts else False,
             )
-        assertion = Assert(self, attr_mock, name, _internal=True)
+        assertion = Assert(self, attr_mock, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
             Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
@@ -1684,11 +1685,15 @@ class Mock:
             elif not parts and force_async:
                 new_callable = umock.AsyncMock
             patch = umock.patch.object(
-                self.__target, name, new_callable=new_callable, create=create
+                self.__target,
+                name,
+                new_callable=new_callable,
+                create=create,
+                name=self.__format_mock_name(name),
             )
             attr_mock = patch.start()
             self.__object_patches.append(patch)
-        assertion = Assert(self, attr_mock, name, patch=patch, _internal=True)
+        assertion = Assert(self, attr_mock, patch=patch, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
             Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
@@ -1700,6 +1705,20 @@ class Mock:
                 force_async=force_async,
             )
         return assertion
+
+    def __format_mock_name(self, name: str) -> str:
+        if self.__target is None:
+            return name
+        target = self.__target
+        if (
+            not inspect.isclass(target)
+            and not inspect.ismodule(target)
+            and hasattr(target, "__class__")
+        ):
+            target = target.__class__
+        if hasattr(target, "__name__"):
+            return f"{target.__name__}.{name}"
+        return name
 
     def _reset(self) -> None:
         while len(self.__object_patches) > 0:

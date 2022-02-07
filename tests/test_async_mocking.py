@@ -55,8 +55,8 @@ class TestAsyncMocking:
             AssertionError,
             (
                 "expected await not found.\n"
-                "Expected: method('foo', arg2=5)\n"
-                "Actual: method('foo', arg2=10)"
+                "Expected: FooClass.method('foo', arg2=5)\n"
+                "Actual: FooClass.method('foo', arg2=10)"
             ),
         ):
             State.teardown()
@@ -76,8 +76,8 @@ class TestAsyncMocking:
             AssertionError,
             (
                 "expected await not found.\n"
-                "Expected: method('foo', arg2=5)\n"
-                "Actual: method('bar', arg2=5)"
+                "Expected: FooClass.method('foo', arg2=5)\n"
+                "Actual: FooClass.method('bar', arg2=5)"
             ),
         ):
             State.teardown()
@@ -87,7 +87,7 @@ class TestAsyncMocking:
         await FooClass().method("foo", arg2=5)
         with assert_raises(
             AssertionError,
-            "Expected method to have been awaited once. Awaited 2 times.",
+            "Expected FooClass.method to have been awaited once. Awaited 2 times.",
         ):
             State.teardown()
 
@@ -108,7 +108,7 @@ class TestAsyncMocking:
         await FooClass().method("baz", arg2=3)
         with assert_raises(
             AssertionError,
-            "method('foo', arg2=4) await not found",
+            "FooClass.method('foo', arg2=4) await not found",
         ):
             State.teardown()
 
@@ -358,7 +358,7 @@ class TestAsyncMocking:
         await FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected method to not have been awaited. Awaited 1 times.",
+            "Expected FooClass.method to not have been awaited. Awaited 1 times.",
         ):
             State.teardown()
 
@@ -373,7 +373,7 @@ class TestAsyncMocking:
         State.teardown()
 
         mocker(FooClass).mock("method").awaited()
-        with assert_raises(AssertionError, "Expected method to have been awaited."):
+        with assert_raises(AssertionError, "Expected FooClass.method to have been awaited."):
             State.teardown()
 
     async def test_mock_async_instance_method_awaited_once(self) -> None:
@@ -387,7 +387,7 @@ class TestAsyncMocking:
 
         mocker(FooClass).mock("method").awaited_once()
         with assert_raises(
-            AssertionError, "Expected 'method' to have been awaited once. Awaited 0 times."
+            AssertionError, "Expected 'FooClass.method' to have been awaited once. Awaited 0 times."
         ):
             State.teardown()
 
@@ -405,7 +405,7 @@ class TestAsyncMocking:
         await FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been awaited twice. Awaited once.\nAwaits: [call()].",
+            "Expected 'FooClass.method' to have been awaited twice. Awaited once.\nAwaits: [call()].",
         ):
             State.teardown()
 
@@ -432,7 +432,7 @@ class TestAsyncMocking:
         await FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been awaited 3 times. "
+            "Expected 'FooClass.method' to have been awaited 3 times. "
             "Awaited twice.\nAwaits: [call(), call()].",
         ):
             State.teardown()
@@ -454,7 +454,7 @@ class TestAsyncMocking:
         await FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been awaited at least 3 times. "
+            "Expected 'FooClass.method' to have been awaited at least 3 times. "
             "Awaited twice.\nAwaits: [call(), call()].",
         ):
             State.teardown()
@@ -465,7 +465,7 @@ class TestAsyncMocking:
         await FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been awaited at least 3 times. "
+            "Expected 'FooClass.method' to have been awaited at least 3 times. "
             "Awaited twice.\nAwaits: [call(), call()].",
         ):
             State.teardown()
@@ -495,7 +495,7 @@ class TestAsyncMocking:
         await FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'method' to have been awaited at most 3 times. "
+            "Expected 'FooClass.method' to have been awaited at most 3 times. "
             "Awaited 4 times.\nAwaits: [call(), call(), call(), call()].",
         ):
             State.teardown()

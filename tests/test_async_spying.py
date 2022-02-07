@@ -19,7 +19,7 @@ class TestSpying:
         mocker(common).spy("some_async_function").called_once()
         with assert_raises(
             AssertionError,
-            "Expected 'some_async_function' to have been called once. Called 0 times.",
+            "Expected 'tests.common.some_async_function' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -35,8 +35,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: some_async_function('foo')\n"
-            "Actual: some_async_function('bar')",
+            "Expected: tests.common.some_async_function('foo')\n"
+            "Actual: tests.common.some_async_function('bar')",
         ):
             State.teardown()
 
@@ -50,7 +50,7 @@ class TestSpying:
         mocker(SomeClass).spy("async_instance_method").called_once()
         with assert_raises(
             AssertionError,
-            "Expected 'async_instance_method' to have been called once. Called 0 times.",
+            "Expected 'SomeClass.async_instance_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -66,8 +66,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: async_instance_method_with_args(1)\n"
-            "Actual: async_instance_method_with_args(2)",
+            "Expected: SomeClass.async_instance_method_with_args(1)\n"
+            "Actual: SomeClass.async_instance_method_with_args(2)",
         ):
             State.teardown()
 
@@ -83,7 +83,7 @@ class TestSpying:
         mocker(instance).spy("async_instance_method").called_once()
         with assert_raises(
             AssertionError,
-            "Expected 'async_instance_method' to have been called once. Called 0 times.",
+            "Expected 'SomeClass.async_instance_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -101,8 +101,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: async_instance_method_with_args(1)\n"
-            "Actual: async_instance_method_with_args(2)",
+            "Expected: SomeClass.async_instance_method_with_args(1)\n"
+            "Actual: SomeClass.async_instance_method_with_args(2)",
         ):
             State.teardown()
 
@@ -116,7 +116,7 @@ class TestSpying:
         mocker(SomeClass).spy("async_class_method").called_once()
         with assert_raises(
             AssertionError,
-            "Expected 'async_class_method' to have been called once. Called 0 times.",
+            "Expected 'SomeClass.async_class_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -132,8 +132,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: async_class_method_with_args(2)\n"
-            "Actual: async_class_method_with_args(3)",
+            "Expected: SomeClass.async_class_method_with_args(2)\n"
+            "Actual: SomeClass.async_class_method_with_args(3)",
         ):
             State.teardown()
 
@@ -161,7 +161,7 @@ class TestSpying:
         mocker(instance).spy("async_class_method").called_once()
         with assert_raises(
             AssertionError,
-            "Expected 'async_class_method' to have been called once. Called 0 times.",
+            "Expected 'SomeClass.async_class_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -179,8 +179,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: async_class_method_with_args(2)\n"
-            "Actual: async_class_method_with_args(3)",
+            "Expected: SomeClass.async_class_method_with_args(2)\n"
+            "Actual: SomeClass.async_class_method_with_args(3)",
         ):
             State.teardown()
 
@@ -194,7 +194,7 @@ class TestSpying:
         mocker(SomeClass).spy("async_static_method").called_once()
         with assert_raises(
             AssertionError,
-            "Expected 'async_static_method' to have been called once. Called 0 times.",
+            "Expected 'SomeClass.async_static_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -210,8 +210,8 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: async_static_method_with_args(3)\n"
-            "Actual: async_static_method_with_args(4)",
+            "Expected: SomeClass.async_static_method_with_args(3)\n"
+            "Actual: SomeClass.async_static_method_with_args(4)",
         ):
             State.teardown()
 
@@ -239,7 +239,7 @@ class TestSpying:
         mocker(instance).spy("async_static_method").called_once()
         with assert_raises(
             AssertionError,
-            "Expected 'async_static_method' to have been called once. Called 0 times.",
+            "Expected 'SomeClass.async_static_method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
@@ -257,7 +257,7 @@ class TestSpying:
         with assert_raises(
             AssertionError,
             "expected call not found.\n"
-            "Expected: async_static_method_with_args(3)\n"
-            "Actual: async_static_method_with_args(4)",
+            "Expected: SomeClass.async_static_method_with_args(3)\n"
+            "Actual: SomeClass.async_static_method_with_args(4)",
         ):
             State.teardown()
