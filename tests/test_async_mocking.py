@@ -405,7 +405,8 @@ class TestAsyncMocking:
         await FooClass().method()
         with assert_raises(
             AssertionError,
-            "Expected 'FooClass.method' to have been awaited twice. Awaited once.\nAwaits: [call()].",
+            "Expected 'FooClass.method' to have been awaited twice. Awaited once."
+            "\nAwaits: [call()].",
         ):
             State.teardown()
 
