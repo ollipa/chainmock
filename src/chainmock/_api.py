@@ -1707,8 +1707,7 @@ class Mock:
         return assertion
 
     def __format_mock_name(self, name: str) -> str:
-        if self.__target is None:
-            return name
+        assert self.__target is not None
         target = self.__target
         if (
             not inspect.isclass(target)
@@ -1718,7 +1717,7 @@ class Mock:
             target = target.__class__
         if hasattr(target, "__name__"):
             return f"{target.__name__}.{name}"
-        return name
+        return name  # pragma: no cover
 
     def _reset(self) -> None:
         while len(self.__object_patches) > 0:

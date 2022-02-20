@@ -20,9 +20,8 @@ def pytest_runtest_makereport(
                 State.validate_mocks()
             except BaseException:  # pylint: disable=broad-except
                 call.excinfo = ExceptionInfo.from_current()
-        else:
-            # Reset state without running validations so that validations
-            # do not leak to the next test.
-            State.reset_state()
+    elif call.when == "teardown":
+        State.reset_mocks()
+        State.reset_state()
 
     _test_report: Optional[TestReport] = yield

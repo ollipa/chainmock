@@ -82,3 +82,47 @@ def test_teardown_on_other_failure(testdir: Any) -> None:
     result = testdir.runpytest("-p", "no:asyncio")
     result.assert_outcomes(passed=1, failed=1)
     result.stdout.no_re_match_line(r".+AssertionError: Expected 'FooClass.method'")
+
+
+def test_teardown_on_fixture_failure(testdir: Any) -> None:
+    """Test that mocks are teared down after a test fails before test case is
+    executed.
+    """
+    testdir.makepyfile(
+        """
+        import pytest
+
+        from chainmock import mocker
+
+        class FooClass:
+
+            def method(self):
+                return "value"
+
+        class TestClass1:
+
+            @pytest.fixture(autouse=True)
+            def mock_fooclass(self):
+                mocked = mocker(FooClass).mock("method").return_value("mocked").called_twice()
+
+            @pytest.fixture()
+            def invalid_fixture(self):
+                return {
+                    {
+                        "foo": "bar"
+                    }
+                }
+
+            def test_teardown(self, invalid_fixture):
+                assert FooClass().method() == "mocked"
+                assert FooClass().method() == "mocked"
+
+        class TestClass2:
+
+            def test_teardown(self):
+                assert FooClass().method() == "value"
+        """
+    )
+    result = testdir.runpytest("-p", "no:asyncio")
+    result.assert_outcomes(passed=1, errors=1)
+    result.stdout.re_match_lines(r".+TypeError: unhashable type: 'dict'")
