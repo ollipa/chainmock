@@ -11,7 +11,7 @@ all: lint test
 lint: isort black mypy pylint
 
 .PHONY: test
-test: install coverage
+test: install docs coverage
 
 .PHONY: install
 install:
@@ -72,6 +72,13 @@ pylint:
 	@printf '$(color)Running pylint$(off)\n'
 	@printf '*****************\n'
 	pylint ${TARGETS}
+
+.PHONY: docs
+docs:
+	@printf '\n\n*****************\n'
+	@printf '$(color)Test building docs$(off)\n'
+	@printf '*****************\n'
+	mkdocs build --strict
 
 .PHONY: docs-requirements
 docs-requirements:

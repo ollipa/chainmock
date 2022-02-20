@@ -46,7 +46,7 @@ coverage = "*"
 tox = "*"
 mkdocs-material = "*"
 markdown-include = "*"
-mkdocstrings = "*"
+mkdocstrings = "0.17.0"
 
 [tool.poetry.plugins.pytest11]
 chainmock = "chainmock._pytest_plugin"
