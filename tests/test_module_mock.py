@@ -1,5 +1,5 @@
 """Tests for mock module."""
-# pylint: disable=missing-docstring,no-self-use
+# pylint: disable=missing-docstring
 from chainmock import mock
 
 from .common import SomeClass

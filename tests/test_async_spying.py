@@ -1,5 +1,5 @@
 """Test spying functionality."""
-# pylint: disable=missing-docstring,no-self-use
+# pylint: disable=missing-docstring
 from chainmock import mocker
 from chainmock._api import State
 

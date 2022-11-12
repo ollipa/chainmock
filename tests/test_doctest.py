@@ -1,5 +1,5 @@
 """Test examples in docstrings."""
-# pylint: disable=missing-docstring,no-self-use
+# pylint: disable=missing-docstring
 import asyncio
 import doctest
 import sys
