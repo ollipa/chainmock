@@ -33,9 +33,9 @@ packages = [{ include = "chainmock", from = "src" }]
 [tool.poetry.dependencies]
 python = "^3.8"
 pytest = ">= 6.0.0"
-typing-extensions = ">=3.10.0; python_version<'3.10'"
+typing-extensions = { version = ">=3.10.0", python = "<3.10" }
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 mypy = "*"
 pylint = "*"
 isort = "*"
@@ -46,7 +46,7 @@ coverage = "*"
 tox = "*"
 mkdocs-material = "*"
 markdown-include = "*"
-mkdocstrings = "0.17.0"
+mkdocstrings = { extras = ["python-legacy"], version = "*" }
 
 [tool.poetry.plugins.pytest11]
 chainmock = "chainmock._pytest_plugin"
@@ -94,7 +94,6 @@ disallow_untyped_decorators = true
 
 check_untyped_defs = true
 no_implicit_optional = true
-ignore_missing_imports = true
 strict_equality = true
 
 [tool.pytest.ini_options]

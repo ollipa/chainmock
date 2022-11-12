@@ -30,7 +30,7 @@ def only_async(fn: Callable[P, T]) -> Callable[P, T]:
 
     @functools.wraps(fn)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        self: Assert = args[0]  # type: ignore
+        self: Assert = args[0]  # type: ignore[assignment]
         if not isinstance(self._attr_mock, umock.AsyncMock):
             raise AttributeError(
                 f"{self._attr_mock.__class__.__name__} does not have '{fn.__name__}' method. "
@@ -1241,7 +1241,7 @@ class State:
             Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
             stub = Stub(target, spec=spec, _internal=True)
             cls.MOCKS[id(stub)] = stub
-            return stub  # type: ignore
+            return stub  # type: ignore[no-any-return]
         key: Union[int, str]
         if isinstance(target, str):
             key = target
@@ -1401,14 +1401,14 @@ class Mock:
     def __get_method_type(
         self,
         name: str,
-        method_type: Union[Type[classmethod], Type[staticmethod]],  # type: ignore # mypy bug?
+        method_type: Union[Type[classmethod], Type[staticmethod]],  # type: ignore[type-arg]
     ) -> bool:
         try:
             return isinstance(inspect.getattr_static(self.__target, name), method_type)
         except AttributeError:
             # Inspecting proxied objects raises AttributeError
             if hasattr(self.__target, "__mro__"):
-                for cls in inspect.getmro(self.__target):  # type: ignore
+                for cls in inspect.getmro(self.__target):  # type: ignore[arg-type]
                     method = vars(cls).get(name)
                     if method is not None:
                         return isinstance(method, method_type)
@@ -1577,7 +1577,7 @@ class Mock:
                         return self.__get_stub_property_mock(name)
                     attr_mock = umock.AsyncMock() if force_async else umock.MagicMock()
                     setattr(self, name, attr_mock)
-                    return attr_mock
+                    return attr_mock  # type: ignore[return-value]
                 raise
             if isinstance(original, property):
                 return self.__get_stub_property_mock(name)
@@ -1588,7 +1588,7 @@ class Mock:
         else:
             attr_mock = getattr(self.__mock, name)
         setattr(self, name, attr_mock)
-        return attr_mock
+        return attr_mock  # type: ignore[return-value]
 
     def __get_stub_property_mock(self, name: str) -> AnyMock:
         attr_mock = umock.PropertyMock()
@@ -1631,7 +1631,7 @@ class Mock:
         self, mock: AnyMock, name: str, *, create: bool, force_property: bool, force_async: bool
     ) -> AnyMock:
         try:
-            attr_mock = getattr(mock, name)
+            attr_mock: AnyMock = getattr(mock, name)
         except AttributeError:
             if create is True:
                 if force_property:

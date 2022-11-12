@@ -82,4 +82,4 @@ docs:
 
 .PHONY: docs-requirements
 docs-requirements:
-	poetry export --without-hashes --dev -f requirements.txt --output docs/requirements.txt
+	poetry export --without-hashes --with dev -f requirements.txt --output docs/requirements.txt

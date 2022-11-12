@@ -1,5 +1,7 @@
 """Test common functionality in Chainmock."""
-# pylint: disable=missing-docstring,no-self-use
+# pylint: disable=missing-docstring
+from unittest import mock as umock
+
 from chainmock._api import Assert, Mock, State, mocker
 
 from .utils import assert_raises
@@ -21,7 +23,7 @@ class TestChainmock:
             RuntimeError, "Assert should not be initialized directly. Use mocker function instead."
         ):
             mock = mocker()
-            Assert(mock, None)
+            Assert(mock, umock.MagicMock())
 
     def test_mocker_should_cache_mocks(self) -> None:
         class FooClass:

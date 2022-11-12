@@ -1,5 +1,5 @@
 """Test patching functionality."""
-# pylint: disable=missing-docstring,no-self-use
+# pylint: disable=missing-docstring
 from typing import Type
 
 from chainmock import mocker
