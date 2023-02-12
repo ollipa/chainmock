@@ -1,5 +1,6 @@
 """Test spying functionality."""
 # pylint: disable=missing-docstring
+import random
 import re
 
 from chainmock import mocker
@@ -663,3 +664,18 @@ class TestSpying:
         assert FooClass("foo").reset_mock("bar") == "bar"
         State.teardown()
         assert FooClass("foo").reset_mock("bar") == "bar"
+
+    def test_spy_builtin_function(self) -> None:
+        mocker(random).mock("randint").called_once_with(1, 2)
+        random.randint(1, 2)
+        State.teardown()
+
+        mocker(random).mock("randint").called_once_with(1, 2)
+        random.randint(1, 3)
+        with assert_raises(
+            AssertionError,
+            "expected call not found.\n"
+            "Expected: random.randint(1, 2)\n"
+            "Actual: random.randint(1, 3)",
+        ):
+            State.teardown()

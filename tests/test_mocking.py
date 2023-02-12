@@ -1,5 +1,6 @@
 """Test mocking functionality."""
 # pylint: disable=missing-docstring
+import sys
 from typing import Type
 
 import pytest
@@ -915,3 +916,32 @@ class TestMocking:
             "You can use 'force_async' parameter to force the mock to be an AsyncMock.",
         ):
             getattr(mocked, method_name)()
+
+    def test_mock_builtin_function(self) -> None:
+        mocker(sys.stdout).mock("write").return_value(123).called_once()
+        assert sys.stdout.write("foo") == 123
+        State.teardown()
+
+        mocker(sys.stdout).mock("write").return_value(123).called_once()
+        sys.stdout.write("foo")
+        sys.stdout.write("bar")
+        with assert_raises(
+            AssertionError,
+            "Expected 'EncodedFile.write' to have been called once. Called twice.\n"
+            "Calls: [call('foo'), call('bar')].",
+        ):
+            State.teardown()
+
+    def test_mock_builtin_called_once_with(self) -> None:
+        # pylint: disable=unreachable
+        mocker(sys).mock("exit").called_once_with(123)
+        sys.exit(123)
+        State.teardown()
+
+        mocker(sys).mock("exit").called_once_with(123)
+        sys.exit(1)
+        with assert_raises(
+            AssertionError,
+            "expected call not found.\nExpected: sys.exit(123)\nActual: sys.exit(1)",
+        ):
+            State.teardown()
