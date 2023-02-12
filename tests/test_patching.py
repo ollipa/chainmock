@@ -133,7 +133,6 @@ class TestPatching:
         assert PatchClass().foo_method() == "mocked"  # type: ignore
 
     def test_patch_non_existing_attribute_fail(self) -> None:
-
         with assert_raises(AttributeError, "Mock object has no attribute 'foo_method'"):
             mocker("tests.test_patching.PatchClass").mock("foo_method", create=False)
 

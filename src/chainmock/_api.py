@@ -1577,7 +1577,7 @@ class Mock:
                         return self.__get_stub_property_mock(name)
                     attr_mock = umock.AsyncMock() if force_async else umock.MagicMock()
                     setattr(self, name, attr_mock)
-                    return attr_mock  # type: ignore[return-value]
+                    return attr_mock
                 raise
             if isinstance(original, property):
                 return self.__get_stub_property_mock(name)
@@ -1588,7 +1588,7 @@ class Mock:
         else:
             attr_mock = getattr(self.__mock, name)
         setattr(self, name, attr_mock)
-        return attr_mock  # type: ignore[return-value]
+        return attr_mock
 
     def __get_stub_property_mock(self, name: str) -> AnyMock:
         attr_mock = umock.PropertyMock()
