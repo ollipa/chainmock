@@ -1375,6 +1375,8 @@ class Mock:
             return cached
         parsed_name = self.__remove_name_mangling(name)
         original = getattr(self.__target, parsed_name)
+        if not callable(original):
+            raise RuntimeError(f"'{name}' is not callable. Only callable objects can be spied.")
         attr_mock = umock.MagicMock(name=self.__format_mock_name(name))
         parameters = tuple(inspect.signature(original).parameters.keys())
         is_class_method = self.__get_method_type(parsed_name, classmethod)

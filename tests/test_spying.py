@@ -679,3 +679,10 @@ class TestSpying:
             "Actual: random.randint(1, 3)",
         ):
             State.teardown()
+
+    def test_spy_global_module_variable(self) -> None:
+        with assert_raises(
+            RuntimeError,
+            "'GLOBAL_VARIABLE' is not callable. Only callable objects can be spied.",
+        ):
+            mocker(common).spy("GLOBAL_VARIABLE")
