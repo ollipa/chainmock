@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "chainmock"
-version = "0.8.2"
+version = "0.9.0"
 description = "Mocking library for Python and Pytest"
 authors = ["Olli Paakkunainen <olli@paakkunainen.fi>"]
 license = "MIT"
@@ -33,7 +33,7 @@ packages = [{ include = "chainmock", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pytest = ">= 6.0.0"
+pytest = ">= 6.2.0"
 typing-extensions = { version = ">=3.10.0", python = "<3.10" }
 
 [tool.poetry.group.dev.dependencies]
