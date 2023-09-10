@@ -7,7 +7,7 @@ from _pytest.runner import CallInfo, ExceptionInfo, Item, TestReport
 from ._api import State
 
 
-@pytest.hookimpl(hookwrapper=True)  # type: ignore
+@pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(
     item: Item,  # pylint: disable=unused-argument
     call: CallInfo[None],
