@@ -68,6 +68,7 @@ good-names = ["fn", "T", "P"]
 disable = [
     "too-few-public-methods",
     "too-many-public-methods",
+    "too-many-arguments",
     "duplicate-code",
 ]
 
