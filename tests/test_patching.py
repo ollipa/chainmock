@@ -60,7 +60,7 @@ class First:
         return Second()
 
 
-class TestPatching:
+class PatchingTestCase:
     def test_patching_should_cache_asserts(self) -> None:
         assert1 = mocker("tests.test_patching.PatchClass").mock("instance_method")
         assert2 = mocker("tests.test_patching.PatchClass").mock("instance_method")

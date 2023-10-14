@@ -11,7 +11,7 @@ from .common import SomeClass
 from .utils import assert_raises
 
 
-class TestAsyncMocking:
+class AsyncMockingTestCase:
     async def test_mock_async_function_return_value(self) -> None:
         mocker(common).mock("some_async_function").return_value("async_mocked")
         assert await common.some_async_function("foo") == "async_mocked"

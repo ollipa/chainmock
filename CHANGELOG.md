@@ -14,6 +14,10 @@ Types of changes:
 
 ## Unreleased
 
+### Added
+
+- Add `unittest` integration.
+
 ### Removed
 
 - Drop support for pytest v6.0 and v6.1.

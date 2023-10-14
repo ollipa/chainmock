@@ -1,9 +1,8 @@
 """Test mocking functionality."""
 # pylint: disable=missing-docstring
+import re
 import sys
 from typing import Type
-
-import pytest
 
 from chainmock import mocker
 from chainmock._api import State
@@ -14,7 +13,7 @@ from .common import DerivedClass, Proxy, SomeClass
 from .utils import assert_raises
 
 
-class TestMocking:
+class MockingTestCase:
     def test_mock_should_cache_asserts(self) -> None:
         assert1 = mocker(SomeClass).mock("instance_method")
         assert2 = mocker(SomeClass).mock("instance_method")
@@ -905,17 +904,15 @@ class TestMocking:
         State.teardown()
         assert instance() == "called"
 
-    @pytest.mark.parametrize(
-        "method_name", ["not_awaited", "awaited_once", "awaited", "awaited_twice"]
-    )
-    def test_mock_call_async_assert_with_non_async_method(self, method_name: str) -> None:
-        mocked = mocker(SomeClass).mock("instance_method")
-        with assert_raises(
-            AttributeError,
-            f"MagicMock does not have '{method_name}' method. "
-            "You can use 'force_async' parameter to force the mock to be an AsyncMock.",
-        ):
-            getattr(mocked, method_name)()
+    def test_mock_call_async_assert_with_non_async_method(self) -> None:
+        for method_name in ["not_awaited", "awaited_once", "awaited", "awaited_twice"]:
+            mocked = mocker(SomeClass).mock("instance_method")
+            with assert_raises(
+                AttributeError,
+                f"MagicMock does not have '{method_name}' method. "
+                "You can use 'force_async' parameter to force the mock to be an AsyncMock.",
+            ):
+                getattr(mocked, method_name)()
 
     def test_mock_builtin_function(self) -> None:
         mocker(sys.stdout).mock("write").return_value(123).called_once()
@@ -927,8 +924,12 @@ class TestMocking:
         sys.stdout.write("bar")
         with assert_raises(
             AssertionError,
-            "Expected 'EncodedFile.write' to have been called once. Called twice.\n"
-            "Calls: [call('foo'), call('bar')].",
+            re.compile(
+                # Pytest wraps TextIoWrapper with EncodedFile
+                r"Expected '(EncodedFile|TextIOWrapper).write' to have been called once. "
+                r"Called twice.\n"
+                r"Calls: \[call\('foo'\), call\('bar'\)\]."
+            ),
         ):
             State.teardown()
 

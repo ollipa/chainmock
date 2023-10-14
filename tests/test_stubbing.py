@@ -6,7 +6,7 @@ from .common import SomeClass
 from .utils import assert_raises
 
 
-class TestStubbing:
+class StubbingTestCase:
     def test_stubbing(self) -> None:
         stub = mocker().mock("method").called_once_with("foo").return_value("stubbed").self()
         assert stub.method("foo") == "stubbed"  # type: ignore

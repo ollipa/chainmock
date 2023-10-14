@@ -8,7 +8,7 @@ from .common import SomeClass
 from .utils import assert_raises
 
 
-class TestSpying:
+class AsyncSpyingTestCase:
     async def test_async_spy_function_called_once(self) -> None:
         mocker(common).spy("some_async_function").called_once()
         assert await common.some_async_function("foo") == "foo"

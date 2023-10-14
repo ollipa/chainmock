@@ -1,4 +1,4 @@
-"""Test examples in docstrings."""
+"""Test docstring integration and examples in docstrings."""
 # pylint: disable=missing-docstring
 import asyncio
 import doctest
@@ -90,8 +90,10 @@ if __name__ == "__main__":
         },
         optionflags=doctest.ELLIPSIS,
     )
+    test_count = results1.attempted + results2.attempted
+    failed_count = results1.failed + results2.failed
     if results1.failed or results2.failed:
-        print("Doctests FAILED")
+        print(f"Doctests FAILED (tests={test_count}, failed={failed_count})\n")
         sys.exit(1)
-    print("Doctests successful")
+    print(f"Doctests successful (tests={test_count}, failed={failed_count})\n")
     sys.exit(0)

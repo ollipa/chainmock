@@ -1,9 +1,13 @@
-"""Test pytest plugin."""
+"""Test pytest integration."""
 from typing import Any
 
+from tests import DefaultTestCase
 
-# Pytester available only in Pytest>=6.2
-# testdir: Pytest.Pytester
+
+class TestPytest(DefaultTestCase):
+    """Tests for unittest integration."""
+
+
 def test_teardown_on_chainmock_success(testdir: Any) -> None:
     """Test that mocks are teared down after a successful test."""
     testdir.makepyfile(
@@ -29,7 +33,7 @@ def test_teardown_on_chainmock_success(testdir: Any) -> None:
 
 
 def test_teardown_on_chainmock_failure(testdir: Any) -> None:
-    """Test that mocks are teared down after a chainmock validations fail."""
+    """Test that mocks are teared down after chainmock validations fail."""
     testdir.makepyfile(
         """
         from chainmock import mocker
