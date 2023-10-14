@@ -7,7 +7,7 @@ from chainmock._api import Assert, Mock, State, mocker
 from .utils import assert_raises
 
 
-class TestChainmock:
+class ChainmockTestCase:
     def test_return_self_when_called(self) -> None:
         stub = mocker()
         assert stub() is stub

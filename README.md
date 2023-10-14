@@ -17,12 +17,12 @@
 
 <hr>
 
-Mocking library for Python and Pytest.
+Mocking library for Python.
 
-Chainmock is a wrapper for Python unittest unit testing library. It provides an
-alternative syntax to create mocks and assertions with some additional features
-to make testing faster and more straightforward. The syntax works especially
-well with pytest fixtures.
+Chainmock is a wrapper for mocks in Python unittest unit testing library. It
+provides an alternative syntax to create mocks and assertions with some
+additional features to make testing faster and more straightforward. The syntax
+works especially well with pytest fixtures.
 
 **Documentation**: https://chainmock.readthedocs.io/
 
@@ -37,7 +37,7 @@ pip install chainmock
 ## Features
 
 Chainmock supports all the same features that Python standard library unittest
-supports and adds some convenient extra functionality.
+mocks support and adds some convenient extra functionality.
 
 - **Mocking**: Create _mocks_ and assert call counts and arguments or replace
   return values.
@@ -51,6 +51,7 @@ supports and adds some convenient extra functionality.
 - **Fully type annotated**: The whole codebase is fully type annotated so
   Chainmock works well with static analysis tools and editor autocomplete.
 - Works with **Python 3.8+ and PyPy3**.
+- Supports `pytest`, `unittest`, and `doctest` test runners.
 
 ## Examples
 
