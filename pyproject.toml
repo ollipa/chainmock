@@ -33,7 +33,6 @@ packages = [{ include = "chainmock", from = "src" }]
 
 [tool.poetry.dependencies]
 python = "^3.8"
-pytest = ">= 6.2.0"
 typing-extensions = { version = ">=3.10.0", python = "<3.10" }
 
 [tool.poetry.group.dev.dependencies]
@@ -48,6 +47,7 @@ tox = "*"
 mkdocs-material = "*"
 markdown-include = "*"
 mkdocstrings = { extras = ["python-legacy"], version = "*" }
+pytest = ">= 6.2.0"
 
 [tool.poetry.plugins.pytest11]
 chainmock = "chainmock._pytest_plugin"

@@ -18,6 +18,11 @@ Types of changes:
 
 - Add `unittest` integration.
 
+### Changed
+
+- Remove `pytest` from dependencies. Chainmock now works also with `unittest`
+  so `pytest` is not a required dependency anymore.
+
 ### Removed
 
 - Drop support for pytest v6.0 and v6.1.
