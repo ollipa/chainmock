@@ -1,19 +1,12 @@
----
-name: Pull Request
-
-about: Submit a pull request to improve this project.
-
----
-
 **Description**
 
 A brief summary of the changes made in this pull request.
 
-**Related Issue**
+**Related issue**
 
 Closes # (if applicable, replace with the issue number this PR addresses)
 
-**Changes Made**
+**Changes made**
 
 List the high-level changes made in this pull request.
 
