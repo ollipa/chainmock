@@ -26,21 +26,29 @@ extra_css:
 repo_name: chainmock
 repo_url: https://github.com/ollipa/chainmock
 edit_uri: ""
+watch:
+  - README.md
+  - CONTRIBUTING.md
+  - CHANGELOG.md
 
 nav:
-- API reference: index.md
+  - Overview: index.md
+  - User Guide: user_guide.md
+  - Contributing: contributing.md
+  - Changelog: changelog.md
+  - API reference: api_reference.md
 
 plugins:
-- search
-- mkdocstrings:
-    handlers:
-      python:
-        options:
-          filters:
-            - "!^_"  # exlude all members starting with _
-          show_source: false
-          show_root_heading: true
-          show_root_full_path: false
+  - search
+  - mkdocstrings:
+      handlers:
+        python:
+          options:
+            filters:
+              - "!^_" # exlude all members starting with _
+            show_source: false
+            show_root_heading: true
+            show_root_full_path: false
 
 markdown_extensions:
   - admonition

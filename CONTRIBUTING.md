@@ -103,6 +103,6 @@ make docs-requirements
 
 ## License
 
-By contributing to this project, you agree to the [License](LICENSE) of this repository.
+By contributing to this project, you agree to the [License](https://github.com/ollipa/chainmock/blob/main/LICENSE) of this repository.
 
 Thank you for your contributions!

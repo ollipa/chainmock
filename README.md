@@ -1,6 +1,8 @@
 <p align="center">
-  <img alt="chainmock" src="https://github.com/ollipa/chainmock/assets/25169984/ad243761-b2ed-4aff-89e7-699e2b4a7e6d.png">
+  <img alt="chainmock" src="https://github.com/ollipa/chainmock/assets/25169984/ad243761-b2ed-4aff-89e7-699e2b4a7e6d">
 </p>
+
+<p align="center"><strong>Chainmock</strong> <em>- Mocking library for Python and Pytest.</em></p>
 
 <p align="center">
 <a href="https://pypi.org/project/chainmock/">
@@ -19,14 +21,15 @@
 
 <hr>
 
-Mocking library for Python.
+<p align="center">
+<a href="https://chainmock.readthedocs.io/">
+  <b>Documentation</b>
+</a>
+</p>
 
-Chainmock is a wrapper for mocks in Python unittest unit testing library. It
-provides an alternative syntax to create mocks and assertions with some
-additional features to make testing faster and more straightforward. The syntax
-works especially well with pytest fixtures.
+<hr>
 
-**Documentation**: https://chainmock.readthedocs.io/
+Chainmock is a mocking Library for Python and pytest. Under the hood it uses Python standard library mocks providing an alternative syntax to create mocks and assertions. Chainmock also comes with some additional features to make testing faster and more straightforward. The syntax works especially well with pytest fixtures.
 
 ## Installation
 
@@ -109,7 +112,7 @@ stub = mocker(my_property=10)
 assert stub.my_property == 10
 ```
 
-For more details and examples, see the documentation.
+For more details and examples, see the [API reference](https://chainmock.readthedocs.io/en/latest/api_reference/).
 
 ## Similar projects
 

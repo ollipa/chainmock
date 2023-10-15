@@ -5,7 +5,7 @@ from chainmock import mock
 from .common import SomeClass
 
 
-class ModuleMockingTestCase:
+class MockModuleTestCase:
     def test_anyof(self) -> None:
         ANY_STR = mock.AnyOf(str)  # pylint: disable=invalid-name
         assert ANY_STR == "foo"
