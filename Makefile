@@ -21,69 +21,69 @@ install:
 ifeq (${VIRTUAL_ENV},)
 	@printf 'Skipping install. VIRTUAL_ENV is not set.\n'
 else
-	pip install --quiet .
+	poetry run pip install --quiet .
 endif
 
 .PHONY: coverage
 coverage:
 # Remove any leftover coverage files before running tests
-	@coverage combine --quiet > /dev/null || true
+	@poetry run coverage combine --quiet > /dev/null || true
 
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running doctest$(off)\n'
 	@printf '*****************\n'
-	coverage run --parallel-mode --source chainmock tests/integrations/i_doctest.py
+	poetry run coverage run --parallel-mode --source chainmock tests/integrations/i_doctest.py
 
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running unittest$(off)\n'
 	@printf '*****************\n'
-	PYTHONPATH=./ coverage run --parallel-mode --source chainmock tests/integrations/i_unittest.py 2> /dev/null
+	PYTHONPATH=./ poetry run coverage run --parallel-mode --source chainmock tests/integrations/i_unittest.py 2> /dev/null
 
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running pytest$(off)\n'
 	@printf '*****************\n'
-	coverage run --parallel-mode --source chainmock -m pytest tests/integrations/i_pytest.py
+	poetry run coverage run --parallel-mode --source chainmock -m pytest tests/integrations/i_pytest.py
 
 	@printf '\n\n*****************\n'
 	@printf '$(color)Test coverage$(off)\n'
 	@printf '*****************\n'
-	@coverage combine --quiet
-	coverage report --fail-under=100 --show-missing
+	@poetry run coverage combine --quiet
+	poetry run coverage report --fail-under=100 --show-missing
 
 .PHONY: mypy
 mypy:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running mypy$(off)\n'
 	@printf '*****************\n'
-	mypy ${TARGETS}
+	poetry run mypy ${TARGETS}
 
 .PHONY: isort
 isort:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running isort$(off)\n'
 	@printf '*****************\n'
-	isort --check-only ${TARGETS}
+	poetry run isort --check-only ${TARGETS}
 
 .PHONY: black
 black:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running black$(off)\n'
 	@printf '*****************\n'
-	black --check ${TARGETS}
+	poetry run black --check ${TARGETS}
 
 .PHONY: pylint
 pylint:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running pylint$(off)\n'
 	@printf '*****************\n'
-	pylint ${TARGETS}
+	poetry run pylint ${TARGETS}
 
 .PHONY: docs
 docs:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Test building docs$(off)\n'
 	@printf '*****************\n'
-	mkdocs build --strict
+	poetry run mkdocs build --strict
 
 .PHONY: docs-requirements
 docs-requirements:
