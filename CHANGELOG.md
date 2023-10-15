@@ -31,6 +31,10 @@ Types of changes:
 
 - Add pypy3.10 to tox test run.
 
+### Documentation
+
+- Add overview, user guide, contributing and changelog sections to documentation.
+
 ## Release 0.8.2
 
 ### Changed

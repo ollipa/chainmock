@@ -1,7 +1,10 @@
-# API reference
+# Overview
 
-::: chainmock.mocker
+<style>
+  /* hide page title */
+  #overview {
+    display: none;
+  }
+</style>
 
-::: chainmock.Mock
-
-::: chainmock.Assert
+{!../README.md!}
