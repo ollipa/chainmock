@@ -1,10 +1,9 @@
 ---
 name: Bug report
 about: Create a bug report to help us improve.
-title: ''
+title: ""
 labels: bug
-assignees: ''
-
+assignees: ""
 ---
 
 **Describe the bug**
@@ -17,8 +16,10 @@ Steps to reproduce the behavior.
 A clear and concise description of what you expected to happen.
 
 **Desktop (please complete the following information):**
- - Python version:
- - Chainmock version:
+
+- Python version:
+- Pytest version:
+- Chainmock version:
 
 **Additional context**
 Add any other context about the problem here.

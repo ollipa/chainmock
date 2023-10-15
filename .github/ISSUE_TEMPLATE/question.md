@@ -1,10 +1,9 @@
 ---
 name: Question
 about: Ask a question or seek help with using the project.
-title: ''
+title: ""
 labels: question
-assignees: ''
-
+assignees: ""
 ---
 
 **Describe your question or problem**
