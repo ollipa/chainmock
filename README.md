@@ -1,4 +1,6 @@
-<h1 align="center">Chainmock</h1>
+<p align="center">
+  <img alt="chainmock" src="https://github.com/ollipa/chainmock/assets/25169984/ad243761-b2ed-4aff-89e7-699e2b4a7e6d.png">
+</p>
 
 <p align="center">
 <a href="https://pypi.org/project/chainmock/">
