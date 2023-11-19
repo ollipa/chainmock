@@ -95,11 +95,7 @@ mkdocs serve
 
 For more details see the [Mkdocs documentation](https://www.mkdocs.org/user-guide/) and [Material for Mkdocs documentation](https://squidfunk.github.io/mkdocs-material/).
 
-The documentation is hosted in [Read the Docs](https://about.readthedocs.com/) and is automatically built and deployed when a pull request is merged. Documentation dependencies that Read the Docs installs are defined in `docs/requirements.txt`. To regenerate the dependency file, run the following command:
-
-```bash
-make docs-requirements
-```
+The documentation is hosted in [Read the Docs](https://about.readthedocs.com/) and is automatically built and deployed when a pull request is merged.
 
 ## License
 
