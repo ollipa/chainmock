@@ -14,7 +14,15 @@ Types of changes:
 
 ## Unreleased
 
--
+### Changed
+
+- Patch `TextResult` class instead of `TextTestResult` class in `unittest`
+  integration.
+
+### Infrastructure
+
+- Add CI testing for Python 3.13.
+- Update Readthedocs configuration.
 
 ## Release 0.9.0
 
