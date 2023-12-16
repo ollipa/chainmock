@@ -5,11 +5,11 @@ import unittest
 
 from ._api import State
 
-original_stop_test = unittest.TextTestResult.stopTest
+original_stop_test = unittest.TestResult.stopTest
 
 
 @functools.wraps(original_stop_test)
-def new_stop_test(self: unittest.TextTestResult, test: unittest.TestCase) -> None:
+def new_stop_test(self: unittest.TestResult, test: unittest.TestCase) -> None:
     """Run chainmock teardown between unittest tests."""
     State.reset_mocks()
     if self.failures and self.failures[-1][0] is test:
@@ -28,4 +28,4 @@ def new_stop_test(self: unittest.TextTestResult, test: unittest.TestCase) -> Non
     return original_stop_test(self, test)
 
 
-unittest.TextTestResult.stopTest = new_stop_test  # type: ignore
+unittest.TestResult.stopTest = new_stop_test  # type: ignore
