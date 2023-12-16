@@ -80,7 +80,7 @@ class Assert:
         and chainmock is that unittest mock validates the assertions right
         away whereas chainmock verifies the assertions after the test execution
         during test teardown. Therefore, unittest mock allows making assertions
-        before the test execution. If you are not sure what this means, see the
+        before the test teardown. If you are not sure what this means, see the
         examples section.
 
         Examples:
