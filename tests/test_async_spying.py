@@ -1,5 +1,7 @@
 """Test spying functionality."""
 # pylint: disable=missing-docstring
+import re
+
 from chainmock import mocker
 from chainmock._api import State
 
@@ -34,9 +36,11 @@ class AsyncSpyingTestCase:
         assert await common.some_async_function("bar") == "bar"
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: tests.common.some_async_function('foo')\n"
-            "Actual: tests.common.some_async_function('bar')",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: tests.common.some_async_function\('foo'\)\n"
+                r"\s*Actual: tests.common.some_async_function\('bar'\)"
+            ),
         ):
             State.teardown()
 
@@ -65,9 +69,11 @@ class AsyncSpyingTestCase:
         assert await SomeClass().async_instance_method_with_args(2) == 2
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.async_instance_method_with_args(1)\n"
-            "Actual: SomeClass.async_instance_method_with_args(2)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.async_instance_method_with_args\(1\)\n"
+                r"\s*Actual: SomeClass.async_instance_method_with_args\(2\)"
+            ),
         ):
             State.teardown()
 
@@ -100,9 +106,11 @@ class AsyncSpyingTestCase:
         assert await instance.async_instance_method_with_args(2) == 2
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.async_instance_method_with_args(1)\n"
-            "Actual: SomeClass.async_instance_method_with_args(2)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.async_instance_method_with_args\(1\)\n"
+                r"\s*Actual: SomeClass.async_instance_method_with_args\(2\)"
+            ),
         ):
             State.teardown()
 
@@ -131,9 +139,11 @@ class AsyncSpyingTestCase:
         assert await SomeClass.async_class_method_with_args(3) == 3
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.async_class_method_with_args(2)\n"
-            "Actual: SomeClass.async_class_method_with_args(3)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.async_class_method_with_args\(2\)\n"
+                r"\s*Actual: SomeClass.async_class_method_with_args\(3\)"
+            ),
         ):
             State.teardown()
 
@@ -178,9 +188,11 @@ class AsyncSpyingTestCase:
         assert await instance.async_class_method_with_args(3) == 3
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.async_class_method_with_args(2)\n"
-            "Actual: SomeClass.async_class_method_with_args(3)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.async_class_method_with_args\(2\)\n"
+                r"\s*Actual: SomeClass.async_class_method_with_args\(3\)"
+            ),
         ):
             State.teardown()
 
@@ -209,9 +221,11 @@ class AsyncSpyingTestCase:
         assert await SomeClass.async_static_method_with_args(4) == 4
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.async_static_method_with_args(3)\n"
-            "Actual: SomeClass.async_static_method_with_args(4)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.async_static_method_with_args\(3\)\n"
+                r"\s*Actual: SomeClass.async_static_method_with_args\(4\)"
+            ),
         ):
             State.teardown()
 
@@ -256,8 +270,10 @@ class AsyncSpyingTestCase:
         assert await instance.async_static_method_with_args(4) == 4
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.async_static_method_with_args(3)\n"
-            "Actual: SomeClass.async_static_method_with_args(4)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.async_static_method_with_args\(3\)\n"
+                r"\s*Actual: SomeClass.async_static_method_with_args\(4\)"
+            ),
         ):
             State.teardown()

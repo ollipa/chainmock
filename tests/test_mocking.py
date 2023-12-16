@@ -126,10 +126,10 @@ class MockingTestCase:
         SomeClass().instance_method_with_args(5)
         with assert_raises(
             AssertionError,
-            (
-                "expected call not found.\n"
-                "Expected: SomeClass.instance_method_with_args(10)\n"
-                "Actual: SomeClass.instance_method_with_args(5)"
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.instance_method_with_args\(10\)\n"
+                r"\s*Actual: SomeClass.instance_method_with_args\(5\)"
             ),
         ):
             State.teardown()
@@ -327,10 +327,10 @@ class MockingTestCase:
         FooClass().method("foo", arg2=10)
         with assert_raises(
             AssertionError,
-            (
-                "expected call not found.\n"
-                "Expected: FooClass.method('foo', arg2=5)\n"
-                "Actual: FooClass.method('foo', arg2=10)"
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: FooClass.method\('foo', arg2=5\)\n"
+                r"\s*Actual: FooClass.method\('foo', arg2=10\)"
             ),
         ):
             State.teardown()
@@ -578,8 +578,11 @@ class MockingTestCase:
         FooClass().method("baz", arg2=3)
         with assert_raises(
             AssertionError,
-            "Calls not found.\nExpected: [call('bar', arg2=2)]\n"
-            "Actual: [call('foo', arg2=1), call('baz', arg2=3)]",
+            re.compile(
+                r"Calls not found.\n"
+                r"Expected: \[call\('bar', arg2=2\)\]\n"
+                r"\s*Actual: \[call\('foo', arg2=1\), call\('baz', arg2=3\)\]"
+            ),
         ):
             State.teardown()
 
@@ -943,6 +946,10 @@ class MockingTestCase:
         sys.exit(1)
         with assert_raises(
             AssertionError,
-            "expected call not found.\nExpected: sys.exit(123)\nActual: sys.exit(1)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: sys.exit\(123\)\n"
+                r"\s*Actual: sys.exit\(1\)"
+            ),
         ):
             State.teardown()

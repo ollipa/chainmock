@@ -1,5 +1,6 @@
 """Test patching functionality."""
 # pylint: disable=missing-docstring
+import re
 from typing import Type
 
 from chainmock import mocker
@@ -162,9 +163,10 @@ class PatchingTestCase:
         assert PatchClass().instance_method_with_args(2) == 2
         with assert_raises(
             AssertionError,
-            (
-                "expected call not found.\nExpected: instance_method_with_args(1)\n"
-                "Actual: instance_method_with_args(2)"
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: instance_method_with_args\(1\)\n"
+                r"\s*Actual: instance_method_with_args\(2\)"
             ),
         ):
             State.teardown()

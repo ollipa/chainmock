@@ -1,5 +1,7 @@
 """Test stubbing functionality."""
 # pylint: disable=missing-docstring
+import re
+
 from chainmock._api import Mock, State, mocker
 
 from .common import SomeClass
@@ -16,7 +18,11 @@ class StubbingTestCase:
         assert stub.method("bar") == "stubbed"  # type: ignore
         with assert_raises(
             AssertionError,
-            "expected call not found.\nExpected: Stub.method('foo')\nActual: Stub.method('bar')",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: Stub.method\('foo'\)\n"
+                r"\s*Actual: Stub.method\('bar'\)"
+            ),
         ):
             State.teardown()
 

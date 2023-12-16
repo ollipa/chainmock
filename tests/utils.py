@@ -29,7 +29,7 @@ def assert_raises(
         fail = False
         if isinstance(match, re.Pattern):
             fail = not match.search(str(raised_exception))
-            match = match.pattern
+            match = match.pattern.replace("\\n", "\n")
         else:
             fail = str(raised_exception) != str(match)
         if fail:

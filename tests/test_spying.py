@@ -57,9 +57,11 @@ class SpyingTestCase:
         assert common.some_function("bar") == "bar"
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: tests.common.some_function('foo')\n"
-            "Actual: tests.common.some_function('bar')",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: tests.common.some_function\('foo'\)\n"
+                r"\s*Actual: tests.common.some_function\('bar'\)"
+            ),
         ):
             State.teardown()
 
@@ -88,9 +90,11 @@ class SpyingTestCase:
         assert SomeClass().instance_method_with_args(2) == 2
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.instance_method_with_args(1)\n"
-            "Actual: SomeClass.instance_method_with_args(2)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.instance_method_with_args\(1\)\n"
+                r"\s*Actual: SomeClass.instance_method_with_args\(2\)"
+            ),
         ):
             State.teardown()
 
@@ -123,9 +127,11 @@ class SpyingTestCase:
         assert instance.instance_method_with_args(2) == 2
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.instance_method_with_args(1)\n"
-            "Actual: SomeClass.instance_method_with_args(2)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.instance_method_with_args\(1\)\n"
+                r"\s*Actual: SomeClass.instance_method_with_args\(2\)"
+            ),
         ):
             State.teardown()
 
@@ -154,9 +160,11 @@ class SpyingTestCase:
         assert SomeClass.class_method_with_args(3) == 3
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.class_method_with_args(2)\n"
-            "Actual: SomeClass.class_method_with_args(3)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.class_method_with_args\(2\)\n"
+                r"\s*Actual: SomeClass.class_method_with_args\(3\)"
+            ),
         ):
             State.teardown()
 
@@ -201,9 +209,11 @@ class SpyingTestCase:
         assert instance.class_method_with_args(3) == 3
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.class_method_with_args(2)\n"
-            "Actual: SomeClass.class_method_with_args(3)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.class_method_with_args\(2\)\n"
+                r"\s*Actual: SomeClass.class_method_with_args\(3\)"
+            ),
         ):
             State.teardown()
 
@@ -232,9 +242,11 @@ class SpyingTestCase:
         assert SomeClass.static_method_with_args(4) == 4
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.static_method_with_args(3)\n"
-            "Actual: SomeClass.static_method_with_args(4)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.static_method_with_args\(3\)\n"
+                r"\s*Actual: SomeClass.static_method_with_args\(4\)"
+            ),
         ):
             State.teardown()
 
@@ -279,9 +291,11 @@ class SpyingTestCase:
         assert instance.static_method_with_args(4) == 4
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: SomeClass.static_method_with_args(3)\n"
-            "Actual: SomeClass.static_method_with_args(4)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: SomeClass.static_method_with_args\(3\)\n"
+                r"\s*Actual: SomeClass.static_method_with_args\(4\)"
+            ),
         ):
             State.teardown()
 
@@ -301,9 +315,11 @@ class SpyingTestCase:
             instance.method(2, 1, "foo")  # type: ignore
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: FooClass.method(1, 'foo')\n"
-            "Actual: FooClass.method(2, 1, 'foo')",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: FooClass.method\(1, 'foo'\)\n"
+                r"\s*Actual: FooClass.method\(2, 1, 'foo'\)"
+            ),
         ):
             State.teardown()
 
@@ -332,9 +348,11 @@ class SpyingTestCase:
         assert DerivedClass().instance_method_with_args(2) == 2
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: DerivedClass.instance_method_with_args(1)\n"
-            "Actual: DerivedClass.instance_method_with_args(2)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: DerivedClass.instance_method_with_args\(1\)\n"
+                r"\s*Actual: DerivedClass.instance_method_with_args\(2\)"
+            ),
         ):
             State.teardown()
 
@@ -367,9 +385,11 @@ class SpyingTestCase:
         assert instance.instance_method_with_args(2) == 2
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: DerivedClass.instance_method_with_args(1)\n"
-            "Actual: DerivedClass.instance_method_with_args(2)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: DerivedClass.instance_method_with_args\(1\)\n"
+                r"\s*Actual: DerivedClass.instance_method_with_args\(2\)"
+            ),
         ):
             State.teardown()
 
@@ -398,9 +418,11 @@ class SpyingTestCase:
         assert DerivedClass.class_method_with_args(3) == 3
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: DerivedClass.class_method_with_args(2)\n"
-            "Actual: DerivedClass.class_method_with_args(3)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: DerivedClass.class_method_with_args\(2\)\n"
+                r"\s*Actual: DerivedClass.class_method_with_args\(3\)"
+            ),
         ):
             State.teardown()
 
@@ -445,9 +467,11 @@ class SpyingTestCase:
         assert instance.class_method_with_args(3) == 3
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: DerivedClass.class_method_with_args(2)\n"
-            "Actual: DerivedClass.class_method_with_args(3)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: DerivedClass.class_method_with_args\(2\)\n"
+                r"\s*Actual: DerivedClass.class_method_with_args\(3\)"
+            ),
         ):
             State.teardown()
 
@@ -476,9 +500,11 @@ class SpyingTestCase:
         assert DerivedClass.static_method_with_args(4) == 4
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: DerivedClass.static_method_with_args(3)\n"
-            "Actual: DerivedClass.static_method_with_args(4)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: DerivedClass.static_method_with_args\(3\)\n"
+                r"\s*Actual: DerivedClass.static_method_with_args\(4\)"
+            ),
         ):
             State.teardown()
 
@@ -523,9 +549,11 @@ class SpyingTestCase:
         assert instance.static_method_with_args(4) == 4
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: DerivedClass.static_method_with_args(3)\n"
-            "Actual: DerivedClass.static_method_with_args(4)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: DerivedClass.static_method_with_args\(3\)\n"
+                r"\s*Actual: DerivedClass.static_method_with_args\(4\)"
+            ),
         ):
             State.teardown()
 
@@ -653,9 +681,11 @@ class SpyingTestCase:
         FooClass("bar")
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: FooClass.__init__('foo')\n"
-            "Actual: FooClass.__init__('bar')",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: FooClass.__init__\('foo'\)\n"
+                r"\s*Actual: FooClass.__init__\('bar'\)"
+            ),
         ):
             State.teardown()
 
@@ -674,9 +704,11 @@ class SpyingTestCase:
         random.randint(1, 3)
         with assert_raises(
             AssertionError,
-            "expected call not found.\n"
-            "Expected: random.randint(1, 2)\n"
-            "Actual: random.randint(1, 3)",
+            re.compile(
+                r"expected call not found.\n"
+                r"Expected: random.randint\(1, 2\)\n"
+                r"\s*Actual: random.randint\(1, 3\)"
+            ),
         ):
             State.teardown()
 

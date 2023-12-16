@@ -1,5 +1,6 @@
 """Test async mocking functionality."""
 # pylint: disable=missing-docstring
+import re
 from typing import Type
 
 from chainmock import mocker
@@ -53,10 +54,10 @@ class AsyncMockingTestCase:
         await FooClass().method("foo", arg2=10)
         with assert_raises(
             AssertionError,
-            (
-                "expected await not found.\n"
-                "Expected: FooClass.method('foo', arg2=5)\n"
-                "Actual: FooClass.method('foo', arg2=10)"
+            re.compile(
+                r"expected await not found.\n"
+                r"Expected: FooClass.method\('foo', arg2=5\)\n"
+                r"\s*Actual: FooClass.method\('foo', arg2=10\)"
             ),
         ):
             State.teardown()
@@ -74,10 +75,10 @@ class AsyncMockingTestCase:
         await FooClass().method("bar", arg2=5)
         with assert_raises(
             AssertionError,
-            (
-                "expected await not found.\n"
-                "Expected: FooClass.method('foo', arg2=5)\n"
-                "Actual: FooClass.method('bar', arg2=5)"
+            re.compile(
+                r"expected await not found.\n"
+                r"Expected: FooClass.method\('foo', arg2=5\)\n"
+                r"\s*Actual: FooClass.method\('bar', arg2=5\)"
             ),
         ):
             State.teardown()
