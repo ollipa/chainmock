@@ -14,6 +14,10 @@ Types of changes:
 
 ## Unreleased
 
+### Added
+
+- Add `Mock.get_mock` method.
+
 ### Changed
 
 - Patch `TextResult` class instead of `TextTestResult` class in `unittest`
