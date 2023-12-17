@@ -1322,6 +1322,28 @@ class Mock:
         """
         return self
 
+    def get_mock(self) -> AsyncAndSyncMock:
+        """Return the unittest mock associated with this Mock object.
+
+        Normally, there should not be a need call this function, but it can be
+        used as an escape hatch when something is not possible with `chainmock`
+        and you need to access the underlying standard library unittest mock
+        object directly.
+
+        Examples:
+            Mocking builtin `open` function:
+
+            >>> mock_file = mocker()
+            >>> mock_file.mock("read").return_value("mocked").called_once()
+            <chainmock._api.Assert object at ...>
+            >>> mock_open = mocker("builtins.open").get_mock()
+            >>> mock_open.return_value.__enter__ = mock_file
+            >>> with open("file_name") as file:
+            ...    file.read()
+            'mocked'
+        """
+        return self.__mock
+
     def spy(self, name: str) -> Assert:
         """Spy an attribute.
 
@@ -1526,7 +1548,7 @@ class Mock:
         return assertion
 
     def __remove_name_mangling(self, name: str) -> str:
-        """Get method the real method name if uses name mangling."""
+        """Get the real method name if it uses name mangling."""
         if inspect.ismodule(self.__target) or name.endswith("__") or not name.startswith("__"):
             return name
         if inspect.isclass(self.__target):

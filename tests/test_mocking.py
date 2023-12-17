@@ -1,8 +1,9 @@
 """Test mocking functionality."""
 # pylint: disable=missing-docstring
+import builtins
 import re
 import sys
-from typing import Type
+from typing import Any, Type
 
 from chainmock import mocker
 from chainmock._api import State
@@ -935,6 +936,38 @@ class MockingTestCase:
             ),
         ):
             State.teardown()
+
+    def test_mock_context_manager(self) -> None:
+        class FooContextManager:
+            def __enter__(self) -> str:
+                return "enter"
+
+            def __exit__(self, exc_type: Any, exc_value: Any, traceback: Any) -> None:
+                pass
+
+        mocker(FooContextManager).mock("__enter__").return_value("mocked").called_once()
+        with FooContextManager() as value:
+            assert value == "mocked"
+        State.teardown()
+        with FooContextManager() as value:
+            assert value == "enter"
+
+    def test_mock_builtin_open(self) -> None:
+        mock_file = mocker()
+        mock_file.mock("read").return_value("mocked1").called_once()
+        mocker(builtins).mock("open").return_value(mock_file)
+        # pylint: disable=consider-using-with
+        assert open("foo", encoding="utf8").read() == "mocked1"
+
+        State.teardown()
+
+        mock_file = mocker()
+        mock_file.mock("read").return_value("mocked2").called_once()
+        mock_open = mocker("builtins.open").get_mock()
+        mock_open.return_value.__enter__ = mock_file
+
+        with open("file_name", encoding="utf8") as file:
+            assert file.read() == "mocked2"
 
     def test_mock_builtin_called_once_with(self) -> None:
         # pylint: disable=unreachable
