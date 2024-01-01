@@ -18,6 +18,8 @@ else:
 AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
 AsyncAndSyncMock = Union[umock.AsyncMock, umock.MagicMock]
 
+_DEFAULT_CLASS_ATTRIBUTES = dir(type("dummy", (object,), {}))
+
 T = TypeVar("T")
 P = ParamSpec("P")
 
@@ -1704,6 +1706,7 @@ class Mock:
                 not parts
                 and force_property
                 or (original is not None and isinstance(original, property))
+                or self.__is_class_attribute(name, original)
             ):
                 new_callable = umock.PropertyMock
             elif not parts and force_async:
@@ -1729,6 +1732,20 @@ class Mock:
                 force_async=force_async,
             )
         return assertion
+
+    def __is_class_attribute(
+        self,
+        name: str,
+        original: Optional[Any],
+    ) -> bool:
+        if callable(original) or not inspect.isclass(self.__target):
+            return False
+        class_attributes = (
+            attr[0]
+            for attr in inspect.getmembers(self.__target)
+            if attr[0] not in _DEFAULT_CLASS_ATTRIBUTES
+        )
+        return name in class_attributes
 
     def __format_mock_name(self, name: str) -> str:
         assert self.__target is not None

@@ -986,3 +986,9 @@ class MockingTestCase:
             ),
         ):
             State.teardown()
+
+    def test_mock_class_attribute(self) -> None:
+        mocker(SomeClass).mock("ATTR", force_property=True).return_value("mocked").called_once()
+        assert SomeClass.ATTR == "mocked"
+        State.teardown()
+        assert SomeClass.ATTR == "class_attr"
