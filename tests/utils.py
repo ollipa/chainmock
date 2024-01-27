@@ -1,4 +1,5 @@
 """Utility functions for testing."""
+
 import re
 from contextlib import contextmanager
 from typing import Generator, Pattern, Type, Union

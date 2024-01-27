@@ -1,4 +1,5 @@
 """Chainmock doctest integration."""
+
 import functools
 from doctest import DocTestRunner, TestResults
 from typing import Any

@@ -1,4 +1,5 @@
 """Test stubbing functionality."""
+
 # pylint: disable=missing-docstring
 import re
 

@@ -1,4 +1,5 @@
 """Re-exports from stdlib unittest.mock and extensions to it."""
+
 from typing import Any, Type
 from unittest.mock import (
     ANY,

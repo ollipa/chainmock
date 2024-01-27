@@ -1,4 +1,5 @@
 """Test docstring integration and examples in docstrings."""
+
 # pylint: disable=missing-docstring
 import asyncio
 import doctest

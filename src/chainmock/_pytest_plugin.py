@@ -1,4 +1,5 @@
 """Pytest plugin."""
+
 from typing import Generator, Optional
 
 import pytest

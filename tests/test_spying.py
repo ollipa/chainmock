@@ -1,4 +1,5 @@
 """Test spying functionality."""
+
 # pylint: disable=missing-docstring
 import random
 import re

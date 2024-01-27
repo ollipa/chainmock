@@ -1,4 +1,5 @@
 """Chainmock unittest integration."""
+
 import functools
 import sys
 import unittest

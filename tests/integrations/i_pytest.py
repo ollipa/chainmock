@@ -1,4 +1,5 @@
 """Test pytest integration."""
+
 from typing import Any
 
 from tests import DefaultTestCase

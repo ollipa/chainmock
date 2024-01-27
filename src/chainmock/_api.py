@@ -1,4 +1,5 @@
 """Chainmock API implementation."""
+
 # pylint: disable=too-many-lines
 from __future__ import annotations
 
@@ -1312,9 +1313,9 @@ class Mock:
             patch.start() if patch else umock.MagicMock(spec=spec if spec is not None else target)
         )
         self.__assertions: Dict[str, Assert] = {}
-        self.__object_patches: List[
-            umock._patch[Any]  # pylint: disable=unsubscriptable-object
-        ] = []
+        self.__object_patches: List[umock._patch[Any]] = (  # pylint: disable=unsubscriptable-object
+            []
+        )
         self.__patch_class: bool = patch_class
 
     def __call__(self, *args: Any, **kwargs: Any) -> Mock:

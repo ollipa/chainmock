@@ -1,4 +1,5 @@
 """Common data structures for testing."""
+
 # pylint: disable=missing-docstring
 from typing import Any
 

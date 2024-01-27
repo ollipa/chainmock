@@ -1,4 +1,5 @@
 """Chainmock tests."""
+
 from .test_async_mocking import AsyncMockingTestCase
 from .test_async_spying import AsyncSpyingTestCase
 from .test_chainmock import ChainmockTestCase

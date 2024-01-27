@@ -1,4 +1,5 @@
 """Test mocking functionality."""
+
 # pylint: disable=missing-docstring
 import builtins
 import re

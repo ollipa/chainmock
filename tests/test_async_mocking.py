@@ -1,4 +1,5 @@
 """Test async mocking functionality."""
+
 # pylint: disable=missing-docstring
 import re
 from typing import Type
