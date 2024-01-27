@@ -14,6 +14,10 @@ Types of changes:
 
 ## Unreleased
 
+-
+
+## Release 0.10.0
+
 ### Added
 
 - Add `Mock.get_mock` method.
