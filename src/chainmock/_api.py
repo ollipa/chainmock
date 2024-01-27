@@ -134,7 +134,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         if isinstance(self._attr_mock, umock.NonCallableMagicMock) and self.__patch is not None:
-            # Support mocking module attributes/variables
+            # Support mocking module attributes/variables and instance attributes
             self.__patch.stop()
             self.__patch.new = value
             self.__patch.start()
@@ -1695,8 +1695,10 @@ class Mock:
         force_async: bool,
     ) -> Assert:
         patch: umock._patch[Any]  # pylint: disable=unsubscriptable-object
-        if inspect.ismodule(self.__target) and not callable(original):
-            # Support mocking module attributes/variables
+        if (inspect.ismodule(self.__target) or self.__is_class_instance()) and (
+            original is not None and not callable(original)
+        ):
+            # Support mocking module attributes/variables and instance attributes
             patch = umock.patch.object(self.__target, name, new=None, create=create)
             patch.start()
             self.__object_patches.append(patch)
@@ -1733,6 +1735,9 @@ class Mock:
                 force_async=force_async,
             )
         return assertion
+
+    def __is_class_instance(self) -> bool:
+        return not inspect.isclass(self.__target) and hasattr(self.__target, "__class__")
 
     def __is_class_attribute(
         self,

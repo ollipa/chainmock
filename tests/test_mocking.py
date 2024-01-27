@@ -1,6 +1,6 @@
 """Test mocking functionality."""
 
-# pylint: disable=missing-docstring
+# pylint: disable=missing-docstring,too-many-lines
 import builtins
 import re
 import sys
@@ -782,6 +782,14 @@ class MockingTestCase:
         State.teardown()
         assert FooClass.method() == "foo"  # type: ignore
 
+    def test_mock_instance_attribute(self) -> None:
+        instance = SomeClass()
+        assert instance.attr == "instance_attr"
+        mocker(instance).mock("attr").return_value("mocked")
+        assert instance.attr == "mocked"
+        State.teardown()
+        assert instance.attr == "instance_attr"
+
     def test_mock_runtime_instance_attribute(self) -> None:
         # pylint: disable=attribute-defined-outside-init
         class FooClass:
@@ -989,7 +997,7 @@ class MockingTestCase:
             State.teardown()
 
     def test_mock_class_attribute(self) -> None:
-        mocker(SomeClass).mock("ATTR", force_property=True).return_value("mocked").called_once()
+        mocker(SomeClass).mock("ATTR").return_value("mocked").called_once()
         assert SomeClass.ATTR == "mocked"
         State.teardown()
         assert SomeClass.ATTR == "class_attr"

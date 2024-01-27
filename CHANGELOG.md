@@ -18,6 +18,7 @@ Types of changes:
 
 - Add `Mock.get_mock` method.
 - Add support for mocking class attributes.
+- Add support for mocking instance attributes.
 
 ### Changed
 
