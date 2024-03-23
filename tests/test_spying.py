@@ -726,3 +726,17 @@ class SpyingTestCase:
             "'some_property' is not callable. Only callable objects can be spied.",
         ):
             mocker(SomeClass).spy("some_property")
+
+    def test_spy_with_return_value(self) -> None:
+        with assert_raises(
+            AttributeError,
+            "'return_value' method is not supported when spying. Use it with mocking instead.",
+        ):
+            mocker(SomeClass).spy("instance_method").return_value("foo")
+
+    def test_spy_with_side_effect(self) -> None:
+        with assert_raises(
+            AttributeError,
+            "'side_effect' method is not supported when spying. Use it with mocking instead.",
+        ):
+            mocker(SomeClass).spy("instance_method").side_effect(["foo", "bar"])

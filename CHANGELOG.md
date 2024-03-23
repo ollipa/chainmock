@@ -14,7 +14,10 @@ Types of changes:
 
 ## Unreleased
 
--
+### Changed
+
+- Raise an AttributeError if `return_value` or `side_effect` is called when
+  spying.
 
 ## Release 0.10.0
 

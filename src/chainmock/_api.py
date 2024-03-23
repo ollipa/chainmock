@@ -133,6 +133,10 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
+        if self._kind == "spy":
+            raise AttributeError(
+                "'return_value' method is not supported when spying. Use it with mocking instead."
+            )
         if isinstance(self._attr_mock, umock.NonCallableMagicMock) and self.__patch is not None:
             # Support mocking module attributes/variables and instance attributes
             self.__patch.stop()
@@ -198,6 +202,10 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
+        if self._kind == "spy":
+            raise AttributeError(
+                "'side_effect' method is not supported when spying. Use it with mocking instead."
+            )
         self._attr_mock.side_effect = value
         return self
 
