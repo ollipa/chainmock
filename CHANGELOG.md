@@ -14,18 +14,26 @@ Types of changes:
 
 ## Unreleased
 
+-
+
+## Release 0.11.0
+
 ### Added
 
 - Stubs with spec pass isinstance test with the spec object.
 
 ### Changed
 
-- Raise an AttributeError if `return_value` or `side_effect` is called when
+- Raise an `AttributeError` if `return_value` or `side_effect` is called when
   spying.
 
 ### Fixed
 
 - Fix spec defined as a list of strings fails with `AttributeError`.
+
+### Infrastructure
+
+- Add Pytest 8 to the test matrix.
 
 ## Release 0.10.0
 
