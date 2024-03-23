@@ -566,6 +566,56 @@ class MockingTestCase:
         ):
             State.teardown()
 
+    def test_mock_property_with_match_args(self) -> None:
+        class FooClass:
+            @property
+            def prop(self) -> str:
+                return "value"
+
+        mocker(FooClass).mock("prop").return_value("mocked").match_args_any_call()
+        assert FooClass().prop == "mocked"
+        State.teardown()
+        assert FooClass().prop == "value"
+
+        mocker(FooClass).mock("prop").return_value("mocked").match_args_any_call("bar")
+        assert FooClass().prop == "mocked"
+        with assert_raises(
+            AssertionError,
+            "No call includes arguments:\nArguments: call('bar')\nCalls: [call()].",
+        ):
+            State.teardown()
+        assert FooClass().prop == "value"
+
+        mocker(FooClass).mock("prop").return_value("mocked").match_args_all_calls()
+        assert FooClass().prop == "mocked"
+        State.teardown()
+        assert FooClass().prop == "value"
+
+        mocker(FooClass).mock("prop").return_value("mocked").match_args_all_calls("bar")
+        assert FooClass().prop == "mocked"
+        with assert_raises(
+            AssertionError,
+            "All calls do not contain the given arguments:\n"
+            "Arguments: call('bar')\n"
+            "Calls: [call()].",
+        ):
+            State.teardown()
+        assert FooClass().prop == "value"
+
+        mocker(FooClass).mock("prop").return_value("mocked").match_args_last_call()
+        assert FooClass().prop == "mocked"
+        State.teardown()
+        assert FooClass().prop == "value"
+
+        mocker(FooClass).mock("prop").return_value("mocked").match_args_last_call("bar")
+        assert FooClass().prop == "mocked"
+        with assert_raises(
+            AssertionError,
+            "Last call does not include arguments:\nArguments: call('bar')\nCalls: [call()].",
+        ):
+            State.teardown()
+        assert FooClass().prop == "value"
+
     def test_mock_instance_method_has_calls(self) -> None:
         class FooClass:
             def method(self, arg1: str, arg2: int = 10) -> str:
