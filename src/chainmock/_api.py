@@ -1473,7 +1473,7 @@ class Mock:
         """Mock an attribute.
 
         The given attribute is mocked and the mock catches all the calls to it.
-        If not return value is set, `None` is returned by default.
+        If no return value is set, `None` is returned by default.
 
         Examples:
             Assert that the method `add_tea` was called once:
