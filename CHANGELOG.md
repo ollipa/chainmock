@@ -14,10 +14,18 @@ Types of changes:
 
 ## Unreleased
 
+### Added
+
+- Stubs with spec pass isinstance test with the spec object.
+
 ### Changed
 
 - Raise an AttributeError if `return_value` or `side_effect` is called when
   spying.
+
+### Fixed
+
+- Fix spec defined as a list of strings fails with `AttributeError`.
 
 ## Release 0.10.0
 

@@ -1315,7 +1315,14 @@ class Mock:
                 "Mock should not be initialized directly. Use mocker function instead."
             )
         self.__target = target
-        self.__spec = spec
+        self.__spec_class: Optional[Type[Any]] = None
+        # Set __spec_class if spec is a class or an instance of a class.
+        if spec is not None and type(spec) not in (list, tuple):
+            if isinstance(spec, type):
+                self.__spec_class = spec
+            else:
+                self.__spec_class = type(spec)
+
         self.__patch = patch
         self.__mock = (
             patch.start() if patch else umock.MagicMock(spec=spec if spec is not None else target)
@@ -1332,6 +1339,12 @@ class Mock:
         This allows mocking methods that are properties but are also callable.
         """
         return self
+
+    @property  # type: ignore[misc]
+    def __class__(self) -> Type[Any]:
+        if self.__spec_class is None:
+            return type(self)
+        return self.__spec_class
 
     def get_mock(self) -> AsyncAndSyncMock:
         """Return the unittest mock associated with this Mock object.
@@ -1603,9 +1616,9 @@ class Mock:
     def __get_stub_attr_mock(
         self, name: str, *, create: bool, force_property: bool, force_async: bool
     ) -> AnyMock:
-        if self.__spec is not None:
+        if self.__spec_class is not None:
             try:
-                original = getattr(self.__spec, name)
+                original = getattr(self.__spec_class, name)
             except AttributeError:
                 if create is True:
                     if force_property:
@@ -1892,17 +1905,23 @@ def mocker(
             mocked and if the target is any other object like class or module,
             you can mock and spy individual functions and methods using the
             returned mock instance.
+
         spec: Spec acts as the specification for the created mock objects. It
             can be either a list of strings or an existing object (a class or
             instance). Accessing any attribute not in the given spec raises an
             AttributeError. Spec can be useful if you want to create stubs with
             a certain spec. Otherwise it is usually not needed because spec is
             automatically set from the given target object.
+
+            If `spec` is an object then `Mock.__class__` returns the class of
+            the spec object. This allows mocks to pass `isinstance` tests.
+
         patch_class: By default, patching an object (setting target to a string)
             allows mocking attributes of the instance of a given target class.
             If you want to mock the class itself, instead of it's instance, set
             this to True. Note that it is usually easier to just use partial
             mocking if you need to patch the class.
+
         **kwargs: You can give arbitrary keyword arguments to quickly set mocked
             attributes and properties.
 
