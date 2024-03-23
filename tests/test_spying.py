@@ -719,3 +719,10 @@ class SpyingTestCase:
             "'GLOBAL_VARIABLE' is not callable. Only callable objects can be spied.",
         ):
             mocker(common).spy("GLOBAL_VARIABLE")
+
+    def test_spy_property(self) -> None:
+        with assert_raises(
+            RuntimeError,
+            "'some_property' is not callable. Only callable objects can be spied.",
+        ):
+            mocker(SomeClass).spy("some_property")
