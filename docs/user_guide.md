@@ -26,14 +26,9 @@ Assert that the method `boil` was called exactly once:
 >>> mocker(Teapot).mock("boil").called_once()
 <chainmock._api.Assert object at ...>
 >>> Teapot().boil()
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
-# Reset mocks between examples
->>> State.teardown()
-
--->
 
 Assert that the method `boil` was called at least once but not more than twice:
 
@@ -42,13 +37,9 @@ Assert that the method `boil` was called at least once but not more than twice:
 <chainmock._api.Assert object at ...>
 >>> teapot.boil()
 >>> teapot.boil()
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 Assert that the method `pour` was called exactly three times:
 
@@ -58,13 +49,9 @@ Assert that the method `pour` was called exactly three times:
 >>> teapot.pour()
 >>> teapot.pour()
 >>> teapot.pour()
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 ### Assert call arguments
 
@@ -74,13 +61,9 @@ Assert that the method `add_tea` was called once with the argument `puehr`:
 >>> mocker(Teapot).mock("add_tea").called_once_with("puehr")
 <chainmock._api.Assert object at ...>
 >>> Teapot().add_tea("puehr")
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 Assert that the method `add_tea` was called once with the argument `oolong` and once with the argument `black`:
 
@@ -90,13 +73,9 @@ Assert that the method `add_tea` was called once with the argument `oolong` and 
 <chainmock._api.Assert object at ...>
 >>> Teapot().add_tea("oolong")
 >>> Teapot().add_tea("black")
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 Assert that the method `add_tea` was called at least once with the keyword argument `loose=True`:
 
@@ -104,13 +83,9 @@ Assert that the method `add_tea` was called at least once with the keyword argum
 >>> mocker(Teapot).mock("add_tea").match_args_any_call(loose=True)
 <chainmock._api.Assert object at ...>
 >>> Teapot().add_tea("oolong", loose=True)
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 ### Mock return values and side effects
 
@@ -121,13 +96,9 @@ Mock the return value of method `brew`:
 <chainmock._api.Assert object at ...>
 >>> Teapot().brew()
 'mocked'
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 Raise an exception when the method `brew` is called:
 
@@ -138,13 +109,9 @@ Raise an exception when the method `brew` is called:
 Traceback (most recent call last):
   ...
 Exception: No tea!
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 Use a list to return a sequence of values:
 
@@ -159,13 +126,9 @@ Use a list to return a sequence of values:
 Traceback (most recent call last):
   ...
 Exception: empty
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 ## Features
 
@@ -204,13 +167,9 @@ _Partially mock_ the `Teapot` class:
 >>> teapot.boil()  # state is not updated because boil method is mocked
 >>> teapot.state
 'full'
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 ### Spying
 
@@ -226,13 +185,9 @@ Assert that the method `add_tea` was called once:
 <chainmock._api.Assert object at ...>
 >>> teapot.add_tea("white tea")
 'loose white tea'
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 Assert that the method add_tea was called with specific arguments:
 
@@ -244,13 +199,9 @@ Assert that the method add_tea was called with specific arguments:
 <chainmock._api.Assert object at ...>
 >>> teapot.add_tea("green tea", loose=True)
 'loose green tea'
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 ### Stubbing
 
@@ -272,13 +223,9 @@ Create a _stub_ and attach methods to it:
 Traceback (most recent call last):
   ...
 RuntimeError: Oh no!
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 ### Patching
 
@@ -300,13 +247,9 @@ Replace all the instances of `SomeClass` with a mock by patching it:
 >>> # We can change return values, assert call counts or arguments
 >>> mocked.mock("method").return_value("mocked")
 <chainmock._api.Assert object at ...>
+>>> State.teardown() #! hidden
 
 ```
-
-<!--
->>> State.teardown()
-
--->
 
 ## Utility objects
 

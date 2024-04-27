@@ -103,7 +103,6 @@ if __name__ == "__main__":
             extraglobs={
                 "Teapot": Teapot,
                 "teapot": Teapot(),
-                "asyncio": asyncio,
                 "mocker": _api.mocker,
                 "State": _api.State,
             },
