@@ -84,3 +84,7 @@ docs:
 	@printf '$(color)Test building docs$(off)\n'
 	@printf '*****************\n'
 	poetry run mkdocs build --strict
+
+.PHONY: open-docs
+open-docs:
+	poetry run mkdocs serve --open
