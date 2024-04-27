@@ -85,6 +85,6 @@ docs:
 	@printf '*****************\n'
 	poetry run mkdocs build --strict
 
-.PHONY: open-docs
-open-docs:
+.PHONY: serve
+serve:
 	poetry run mkdocs serve --open

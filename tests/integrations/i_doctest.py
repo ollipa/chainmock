@@ -4,6 +4,7 @@
 import asyncio
 import doctest
 import sys
+from typing import List
 
 from chainmock import _api
 
@@ -77,23 +78,41 @@ class TestDoctestTeardown:
 
 
 if __name__ == "__main__":
-    results1 = doctest.testmod(
-        sys.modules[__name__],  # current module
-        extraglobs={"Teapot": Teapot},
-        optionflags=doctest.ELLIPSIS,
+    results: List[doctest.TestResults] = []
+    results.append(
+        doctest.testmod(
+            sys.modules[__name__],  # current module
+            extraglobs={"Teapot": Teapot},
+            optionflags=doctest.ELLIPSIS,
+        )
     )
-    results2 = doctest.testmod(
-        _api,
-        extraglobs={
-            "Teapot": Teapot,
-            "teapot": Teapot(),
-            "asyncio": asyncio,
-        },
-        optionflags=doctest.ELLIPSIS,
+    results.append(
+        doctest.testmod(
+            _api,
+            extraglobs={
+                "Teapot": Teapot,
+                "teapot": Teapot(),
+                "asyncio": asyncio,
+            },
+            optionflags=doctest.ELLIPSIS,
+        )
     )
-    test_count = results1.attempted + results2.attempted
-    failed_count = results1.failed + results2.failed
-    if results1.failed or results2.failed:
+    results.append(
+        doctest.testfile(
+            "../../docs/user_guide.md",
+            extraglobs={
+                "Teapot": Teapot,
+                "teapot": Teapot(),
+                "asyncio": asyncio,
+                "mocker": _api.mocker,
+                "State": _api.State,
+            },
+            optionflags=doctest.ELLIPSIS,
+        )
+    )
+    test_count = sum(result.attempted for result in results)
+    failed_count = sum(result.failed for result in results)
+    if failed_count:
         print(f"Doctests FAILED (tests={test_count}, failed={failed_count})\n")
         sys.exit(1)
     print(f"Doctests successful (tests={test_count}, failed={failed_count})\n")
