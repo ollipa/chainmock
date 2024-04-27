@@ -8,6 +8,7 @@ theme:
   features:
     - content.code.annotate
     - navigation.expand
+    - content.code.copy
   palette:
     - media: "(prefers-color-scheme: light)"
       scheme: default
