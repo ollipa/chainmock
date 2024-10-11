@@ -14,6 +14,8 @@ Types of changes:
 
 ## Unreleased
 
+### Removed
+
 - Drop support for Python 3.8.
 
 ## Release 0.11.0
