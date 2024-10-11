@@ -75,7 +75,7 @@ disable = [
 ]
 
 [tool.pylint.format]
-max-line-length = "100"
+max-line-length = "110"
 
 [tool.isort]
 line_length = 100
