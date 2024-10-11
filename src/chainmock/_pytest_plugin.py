@@ -1,6 +1,7 @@
 """Pytest plugin."""
 
-from typing import Generator, Optional
+from collections.abc import Generator
+from typing import Optional
 
 import pytest
 from _pytest.runner import CallInfo, ExceptionInfo, Item, TestReport
@@ -12,7 +13,7 @@ from ._api import State
 def pytest_runtest_makereport(
     item: Item,  # pylint: disable=unused-argument
     call: CallInfo[None],
-) -> Generator[None, None, None]:
+) -> Generator[None]:
     """Hook into test execution and execute teardown after a test."""
     if call.when == "call":
         State.reset_mocks()

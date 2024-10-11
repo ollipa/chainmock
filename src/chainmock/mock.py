@@ -1,6 +1,6 @@
 """Re-exports from stdlib unittest.mock and extensions to it."""
 
-from typing import Any, Type
+from typing import Any
 from unittest.mock import (
     ANY,
     DEFAULT,
@@ -52,7 +52,7 @@ __all__ = [
 class AnyOf:  # pylint: disable=invalid-name
     """A helper object that compares equal to any given type."""
 
-    def __init__(self, kind: Type[Any]) -> None:
+    def __init__(self, kind: type[Any]) -> None:
         self._kind = kind
 
     def __eq__(self, other: Any) -> bool:

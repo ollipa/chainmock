@@ -2,7 +2,6 @@
 
 # pylint: disable=missing-docstring
 import re
-from typing import Type
 
 from chainmock import mocker
 from chainmock._api import State
@@ -49,7 +48,7 @@ class Third:
 
 
 class Second:
-    def get_third(self) -> Type[Third]:
+    def get_third(self) -> type[Third]:
         return Third
 
     @property

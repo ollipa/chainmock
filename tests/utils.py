@@ -1,14 +1,15 @@
 """Utility functions for testing."""
 
 import re
+from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Generator, Pattern, Type, Union
+from typing import Union
 
 
 @contextmanager
 def assert_raises(
-    expected_exception: Type[BaseException], match: Union[Pattern[str], str]
-) -> Generator[None, None, None]:
+    expected_exception: type[BaseException], match: Union[re.Pattern[str], str]
+) -> Generator[None]:
     """Context manager to assert that an exception is raised with a specific error message.
 
     Args:

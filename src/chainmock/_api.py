@@ -7,7 +7,8 @@ import functools
 import inspect
 import itertools
 import sys
-from typing import Any, Callable, Dict, List, Literal, Optional, Sequence, Type, TypeVar, Union
+from collections.abc import Callable, Sequence
+from typing import Any, Literal, Optional, TypeVar, Union
 from unittest import mock as umock
 from unittest.util import safe_repr
 
@@ -67,7 +68,7 @@ class Assert:
             )
         self.__parent = parent
         self._attr_mock = attr_mock
-        self.__assertions: List[Callable[..., None]] = []
+        self.__assertions: list[Callable[..., None]] = []
         self.__patch = patch
         self._kind = kind
 
@@ -1146,9 +1147,9 @@ class Assert:
             else:
                 msg = "No call includes arguments"
             msg = (
-                f"{msg}:\n"  # pylint:disable=protected-access
+                f"{msg}:\n"
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self._attr_mock._calls_repr()}"
+                f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
             )
             raise AssertionError(msg)
 
@@ -1237,7 +1238,7 @@ class State:
     Used internally by chainmock to tear down mocks.
     """
 
-    MOCKS: Dict[Union[int, str], Mock] = {}
+    MOCKS: dict[Union[int, str], Mock] = {}
 
     @classmethod
     def get_or_create_mock(
@@ -1315,7 +1316,7 @@ class Mock:
                 "Mock should not be initialized directly. Use mocker function instead."
             )
         self.__target = target
-        self.__spec_class: Optional[Type[Any]] = None
+        self.__spec_class: Optional[type[Any]] = None
         # Set __spec_class if spec is a class or an instance of a class.
         if spec is not None and type(spec) not in (list, tuple):
             if isinstance(spec, type):
@@ -1327,8 +1328,8 @@ class Mock:
         self.__mock = (
             patch.start() if patch else umock.MagicMock(spec=spec if spec is not None else target)
         )
-        self.__assertions: Dict[str, Assert] = {}
-        self.__object_patches: List[umock._patch[Any]] = (  # pylint: disable=unsubscriptable-object
+        self.__assertions: dict[str, Assert] = {}
+        self.__object_patches: list[umock._patch[Any]] = (  # pylint: disable=unsubscriptable-object
             []
         )
         self.__patch_class: bool = patch_class
@@ -1341,7 +1342,7 @@ class Mock:
         return self
 
     @property  # type: ignore[misc]
-    def __class__(self) -> Type[Any]:
+    def __class__(self) -> type[Any]:
         if self.__spec_class is None:
             return type(self)
         return self.__spec_class
@@ -1449,7 +1450,7 @@ class Mock:
     def __get_method_type(
         self,
         name: str,
-        method_type: Union[Type[classmethod], Type[staticmethod]],  # type: ignore[type-arg]
+        method_type: Union[type[classmethod], type[staticmethod]],  # type: ignore[type-arg]
     ) -> bool:
         try:
             return isinstance(inspect.getattr_static(self.__target, name), method_type)
@@ -1591,7 +1592,7 @@ class Mock:
             raise
 
     def __stub_attribute(
-        self, name: str, parts: List[str], *, create: bool, force_property: bool, force_async: bool
+        self, name: str, parts: list[str], *, create: bool, force_property: bool, force_async: bool
     ) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
@@ -1644,7 +1645,7 @@ class Mock:
         return attr_mock
 
     def __patch_attribute(
-        self, name: str, parts: List[str], *, create: bool, force_property: bool, force_async: bool
+        self, name: str, parts: list[str], *, create: bool, force_property: bool, force_async: bool
     ) -> Assert:
         if not self.__patch_class and self.__patch and inspect.isclass(self.__patch.temp_original):
             attr_mock: AnyMock = self.__get_patch_attr_mock(
@@ -1708,7 +1709,7 @@ class Mock:
     def __mock_attribute(
         self,
         name: str,
-        parts: List[str],
+        parts: list[str],
         original: Optional[Any],
         *,
         create: bool,

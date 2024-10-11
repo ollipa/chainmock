@@ -14,7 +14,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Framework :: Pytest",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
@@ -33,7 +32,7 @@ packages = [{ include = "chainmock", from = "src" }]
 "Issue Tracker" = "https://github.com/ollipa/chainmock/issues"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = "^3.9"
 typing-extensions = { version = ">=3.10.0", python = "<3.10" }
 
 [tool.poetry.group.dev.dependencies]

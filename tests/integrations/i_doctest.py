@@ -4,7 +4,6 @@
 import asyncio
 import doctest
 import sys
-from typing import List
 
 from chainmock import _api
 
@@ -78,7 +77,7 @@ class TestDoctestTeardown:
 
 
 if __name__ == "__main__":
-    results: List[doctest.TestResults] = []
+    results: list[doctest.TestResults] = []
     results.append(
         doctest.testmod(
             sys.modules[__name__],  # current module

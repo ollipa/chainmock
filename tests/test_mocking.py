@@ -4,7 +4,7 @@
 import builtins
 import re
 import sys
-from typing import Any, Type
+from typing import Any
 
 from chainmock import mocker
 from chainmock._api import State
@@ -176,7 +176,7 @@ class MockingTestCase:
                 return "value"
 
         class Second:
-            def get_third(self) -> Type[Third]:
+            def get_third(self) -> type[Third]:
                 return Third
 
         class First:
