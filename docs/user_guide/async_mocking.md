@@ -2,6 +2,12 @@
 
 Chainmock provides comprehensive support for mocking and asserting async methods. You can mock async methods, set their return values, and verify how they were awaited.
 
+Chainmock uses unittest `AsyncMock` under the hood to provide async mocking functionality. This means that you can use all the same features and functionality as with `AsyncMock`.
+
+!!! note
+
+    Methods like `called()` also work with async functions. However, if you want to explicitly assert that a method was awaited, instead of just called, you should use the `awaited()` method.
+
 ## Basic async mocking
 
 To mock an async method, use the regular mock() function. Chainmock will automatically detect that the method is async and create an appropriate async mock:

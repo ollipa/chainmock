@@ -130,6 +130,39 @@ Exception: empty
 
 ```
 
+### Chaining assertions
+
+Chainmock allows you to chain multiple assertions together, making it easy to test complex interactions in your code. For example, you can assert that a method was called with specific arguments and return a specific value:
+
+```python
+>>> (mocker(Teapot)
+...    .mock("add_tea")
+...    .called_once_with("green")
+...    .return_value("loose green tea"))
+<chainmock._api.Assert object at ...>
+>>> Teapot().add_tea("green")
+'loose green tea'
+>>> State.teardown() #! hidden
+
+```
+
+Another example, assert that the method `add_tea` was called at least once but not more than twice with the arguments `green` and `black`, and return a specific value:
+
+```python
+>>> (mocker(Teapot)
+...    .mock("add_tea")
+...    .call_count_at_least(1)
+...    .call_count_at_most(2)
+...    .has_calls([call("green"), call("black")])
+...    .return_value("mocked tea"))
+<chainmock._api.Assert object at ...>
+>>> Teapot().add_tea("green")
+'mocked tea'
+>>> Teapot().add_tea("black")
+'mocked tea'
+
+```
+
 ## Features
 
 ### Partial mocking

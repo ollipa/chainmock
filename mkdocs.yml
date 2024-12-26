@@ -39,6 +39,7 @@ nav:
   - User Guide:
       - Getting started: user_guide/getting_started.md
       - Async mocking: user_guide/async_mocking.md
+      - Mocking properties: user_guide/mocking_properties.md
   - Contributing: contributing.md
   - Changelog: changelog.md
   - API reference: api_reference.md
