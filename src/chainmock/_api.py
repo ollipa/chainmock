@@ -259,7 +259,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)  # type: ignore[misc]
+            functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)
         )
         return self
 
@@ -391,7 +391,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)  # type: ignore[misc]
+            functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)
         )
         return self
 
@@ -452,7 +452,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)  # type: ignore[misc]
+            functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
         )
         return self
 
@@ -730,7 +730,7 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         self.__assertions.append(
-            functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)  # type: ignore[misc]
+            functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)
         )
         return self
 
@@ -770,7 +770,7 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        self.__assertions.append(functools.partial(self._attr_mock.assert_not_awaited))  # type: ignore[misc]
+        self.__assertions.append(functools.partial(self._attr_mock.assert_not_awaited))
         return self
 
     def called(self) -> Assert:
@@ -811,7 +811,7 @@ class Assert:
         Returns:
             Assert instance so that calls can be chained.
         """
-        self.__assertions.append(functools.partial(self._attr_mock.assert_awaited))  # type: ignore[misc]
+        self.__assertions.append(functools.partial(self._attr_mock.assert_awaited))
         return self
 
     def called_once(self) -> Assert:
