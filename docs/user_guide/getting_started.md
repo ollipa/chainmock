@@ -1,4 +1,4 @@
-# User guide
+# Getting started
 
 Chainmock is a Python library designed to simplify and streamline the process of mocking, stubbing, and patching objects in your test code. It is built on top of the Python standard library `unittest.mock` module, providing a more intuitive and convenient interface for performing these tasks.
 
@@ -16,7 +16,7 @@ from chainmock import mocker
 
 !!! note
 
-    These examples contain just a small part of Chainmock's functionality. For more details and examples, see the [API reference](api_reference.md).
+    These examples contain just a small part of Chainmock's functionality. For more details and examples, see the [API reference](../api_reference.md).
 
 ### Assert call counts
 
@@ -287,4 +287,4 @@ assert {
 
 !!! note
 
-    For more information, please see also [API reference](api_reference.md). It contains more examples and extensive documentation about every method and function available in Chainmock.
+    For more information, please see also [API reference](../api_reference.md). It contains more examples and extensive documentation about every method and function available in Chainmock.

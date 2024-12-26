@@ -36,7 +36,9 @@ hooks:
 
 nav:
   - Overview: index.md
-  - User Guide: user_guide.md
+  - User Guide:
+      - Getting started: user_guide/getting_started.md
+      - Async mocking: user_guide/async_mocking.md
   - Contributing: contributing.md
   - Changelog: changelog.md
   - API reference: api_reference.md

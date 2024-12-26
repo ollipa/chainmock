@@ -3,6 +3,7 @@
 # pylint: disable=missing-docstring
 import asyncio
 import doctest
+import os
 import sys
 
 from chainmock import _api
@@ -96,18 +97,28 @@ if __name__ == "__main__":
             optionflags=doctest.ELLIPSIS,
         )
     )
-    results.append(
-        doctest.testfile(
-            "../../docs/user_guide.md",
-            extraglobs={
-                "Teapot": Teapot,
-                "teapot": Teapot(),
-                "mocker": _api.mocker,
-                "State": _api.State,
-            },
-            optionflags=doctest.ELLIPSIS,
+
+    DOCS_PATH = "docs/user_guide"
+    md_files = [
+        f"../../{DOCS_PATH}/{md_file}"
+        for md_file in os.listdir(DOCS_PATH)
+        if md_file.endswith(".md")
+    ]
+    for md_file in md_files:
+        results.append(
+            doctest.testfile(
+                md_file,
+                extraglobs={
+                    "Teapot": Teapot,
+                    "teapot": Teapot(),
+                    "mocker": _api.mocker,
+                    "State": _api.State,
+                    "asyncio": asyncio,
+                },
+                optionflags=doctest.ELLIPSIS,
+            )
         )
-    )
+
     test_count = sum(result.attempted for result in results)
     failed_count = sum(result.failed for result in results)
     if failed_count:
