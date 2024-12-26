@@ -40,6 +40,8 @@ nav:
       - Getting started: user_guide/getting_started.md
       - Async mocking: user_guide/async_mocking.md
       - Mocking properties: user_guide/mocking_properties.md
+      - Mocking modules: user_guide/mocking_modules.md
+      - Advanced usage: user_guide/advanced_usage.md
   - Contributing: contributing.md
   - Changelog: changelog.md
   - API reference: api_reference.md

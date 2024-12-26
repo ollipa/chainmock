@@ -23,9 +23,10 @@ from chainmock import mocker
 Assert that the method `boil` was called exactly once:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("boil").called_once()
 <chainmock._api.Assert object at ...>
->>> Teapot().boil()
+>>> Teapot().boil() #! hidden
 >>> State.teardown() #! hidden
 
 ```
@@ -33,10 +34,11 @@ Assert that the method `boil` was called exactly once:
 Assert that the method `boil` was called at least once but not more than twice:
 
 ```python
+#! remove-prefix
 >>> mocker(teapot).mock("boil").call_count_at_least(1).call_count_at_most(2)
 <chainmock._api.Assert object at ...>
->>> teapot.boil()
->>> teapot.boil()
+>>> teapot.boil() #! hidden
+>>> teapot.boil() #! hidden
 >>> State.teardown() #! hidden
 
 ```
@@ -44,11 +46,12 @@ Assert that the method `boil` was called at least once but not more than twice:
 Assert that the method `pour` was called exactly three times:
 
 ```python
+#! remove-prefix
 >>> mocker(teapot).mock("pour").call_count(3)
 <chainmock._api.Assert object at ...>
->>> teapot.pour()
->>> teapot.pour()
->>> teapot.pour()
+>>> teapot.pour() #! hidden
+>>> teapot.pour() #! hidden
+>>> teapot.pour() #! hidden
 >>> State.teardown() #! hidden
 
 ```
@@ -58,9 +61,10 @@ Assert that the method `pour` was called exactly three times:
 Assert that the method `add_tea` was called once with the argument `puehr`:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("add_tea").called_once_with("puehr")
 <chainmock._api.Assert object at ...>
->>> Teapot().add_tea("puehr")
+>>> Teapot().add_tea("puehr") #! hidden
 >>> State.teardown() #! hidden
 
 ```
@@ -68,6 +72,7 @@ Assert that the method `add_tea` was called once with the argument `puehr`:
 Assert that the method `add_tea` was called once with the argument `oolong` and once with the argument `black`:
 
 ```python
+#! remove-prefix
 >>> from chainmock.mock import call
 >>> mocker(Teapot).mock("add_tea").has_calls([call("oolong"), call("black")])
 <chainmock._api.Assert object at ...>
@@ -80,6 +85,7 @@ Assert that the method `add_tea` was called once with the argument `oolong` and 
 Assert that the method `add_tea` was called at least once with the keyword argument `loose=True`:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("add_tea").match_args_any_call(loose=True)
 <chainmock._api.Assert object at ...>
 >>> Teapot().add_tea("oolong", loose=True)
@@ -92,10 +98,10 @@ Assert that the method `add_tea` was called at least once with the keyword argum
 Mock the return value of method `brew`:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("brew").return_value("mocked")
 <chainmock._api.Assert object at ...>
->>> Teapot().brew()
-'mocked'
+>>> assert Teapot().brew() == "mocked"
 >>> State.teardown() #! hidden
 
 ```
@@ -103,6 +109,7 @@ Mock the return value of method `brew`:
 Raise an exception when the method `brew` is called:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("brew").side_effect(Exception("No tea!"))
 <chainmock._api.Assert object at ...>
 >>> Teapot().brew()
@@ -116,12 +123,11 @@ Exception: No tea!
 Use a list to return a sequence of values:
 
 ```python
+#! remove-prefix
 >>> mocker(teapot).mock("pour").side_effect([2, 1, Exception("empty")])
 <chainmock._api.Assert object at ...>
->>> teapot.pour()
-2
->>> teapot.pour()
-1
+>>> assert teapot.pour() == 2
+>>> assert teapot.pour() == 1
 >>> teapot.pour()
 Traceback (most recent call last):
   ...
@@ -135,13 +141,10 @@ Exception: empty
 Chainmock allows you to chain multiple assertions together, making it easy to test complex interactions in your code. For example, you can assert that a method was called with specific arguments and return a specific value:
 
 ```python
->>> (mocker(Teapot)
-...    .mock("add_tea")
-...    .called_once_with("green")
-...    .return_value("loose green tea"))
+#! remove-prefix
+>>> mocker(Teapot).mock("add_tea").called_once_with("green").return_value("mocked")
 <chainmock._api.Assert object at ...>
->>> Teapot().add_tea("green")
-'loose green tea'
+>>> assert Teapot().add_tea("green") == "mocked"
 >>> State.teardown() #! hidden
 
 ```
@@ -149,17 +152,18 @@ Chainmock allows you to chain multiple assertions together, making it easy to te
 Another example, assert that the method `add_tea` was called at least once but not more than twice with the arguments `green` and `black`, and return a specific value:
 
 ```python
->>> (mocker(Teapot)
-...    .mock("add_tea")
-...    .call_count_at_least(1)
-...    .call_count_at_most(2)
-...    .has_calls([call("green"), call("black")])
-...    .return_value("mocked tea"))
+#! remove-prefix
+>>> mocked = mocker(Teapot).mock("add_tea")
+>>> mocked.call_count_at_least(1)
 <chainmock._api.Assert object at ...>
->>> Teapot().add_tea("green")
-'mocked tea'
->>> Teapot().add_tea("black")
-'mocked tea'
+>>> mocked.call_count_at_most(2)
+<chainmock._api.Assert object at ...>
+>>> mocked.has_calls([call("green"), call("black")])
+<chainmock._api.Assert object at ...>
+>>> mocked.return_value("mocked tea")
+<chainmock._api.Assert object at ...>
+>>> assert Teapot().add_tea("green") == "mocked tea"
+>>> assert Teapot().add_tea("black") == "mocked tea"
 
 ```
 
@@ -174,32 +178,28 @@ If `mocker` is invoked with an object (eg. class, instance, module), the named m
 _Partially mock_ the `Teapot` class:
 
 ```python
+#! remove-prefix
 >>> # First let's fill a teapot and boil the water without mocking
 >>> teapot = Teapot()
->>> teapot.state
-'empty'
+>>> assert teapot.state == "empty"
 >>> teapot.fill()
->>> teapot.state
-'full'
+>>> assert teapot.state == "full"
 >>> teapot.boil()
->>> teapot.state
-'boiling'
+>>> assert teapot.state == "boiling"
 
 ```
 
 ```python
+#! remove-prefix
 >>> # Now let's try the same thing but also mock the boil call
 >>> mocker(Teapot).mock("boil")
 <chainmock._api.Assert object at ...>
 >>> teapot = Teapot()
->>> teapot.state
-'empty'
+>>> assert teapot.state == "empty"
 >>> teapot.fill()  # fill still works because only boil method is mocked
->>> teapot.state
-'full'
+>>> assert teapot.state == "full"
 >>> teapot.boil()  # state is not updated because boil method is mocked
->>> teapot.state
-'full'
+>>> assert teapot.state == "full"
 >>> State.teardown() #! hidden
 
 ```
@@ -211,13 +211,12 @@ Spying allows monitoring specific interactions with objects or methods in your c
 Assert that the method `add_tea` was called once:
 
 ```python
+#! remove-prefix
 >>> teapot = Teapot()
->>> teapot.add_tea("white tea")
-'loose white tea'
+>>> assert teapot.add_tea("white tea") == "loose white tea"
 >>> mocker(teapot).spy("add_tea").called_once()
 <chainmock._api.Assert object at ...>
->>> teapot.add_tea("white tea")
-'loose white tea'
+>>> assert teapot.add_tea("white tea") == "loose white tea"
 >>> State.teardown() #! hidden
 
 ```
@@ -225,13 +224,12 @@ Assert that the method `add_tea` was called once:
 Assert that the method add_tea was called with specific arguments:
 
 ```python
+#! remove-prefix
 >>> teapot = Teapot()
->>> teapot.add_tea("white tea", loose=False)
-'bagged white tea'
+>>> assert teapot.add_tea("white tea", loose=False) == "bagged white tea"
 >>> mocker(teapot).spy("add_tea").called_last_with("green tea", loose=True)
 <chainmock._api.Assert object at ...>
->>> teapot.add_tea("green tea", loose=True)
-'loose green tea'
+>>> assert teapot.add_tea("green tea", loose=True) == 'loose green tea'
 >>> State.teardown() #! hidden
 
 ```
@@ -245,13 +243,13 @@ If `mocker` is invoked without a target, a stub is created. For example, by call
 Create a _stub_ and attach methods to it:
 
 ```python
+#! remove-prefix
 >>> stub = mocker()
 >>> stub.mock("my_method").return_value("It works!")
 <chainmock._api.Assert object at ...>
 >>> stub.mock("another_method").side_effect(RuntimeError("Oh no!"))
 <chainmock._api.Assert object at ...>
->>> stub.my_method()
-'It works!'
+>>> assert stub.my_method() == "It works!"
 >>> stub.another_method()
 Traceback (most recent call last):
   ...
@@ -269,6 +267,7 @@ By default, Chainmock patches class instances. However, if you prefer to patch t
 Replace all the instances of `SomeClass` with a mock by patching it:
 
 ```python
+#! remove-prefix
 >>> class SomeClass:
 ...    def method(self, arg):
 ...        pass
@@ -291,31 +290,33 @@ Replace all the instances of `SomeClass` with a mock by patching it:
 `unittest.mock` module contains `ANY` object that can be compared to any other object and the comparison returns `True`. `chainmock.mock` contains the following additional objects: `ANY_BOOL`, `ANY_BYTES`, `ANY_COMPLEX`, `ANY_DICT`, `ANY_FLOAT`, `ANY_INT`, `ANY_LIST`, `ANY_SET`, `ANY_STR`, and `ANY_TUPLE`.
 
 ```python
-from chainmock import mock
+#! remove-prefix
+>>> from chainmock import mock
+>>>
+>>> assert {
+...     "bool": mock.ANY_BOOL,
+...     "bytes": mock.ANY_BYTES,
+...     "complex": mock.ANY_COMPLEX,
+...     "dict": mock.ANY_DICT,
+...     "float": mock.ANY_FLOAT,
+...     "int": mock.ANY_INT,
+...     "list": mock.ANY_LIST,
+...     "set": mock.ANY_SET,
+...     "string": mock.ANY_STR,
+...     "tuple": mock.ANY_TUPLE,
+... } == {
+...     "bool": True,
+...     "bytes": b"some_bytes",
+...     "complex": complex("1+2j"),
+...     "dict": {"nested": "value"},
+...     "float": 1.23,
+...     "int": 7983,
+...     "list": [1, 2, 3],
+...     "set": {"foo", "bar"},
+...     "string": "some_string",
+...     "tuple": (1, 2),
+... }
 
-assert {
-    "bool": mock.ANY_BOOL,
-    "bytes": mock.ANY_BYTES,
-    "complex": mock.ANY_COMPLEX,
-    "dict": mock.ANY_DICT,
-    "float": mock.ANY_FLOAT,
-    "int": mock.ANY_INT,
-    "list": mock.ANY_LIST,
-    "set": mock.ANY_SET,
-    "string": mock.ANY_STR,
-    "tuple": mock.ANY_TUPLE,
-} == {
-    "bool": True,
-    "bytes": b"some_bytes",
-    "complex": complex("1+2j"),
-    "dict": {"nested": "value"},
-    "float": 1.23,
-    "int": 7983,
-    "list": [1, 2, 3],
-    "set": {"foo", "bar"},
-    "string": "some_string",
-    "tuple": (1, 2),
-}
 ```
 
 !!! note

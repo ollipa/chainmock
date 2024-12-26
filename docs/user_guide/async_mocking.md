@@ -13,6 +13,7 @@ Chainmock uses unittest `AsyncMock` under the hood to provide async mocking func
 To mock an async method, use the regular mock() function. Chainmock will automatically detect that the method is async and create an appropriate async mock:
 
 ```python
+#! remove-prefix
 >>> async def mock_async_method():
 ...     mocker(Teapot).mock("timer").return_value("mocked")
 ...     assert await Teapot().timer(1, 2) == "mocked"
@@ -24,6 +25,7 @@ To mock an async method, use the regular mock() function. Chainmock will automat
 You can force a mock to be async by setting `force_async=True`, which is useful when working with stubs or when automatic detection doesn't work:
 
 ```python
+#! remove-prefix
 >>> async def mock_forced_async():
 ...     stub = mocker()
 ...     stub.mock("async_method", force_async=True).return_value("forced async")
@@ -40,6 +42,7 @@ You can force a mock to be async by setting `force_async=True`, which is useful 
 Assert that an async method was awaited at least once:
 
 ```python
+#! remove-prefix
 >>> async def assert_awaited():
 ...     mocker(Teapot).mock("timer").awaited()
 ...     await Teapot().timer(5)
@@ -51,6 +54,7 @@ Assert that an async method was awaited at least once:
 Assert that an async method was never awaited:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("timer").not_awaited()
 <chainmock._api.Assert object at ...>
 >>> State.teardown() #! hidden
@@ -62,12 +66,13 @@ Assert that an async method was never awaited:
 You can also assert the number of times an async method was awaited:
 
 ```python
+#! remove-prefix
 >>> async def assert_awaited():
 ...     mocker(Teapot).mock("open").awaited_once()
 ...     mocker(Teapot).mock("close").awaited_twice()
-...     await Teapot().open()
-...     await Teapot().close()
-...     await Teapot().close()
+...     await Teapot().open() #! hidden
+...     await Teapot().close() #! hidden
+...     await Teapot().close() #! hidden
 >>> asyncio.run(assert_awaited()) #! hidden
 >>> State.teardown() #! hidden
 
@@ -76,22 +81,23 @@ You can also assert the number of times an async method was awaited:
 Also more advanced call count assertions are supported:
 
 ```python
+#! remove-prefix
 >>> async def assert_await_counts():
 ...     mock = mocker(Teapot)
 ...     # Exact count
 ...     mock.mock("timer").await_count(3)
-...     await Teapot().timer(1)
-...     await Teapot().timer(2)
-...     await Teapot().timer(3)
+...     await Teapot().timer(1) #! hidden
+...     await Teapot().timer(2) #! hidden
+...     await Teapot().timer(3) #! hidden
 ...
 ...     # At least once
 ...     mock.mock("open").await_count_at_least(1)
-...     await Teapot().open()
+...     await Teapot().open() #! hidden
 ...
 ...     # At most twice
 ...     mock.mock("close").await_count_at_most(2)
-...     await Teapot().close()
-...     await Teapot().close()
+...     await Teapot().close() #! hidden
+...     await Teapot().close() #! hidden
 >>> asyncio.run(assert_await_counts()) #! hidden
 >>> State.teardown() #! hidden
 
@@ -102,6 +108,7 @@ Also more advanced call count assertions are supported:
 Assert that the last await was with specific arguments:
 
 ```python
+#! remove-prefix
 >>> async def assert_last_await():
 ...     mocker(Teapot).mock("timer").awaited_last_with(5, seconds=30)
 ...     await Teapot().timer(5, seconds=30)
@@ -113,10 +120,11 @@ Assert that the last await was with specific arguments:
 Assert that any await included specific arguments:
 
 ```python
+#! remove-prefix
 >>> async def assert_any_await():
 ...     mocker(Teapot).mock("timer").any_await_with(5, seconds=30)
-...     await Teapot().timer(2)
-...     await Teapot().timer(5, seconds=30)
+...     await Teapot().timer(2) # This one doesn't match
+...     await Teapot().timer(5, seconds=30) # This one does
 >>> asyncio.run(assert_any_await()) #! hidden
 >>> State.teardown() #! hidden
 
@@ -125,6 +133,7 @@ Assert that any await included specific arguments:
 Match partial arguments in awaits:
 
 ```python
+#! remove-prefix
 >>> async def assert_partial_args():
 ...     # Match just the minutes parameter
 ...     mock = mocker(Teapot).mock("timer")
@@ -142,6 +151,7 @@ Match partial arguments in awaits:
 Assert a sequence of awaits:
 
 ```python
+#! remove-prefix
 >>> from chainmock.mock import call
 >>> async def assert_await_sequence():
 ...     mock = mocker(Teapot).mock("timer")
@@ -161,6 +171,7 @@ Assert a sequence of awaits:
 You can use `return_value()` and `side_effect()` with async mocks just like with regular mocks:
 
 ```python
+#! remove-prefix
 >>> async def mock_async_returns():
 ...     # Return a fixed value
 ...     mock = mocker(Teapot)

@@ -22,6 +22,10 @@ Types of changes:
 
 - Drop support for Python 3.8.
 
+### Documentation
+
+- User guide updates and documentation improvements.
+
 ## Release 0.11.0
 
 ### Added

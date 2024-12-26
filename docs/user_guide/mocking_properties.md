@@ -7,12 +7,12 @@ Chainmock provides robust support for mocking properties in Python classes. You 
 Mock a property to return a specific value:
 
 ```python
+#! remove-prefix
 
 >>> mocker(Teapot).mock("state").return_value("mocked state")
 <chainmock._api.Assert object at ...>
 >>> teapot = Teapot()
->>> teapot.state
-'mocked state'
+>>> assert teapot.state == "mocked state"
 >>> State.teardown() #! hidden
 
 ```
@@ -20,11 +20,11 @@ Mock a property to return a specific value:
 Sometimes you might want to force an attribute to be mocked as a property, especially when working with stubs or when automatic detection doesn't work. Use the `force_property=True` parameter:
 
 ```python
+#! remove-prefix
 >>> stub = mocker()
 >>> stub.mock("temperature", force_property=True).return_value(98)
 <chainmock._api.Assert object at ...>
->>> stub.temperature
-98
+>>> assert stub.temperature == 98
 >>> State.teardown() #! hidden
 
 ```
@@ -36,6 +36,7 @@ Sometimes you might want to force an attribute to be mocked as a property, espec
 You can verify that a property was accessed (read):
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("state").called_once()
 <chainmock._api.Assert object at ...>
 >>> teapot = Teapot()
@@ -47,6 +48,7 @@ You can verify that a property was accessed (read):
 Assert that a property was read exactly twice:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("state").called_twice()
 <chainmock._api.Assert object at ...>
 >>> teapot = Teapot()
@@ -59,6 +61,7 @@ Assert that a property was read exactly twice:
 Assert that a property was never accessed:
 
 ```python
+#! remove-prefix
 >>> mocker(Teapot).mock("state").not_called()
 <chainmock._api.Assert object at ...>
 >>> State.teardown() #! hidden
