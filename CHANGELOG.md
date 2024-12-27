@@ -14,6 +14,10 @@ Types of changes:
 
 ## Unreleased
 
+-
+
+## Release 1.0.0
+
 ### Added
 
 - Add Python 3.14 support.
