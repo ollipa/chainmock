@@ -23,7 +23,7 @@ Traceback (most recent call last):
   ...
 AssertionError: expected call not found.
 Expected: Teapot.add_tea('green')
-Actual: Teapot.add_tea('green', loose=False)
+...Actual: Teapot.add_tea('green', loose=False)
 
 ```
 

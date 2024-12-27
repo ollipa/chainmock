@@ -31,8 +31,10 @@ def on_startup(command: str, dirty: bool) -> None:
             for line in src.splitlines():
                 if line.startswith("#! remove-prefix"):
                     continue
-                elif line.startswith(">>>") or line.startswith("..."):
+                elif line.startswith(">>> ") or line.startswith("... "):
                     new_src += line[4:] + "\n"
+                elif line.startswith(">>>") or line.startswith("..."):
+                    new_src += line[3:] + "\n"
                 elif line.startswith("Traceback (most recent call last):"):
                     new_src += f"|\n{line}\n"
                 else:
