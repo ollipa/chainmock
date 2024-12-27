@@ -116,16 +116,16 @@ For more details and examples, see the [API reference](https://chainmock.readthe
 
 ## Similar projects
 
-If chainmock is not what you need, check out also these cool projects:
+If Chainmock is not what you need, check out also these cool projects:
 
 - [flexmock](https://github.com/flexmock/flexmock): Chainmock's API is heavily
-  inspired by flexmock. Flexmock doesn't use standard library unittest and it
-  has fully custom mocking implementation. Compared to flexmock, chainmock has
+  inspired by flexmock. Flexmock doesn't use standard library unicttest and it
+  has fully custom mocking implementation. Compared to flexmock, Chainmock has
   more familiar API if you have been using standard library unittest and
   Chainmock also supports async mocking and partial argument matching.
 - [pytest-mock](https://github.com/pytest-dev/pytest-mock/): Similar to
-  chainmock, pytest-mock is a wrapper for standard library unittest. Compared to
-  pytest-mock, chainmock has a more ergonomic API for mocking and spying.
+  Chainmock, pytest-mock is a wrapper for standard library unittest. Compared to
+  pytest-mock, Chainmock has a more ergonomic API for mocking and spying.
 
 ## Contributing
 
