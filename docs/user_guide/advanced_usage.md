@@ -57,6 +57,26 @@ You can mock chained method access by using dot notation:
 
 ```
 
+## Mocking new instances
+
+When you need to mock every new instance of a class that gets created during testing, Chainmock provides a straightforward way to do this using patching.
+
+```python
+#! remove-prefix
+>>> class SomeClass:
+...     def method(self):
+...         return "original"
+...
+>>> mocked = mocker("__main__.SomeClass")
+>>> # Any new instance will use the mocked method
+>>> mocked.mock("method").return_value("mocked")
+<chainmock._api.Assert object at ...>
+>>> State.teardown() #! hidden
+
+```
+
+Note that instance mocking uses Python's import system, so the class must be importable from the environment where you're running the tests.
+
 !!! note
 
     For more information, please see also [API reference](../api_reference.md). It contains more examples and extensive documentation about every method and function available in Chainmock.

@@ -269,8 +269,8 @@ Replace all the instances of `SomeClass` with a mock by patching it:
 ```python
 #! remove-prefix
 >>> class SomeClass:
-...    def method(self, arg):
-...        pass
+...     def method(self, arg):
+...         pass
 ...
 >>> mocked = mocker("__main__.SomeClass")
 >>> # SomeClass instances are now replaced by a mock
