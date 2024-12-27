@@ -43,6 +43,7 @@ nav:
       - Mocking properties: user_guide/mocking_properties.md
       - Mocking modules: user_guide/mocking_modules.md
       - Advanced usage: user_guide/advanced_usage.md
+  - Comparison with unittest: unittest_comparison.md
   - Contributing: contributing.md
   - Changelog: changelog.md
   - API reference: api_reference.md

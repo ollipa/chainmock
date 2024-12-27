@@ -12,6 +12,7 @@ The `match_args_*` methods are more flexible than their exact matching counterpa
 Compare these approaches:
 
 ```python
+#! remove-prefix
 # Exact matching - this will fail because it expects exact arguments
 >>> teapot = Teapot()
 >>> mocker(teapot).mock("add_tea").called_last_with("green")
@@ -27,6 +28,7 @@ Actual: Teapot.add_tea('green', loose=False)
 ```
 
 ```python
+#! remove-prefix
 # Argument matching - this will pass because it only checks for "green"
 >>> teapot = Teapot()
 >>> mocker(teapot).mock("add_tea").match_args_last_call("green")

@@ -104,6 +104,7 @@ if __name__ == "__main__":
         for md_file in os.listdir(DOCS_PATH)
         if md_file.endswith(".md")
     ]
+    md_files.append("../../docs/unittest_comparison.md")
     for md_file in md_files:
         results.append(
             doctest.testfile(
