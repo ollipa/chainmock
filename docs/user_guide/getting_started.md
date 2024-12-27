@@ -167,122 +167,6 @@ Another example, assert that the method `add_tea` was called at least once but n
 
 ```
 
-## Features
-
-### Partial mocking
-
-Partial mocking and spying of objects, allows you to mock or spy only specific methods or attributes of an object. This is useful when you want to mock or spy only a single method of an object, while leaving the rest of the object's behavior intact.
-
-If `mocker` is invoked with an object (eg. class, instance, module), the named members of the object can be mocked or spied individually. For example, by calling `mocker(SomeClass)` you are setting the mocking target to a class. The original object is not modified until you explicitly spy or mock it's members.
-
-_Partially mock_ the `Teapot` class:
-
-```python
-#! remove-prefix
->>> # First let's fill a teapot and boil the water without mocking
->>> teapot = Teapot()
->>> assert teapot.state == "empty"
->>> teapot.fill()
->>> assert teapot.state == "full"
->>> teapot.boil()
->>> assert teapot.state == "boiling"
-
-```
-
-```python
-#! remove-prefix
->>> # Now let's try the same thing but also mock the boil call
->>> mocker(Teapot).mock("boil")
-<chainmock._api.Assert object at ...>
->>> teapot = Teapot()
->>> assert teapot.state == "empty"
->>> teapot.fill()  # fill still works because only boil method is mocked
->>> assert teapot.state == "full"
->>> teapot.boil()  # state is not updated because boil method is mocked
->>> assert teapot.state == "full"
->>> State.teardown() #! hidden
-
-```
-
-### Spying
-
-Spying allows monitoring specific interactions with objects or methods in your code. When you create a spy, you essentially "watch" the behavior of the target object or method, without changing its original functionality. With spies, you can assert that a function or method was called without mocking it.
-
-Assert that the method `add_tea` was called once:
-
-```python
-#! remove-prefix
->>> teapot = Teapot()
->>> assert teapot.add_tea("white tea") == "loose white tea"
->>> mocker(teapot).spy("add_tea").called_once()
-<chainmock._api.Assert object at ...>
->>> assert teapot.add_tea("white tea") == "loose white tea"
->>> State.teardown() #! hidden
-
-```
-
-Assert that the method add_tea was called with specific arguments:
-
-```python
-#! remove-prefix
->>> teapot = Teapot()
->>> assert teapot.add_tea("white tea", loose=False) == "bagged white tea"
->>> mocker(teapot).spy("add_tea").called_last_with("green tea", loose=True)
-<chainmock._api.Assert object at ...>
->>> assert teapot.add_tea("green tea", loose=True) == 'loose green tea'
->>> State.teardown() #! hidden
-
-```
-
-### Stubbing
-
-If `mocker` is invoked without a target, it creates a stub, an empty object that doesn't have any methods or attributes. For example, by calling `mocker()`. You can then explicitly set these methods and attributes as needed during testing. This is useful for simulating behavior within your test environment, ensuring that your code interacts as expected with the stubbed object.
-
-If `mocker` is invoked without a target, a stub is created. For example, by calling `mocker()`. The created stub doesn't have any methods or attributes until you explicitly set them.
-
-Create a _stub_ and attach methods to it:
-
-```python
-#! remove-prefix
->>> stub = mocker()
->>> stub.mock("my_method").return_value("It works!")
-<chainmock._api.Assert object at ...>
->>> stub.mock("another_method").side_effect(RuntimeError("Oh no!"))
-<chainmock._api.Assert object at ...>
->>> assert stub.my_method() == "It works!"
->>> stub.another_method()
-Traceback (most recent call last):
-  ...
-RuntimeError: Oh no!
->>> State.teardown() #! hidden
-
-```
-
-### Patching
-
-Patching allows you to replace a specified object with a mock, particularly useful when you need to replace all new instances of a class with a mock. If the target given to `mocker` function is a string in the form of `package.module.ClassName`, Chainmock imports the target and replaces the specified object with a mock. After patching the object, you can set assertions and return values on the mock, controlling its behavior for your tests.
-
-By default, Chainmock patches class instances. However, if you prefer to patch the class itself, you can set the `patch_class` argument to `True`.
-
-Replace all the instances of `SomeClass` with a mock by patching it:
-
-```python
-#! remove-prefix
->>> class SomeClass:
-...     def method(self, arg):
-...         pass
-...
->>> mocked = mocker("__main__.SomeClass")
->>> # SomeClass instances are now replaced by a mock
->>> some_class = SomeClass()
->>> some_class.method("foo")
->>> # We can change return values, assert call counts or arguments
->>> mocked.mock("method").return_value("mocked")
-<chainmock._api.Assert object at ...>
->>> State.teardown() #! hidden
-
-```
-
 ## Utility objects
 
 `chainmock.mock` module contains some re-exports from standard library `unittest.mock` module for convenience. It also contains utility objects that are helpful when asserting values in tests. Often you don't necessarily care about the exact value of something, but you might want to make sure that it is of a certain type.
@@ -316,6 +200,18 @@ Replace all the instances of `SomeClass` with a mock by patching it:
 ...     "string": "some_string",
 ...     "tuple": (1, 2),
 ... }
+>>> State.teardown() #! hidden
+
+```
+
+These objects are useful in argument matching when asserting calls to mocked methods. For example:
+
+```python
+#! remove-prefix
+>>> mocker(Teapot).mock("add_tea").called_once_with(mock.ANY_STR, mock.ANY_BOOL)
+<chainmock._api.Assert object at ...>
+>>> Teapot().add_tea("green", True)
+>>> State.teardown() #! hidden
 
 ```
 

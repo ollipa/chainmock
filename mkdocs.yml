@@ -38,6 +38,10 @@ nav:
   - Overview: index.md
   - User Guide:
       - Getting started: user_guide/getting_started.md
+      - Mocking: user_guide/mocking.md
+      - Spying: user_guide/spying.md
+      - Stubs: user_guide/stubs.md
+      - Patching: user_guide/patching.md
       - Argument matching: user_guide/argument_matching.md
       - Async mocking: user_guide/async_mocking.md
       - Mocking properties: user_guide/mocking_properties.md
