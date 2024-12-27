@@ -124,9 +124,8 @@ If chainmock is not what you need, check out also these cool projects:
   more familiar API if you have been using standard library unittest and
   Chainmock also supports async mocking and partial argument matching.
 - [pytest-mock](https://github.com/pytest-dev/pytest-mock/): Similar to
-  chainmock, pytest-mock is a wrapper for standard library unittest. However,
-  pytest-mock doesn't provide any extra functionality as it just exposes
-  unittest mocks directly to the user.
+  chainmock, pytest-mock is a wrapper for standard library unittest. Compared to
+  pytest-mock, chainmock has a more ergonomic API for mocking and spying.
 
 ## Contributing
 
