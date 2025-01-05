@@ -29,7 +29,7 @@
 
 <hr>
 
-Chainmock is a mocking Library for Python and pytest. Under the hood it uses Python standard library mocks providing an alternative syntax to create mocks and assertions. Chainmock also comes with some additional features to make testing faster and more straightforward. The syntax works especially well with pytest fixtures.
+Chainmock is a mocking library for Python and pytest. Under the hood it uses Python standard library mocks providing an alternative syntax to create mocks and assertions. Chainmock also comes with some additional features to make testing faster and more straightforward. The syntax works especially well with pytest fixtures.
 
 ## Installation
 
