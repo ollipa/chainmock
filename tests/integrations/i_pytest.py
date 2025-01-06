@@ -6,7 +6,7 @@ from tests import DefaultTestCase
 
 
 class TestPytest(DefaultTestCase):
-    """Tests for unittest integration."""
+    """Tests for pytest integration."""
 
 
 def test_teardown_on_chainmock_success(testdir: Any) -> None:
