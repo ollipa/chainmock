@@ -73,28 +73,6 @@ class Assert:
         self.__patch = patch
         self._kind = kind
 
-    def __enter__(self) -> Any:
-        return self._attr_mock
-
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        pass
-
-    async def __aenter__(self) -> Any:
-        return self._attr_mock
-
-    async def __aexit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        pass
-
     def get_mock(self) -> AnyMock:
         """Return the unittest mock associated with this Assert object.
 
@@ -1363,6 +1341,28 @@ class Mock:
         This allows mocking methods that are properties but are also callable.
         """
         return self
+
+    def __enter__(self) -> Any:
+        return self
+
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        pass
+
+    async def __aenter__(self) -> Any:
+        return self
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        pass
 
     @property  # type: ignore[misc]
     def __class__(self) -> type[Any]:
