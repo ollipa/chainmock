@@ -8,7 +8,6 @@ import inspect
 import itertools
 import sys
 from collections.abc import Callable, Sequence
-from types import TracebackType
 from typing import Any, Literal, Optional, TypeVar, Union
 from unittest import mock as umock
 from unittest.util import safe_repr
@@ -1341,28 +1340,6 @@ class Mock:
         This allows mocking methods that are properties but are also callable.
         """
         return self
-
-    def __enter__(self) -> Any:
-        return self
-
-    def __exit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        pass
-
-    async def __aenter__(self) -> Any:
-        return self
-
-    async def __aexit__(
-        self,
-        exc_type: Optional[type[BaseException]],
-        exc_value: Optional[BaseException],
-        traceback: Optional[TracebackType],
-    ) -> None:
-        pass
 
     @property  # type: ignore[misc]
     def __class__(self) -> type[Any]:
