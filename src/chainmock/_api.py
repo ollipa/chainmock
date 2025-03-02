@@ -8,6 +8,7 @@ import inspect
 import itertools
 import sys
 from collections.abc import Callable, Sequence
+from types import TracebackType
 from typing import Any, Literal, Optional, TypeVar, Union
 from unittest import mock as umock
 from unittest.util import safe_repr
@@ -71,6 +72,28 @@ class Assert:
         self.__assertions: list[Callable[..., None]] = []
         self.__patch = patch
         self._kind = kind
+
+    def __enter__(self) -> Any:
+        return self._attr_mock
+
+    def __exit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        pass
+
+    async def __aenter__(self) -> Any:
+        return self._attr_mock
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[type[BaseException]],
+        exc_value: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        pass
 
     def get_mock(self) -> AnyMock:
         """Return the unittest mock associated with this Assert object.
