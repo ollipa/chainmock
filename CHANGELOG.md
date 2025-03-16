@@ -14,7 +14,9 @@ Types of changes:
 
 ## Unreleased
 
--
+### Infrastructure
+
+- Add pypy3.11 to tox test run.
 
 ## Release 1.0.0
 
