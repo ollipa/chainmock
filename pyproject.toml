@@ -47,8 +47,9 @@ coverage = "*"
 tox = "*"
 mkdocs-material = "*"
 markdown-include = "*"
-mkdocstrings = { extras = ["python-legacy"], version = "*" }
+mkdocstrings = "*"
 pytest = ">= 6.2.0"
+mkdocstrings-python = "*"
 
 [tool.poetry.plugins.pytest11]
 chainmock = "chainmock._pytest_plugin"
@@ -103,3 +104,4 @@ strict_equality = true
 [tool.pytest.ini_options]
 xfail_strict = true
 asyncio_mode = "auto"
+asyncio_default_fixture_loop_scope = "function"
