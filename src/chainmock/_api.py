@@ -71,6 +71,9 @@ class Assert:
         self.__assertions: list[Callable[..., None]] = []
         self.__patch = patch
         self._kind = kind
+        self._spy_expected_return_value = umock.DEFAULT
+        self._spy_expected_side_effects = None
+        self._spy_actual_outcomes: list[Any] = []
 
     def get_mock(self) -> AnyMock:
         """Return the unittest mock associated with this Assert object.
@@ -135,9 +138,9 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         if self._kind == "spy":
-            raise AttributeError(
-                "'return_value' method is not supported when spying. Use it with mocking instead."
-            )
+            self._spy_expected_return_value = value
+            self._spy_expected_side_effects = None
+            return self
         if isinstance(self._attr_mock, umock.NonCallableMagicMock) and self.__patch is not None:
             # Support mocking module attributes/variables and instance attributes
             self.__patch.stop()
@@ -204,9 +207,9 @@ class Assert:
             Assert instance so that calls can be chained.
         """
         if self._kind == "spy":
-            raise AttributeError(
-                "'side_effect' method is not supported when spying. Use it with mocking instead."
-            )
+            self._spy_expected_side_effects = value
+            self._spy_expected_return_value = umock.DEFAULT
+            return self
         self._attr_mock.side_effect = value
         return self
 
@@ -1227,6 +1230,96 @@ class Assert:
         return f"{call_count} times"
 
     def _validate(self) -> None:
+        if self._kind == "spy":
+            # --- Validation for _spy_expected_return_value ---
+            if self._spy_expected_return_value is not umock.DEFAULT:
+                # If _spy_actual_outcomes is empty, other assertions like not_called() or call_count()
+                # are expected to catch this. If it was called, then each call's outcome is checked.
+                for i, (actual_value, actual_exception) in enumerate(self._spy_actual_outcomes):
+                    mock_name = self._attr_mock._mock_name or "mock"  # pylint:disable=protected-access
+                    if actual_exception is not None:
+                        raise AssertionError(
+                            f"Spy for '{mock_name}' expected to return "
+                            f"{safe_repr(self._spy_expected_return_value)} on call {i+1}, "
+                            f"but it raised {safe_repr(actual_exception)}."
+                        )
+                    if actual_value != self._spy_expected_return_value:
+                        raise AssertionError(
+                            f"Spy for '{mock_name}' expected to return "
+                            f"{safe_repr(self._spy_expected_return_value)} on call {i+1}, "
+                            f"but it returned {safe_repr(actual_value)}."
+                        )
+
+            # --- Validation for _spy_expected_side_effects ---
+            elif self._spy_expected_side_effects is not None:
+                expected_effects = self._spy_expected_side_effects
+                mock_name = self._attr_mock._mock_name or "mock"  # pylint:disable=protected-access
+
+                if isinstance(expected_effects, BaseException) or \
+                   (isinstance(expected_effects, type) and issubclass(expected_effects, BaseException)):
+                    expected_effects_iter = iter([expected_effects])
+                elif not hasattr(expected_effects, '__iter__') or isinstance(expected_effects, str):
+                    expected_effects_iter = iter([expected_effects])
+                else:
+                    expected_effects_iter = iter(expected_effects)
+
+                for i, (actual_value, actual_exception) in enumerate(self._spy_actual_outcomes):
+                    try:
+                        expected_effect = next(expected_effects_iter)
+                    except StopIteration:
+                        raise AssertionError(
+                            f"Spy for '{mock_name}' was called more times ({len(self._spy_actual_outcomes)}) "
+                            f"than expected side effects were provided ({i})."
+                        ) from None
+
+                    if isinstance(expected_effect, BaseException):
+                        if actual_exception is None:
+                            raise AssertionError(
+                                f"Spy for '{mock_name}' expected to raise "
+                                f"{safe_repr(expected_effect)} on call {i+1}, but it returned {safe_repr(actual_value)}."
+                            )
+                        if not isinstance(actual_exception, type(expected_effect)) or actual_exception.args != expected_effect.args:
+                            raise AssertionError(
+                                f"Spy for '{mock_name}' expected to raise "
+                                f"{safe_repr(expected_effect)} on call {i+1}, but it raised {safe_repr(actual_exception)}."
+                            )
+                    elif isinstance(expected_effect, type) and issubclass(expected_effect, BaseException):
+                        if actual_exception is None:
+                            raise AssertionError(
+                                f"Spy for '{mock_name}' expected to raise an instance of "
+                                f"{expected_effect.__name__} on call {i+1}, but it returned {safe_repr(actual_value)}."
+                            )
+                        if not isinstance(actual_exception, expected_effect):
+                            raise AssertionError(
+                                f"Spy for '{mock_name}' expected to raise an instance of "
+                                f"{expected_effect.__name__} on call {i+1}, but it raised {safe_repr(actual_exception)}."
+                            )
+                    else:  # Expected a return value
+                        if actual_exception is not None:
+                            raise AssertionError(
+                                f"Spy for '{mock_name}' expected to return "
+                                f"{safe_repr(expected_effect)} on call {i+1}, but it raised {safe_repr(actual_exception)}."
+                            )
+                        if actual_value != expected_effect:
+                            raise AssertionError(
+                                f"Spy for '{mock_name}' expected to return "
+                                f"{safe_repr(expected_effect)} on call {i+1}, but it returned {safe_repr(actual_value)}."
+                            )
+                
+                # Check if there are unused expected effects
+                try:
+                    next_expected_effect_for_check = next(expected_effects_iter)
+                    # Count remaining effects for a more informative message
+                    remaining_effects_count = 1 + sum(1 for _ in expected_effects_iter)
+                    raise AssertionError(
+                        f"Spy for '{mock_name}' was called fewer times ({len(self._spy_actual_outcomes)}) "
+                        f"than expected side effects were provided. {remaining_effects_count} expected effect(s) were not consumed, "
+                        f"starting with {safe_repr(next_expected_effect_for_check)}."
+                    )
+                except StopIteration:
+                    pass  # Good, all expected effects were consumed
+
+        # Existing assertion validation loop
         while len(self.__assertions) > 0:
             assertion = self.__assertions.pop()
             assertion()
@@ -1428,21 +1521,38 @@ class Mock:
         parameters = tuple(inspect.signature(original).parameters.keys())
         is_class_method = self.__get_method_type(parsed_name, classmethod)
         is_static_method = self.__get_method_type(parsed_name, staticmethod)
+        # assertion object is created later, so we need to fetch it inside pass_through
+        # assertion = Assert(self, attr_mock, kind="spy", _internal=True)
+        # self.__assertions[name] = assertion
 
         def pass_through(*args: Any, **kwargs: Any) -> Any:
+            spy_asserter: Assert = self.__assertions[name]
             has_self = len(parameters) > 0 and parameters[0] == "self"
             skip_first = len(args) > len(parameters) and (is_class_method or is_static_method)
             mock_args = list(args)
             if has_self or skip_first:
                 mock_args = mock_args[1:]
-            attr_mock(*mock_args, **kwargs)
+            attr_mock(*mock_args, **kwargs)  # Call the unittest.mock.MagicMock
             if skip_first:
-                args = tuple(list(args)[1:])
-            return original(*args, **kwargs)
+                args_for_original = tuple(list(args)[1:])
+            else:
+                args_for_original = args
+
+            try:
+                actual_return_value = original(*args_for_original, **kwargs)
+                spy_asserter._spy_actual_outcomes.append((actual_return_value, None))
+                return actual_return_value
+            except Exception as e:
+                spy_asserter._spy_actual_outcomes.append((None, e))
+                raise
 
         patch = umock.patch.object(self.__target, parsed_name, new=pass_through)
         patch.start()
         self.__object_patches.append(patch)
+        # Create and store the asserter *before* it's potentially accessed in pass_through
+        # if the spied method is called immediately (e.g. by another thread or reentrantly)
+        # though in typical single-threaded test scenarios, the order might not strictly matter
+        # as pass_through is called after spy() returns. However, this is safer.
         assertion = Assert(self, attr_mock, kind="spy", _internal=True)
         self.__assertions[name] = assertion
         return assertion
