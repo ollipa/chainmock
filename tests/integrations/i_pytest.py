@@ -1,5 +1,6 @@
 """Test pytest integration."""
 
+import sys
 from typing import Any
 
 from tests import DefaultTestCase
@@ -130,4 +131,10 @@ def test_teardown_on_fixture_failure(testdir: Any) -> None:
     )
     result = testdir.runpytest("-p", "no:asyncio")
     result.assert_outcomes(passed=1, errors=1)
-    result.stdout.re_match_lines(r".+TypeError: unhashable type: 'dict'")
+    if sys.version_info < (3, 14):
+        result.stdout.re_match_lines(r".+TypeError: unhashable type: 'dict'")
+    else:
+        # Python 3.14+ changed the error message for unhashable types
+        result.stdout.re_match_lines(
+            r".+TypeError: cannot use 'dict' as a set element \(unhashable type: 'dict'\)"
+        )
