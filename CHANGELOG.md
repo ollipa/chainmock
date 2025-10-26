@@ -16,7 +16,8 @@ Types of changes:
 
 ### Infrastructure
 
-- Add pypy3.11 to tox test run.
+- Add PyPy 3.11 to tox test run.
+- Add Python 3.15 to tox test run.
 
 ## Release 1.0.0
 
