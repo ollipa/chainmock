@@ -14,9 +14,18 @@ Types of changes:
 
 ## Unreleased
 
+### Added
+
+- Add Python 3.15 support.
+
+### Removed
+
+- Drop support for Python 3.9.
+
 ### Infrastructure
 
 - Add PyPy 3.11 to tox test run.
+- Add Pytest 8.4 to tox test run.
 - Add Python 3.15 to tox test run.
 
 ## Release 1.0.0

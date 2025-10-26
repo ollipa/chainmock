@@ -1,7 +1,6 @@
 """Pytest plugin."""
 
 from collections.abc import Generator
-from typing import Optional
 
 import pytest
 from _pytest.runner import CallInfo, ExceptionInfo, Item, TestReport
@@ -26,4 +25,4 @@ def pytest_runtest_makereport(
         State.reset_mocks()
         State.reset_state()
 
-    _test_report: Optional[TestReport] = yield
+    _test_report: TestReport | None = yield

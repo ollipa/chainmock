@@ -3,12 +3,11 @@
 import re
 from collections.abc import Generator
 from contextlib import contextmanager
-from typing import Union
 
 
 @contextmanager
 def assert_raises(
-    expected_exception: type[BaseException], match: Union[re.Pattern[str], str]
+    expected_exception: type[BaseException], match: re.Pattern[str] | str
 ) -> Generator[None]:
     """Context manager to assert that an exception is raised with a specific error message.
 

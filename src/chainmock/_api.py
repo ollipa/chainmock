@@ -6,19 +6,13 @@ from __future__ import annotations
 import functools
 import inspect
 import itertools
-import sys
 from collections.abc import Callable, Sequence
-from typing import Any, Literal, Optional, TypeVar, Union
+from typing import Any, Literal, ParamSpec, TypeVar
 from unittest import mock as umock
 from unittest.util import safe_repr
 
-if sys.version_info >= (3, 10):
-    from typing import ParamSpec  # pragma: no cover
-else:
-    from typing_extensions import ParamSpec
-
-AnyMock = Union[umock.AsyncMock, umock.MagicMock, umock.PropertyMock]
-AsyncAndSyncMock = Union[umock.AsyncMock, umock.MagicMock]
+AnyMock = umock.AsyncMock | umock.MagicMock | umock.PropertyMock
+AsyncAndSyncMock = umock.AsyncMock | umock.MagicMock
 
 _DEFAULT_CLASS_ATTRIBUTES = dir(type("dummy", (object,), {}))
 
@@ -59,7 +53,7 @@ class Assert:
         attr_mock: AnyMock,
         *,
         kind: Literal["spy", "mock"] = "mock",
-        patch: Optional[umock._patch[Any]] = None,  # pylint: disable=unsubscriptable-object
+        patch: umock._patch[Any] | None = None,
         _internal: bool = False,
     ) -> None:
         if not _internal:
@@ -1073,7 +1067,7 @@ class Assert:
         return self.__parent
 
     def _assert_call_count(
-        self, call_count: int, modifier: Optional[Literal["at least", "at most"]] = None
+        self, call_count: int, modifier: Literal["at least", "at most"] | None = None
     ) -> None:
         if modifier is None and self._attr_mock.call_count == call_count:
             return
@@ -1092,7 +1086,7 @@ class Assert:
         raise AssertionError(msg)
 
     def _assert_await_count(
-        self, await_count: int, modifier: Optional[Literal["at least", "at most"]] = None
+        self, await_count: int, modifier: Literal["at least", "at most"] | None = None
     ) -> None:
         if modifier is None and self._attr_mock.await_count == await_count:
             return
@@ -1238,14 +1232,14 @@ class State:
     Used internally by chainmock to tear down mocks.
     """
 
-    MOCKS: dict[Union[int, str], Mock] = {}
+    MOCKS: dict[int | str, Mock] = {}
 
     @classmethod
     def get_or_create_mock(
         cls,
-        target: Optional[Any],
+        target: Any | None,
         *,
-        spec: Optional[Any] = None,
+        spec: Any | None = None,
         patch_class: bool = False,
     ) -> Mock:
         """Get existing mock or create a new one if the object has not been mocked yet."""
@@ -1254,7 +1248,7 @@ class State:
             stub = Stub(target, spec=spec, _internal=True)
             cls.MOCKS[id(stub)] = stub
             return stub  # type: ignore[no-any-return]
-        key: Union[int, str]
+        key: int | str
         if isinstance(target, str):
             key = target
         else:
@@ -1302,12 +1296,10 @@ class Mock:
 
     def __init__(
         self,
-        target: Optional[Any] = None,
+        target: Any | None = None,
         *,
-        patch: Optional[
-            umock._patch[AsyncAndSyncMock]  # pylint: disable=unsubscriptable-object
-        ] = None,
-        spec: Optional[Any] = None,
+        patch: umock._patch[AsyncAndSyncMock] | None = None,
+        spec: Any | None = None,
         patch_class: bool = False,
         _internal: bool = False,
     ) -> None:
@@ -1316,7 +1308,7 @@ class Mock:
                 "Mock should not be initialized directly. Use mocker function instead."
             )
         self.__target = target
-        self.__spec_class: Optional[type[Any]] = None
+        self.__spec_class: type[Any] | None = None
         # Set __spec_class if spec is a class or an instance of a class.
         if spec is not None and type(spec) not in (list, tuple):
             if isinstance(spec, type):
@@ -1329,9 +1321,7 @@ class Mock:
             patch.start() if patch else umock.MagicMock(spec=spec if spec is not None else target)
         )
         self.__assertions: dict[str, Assert] = {}
-        self.__object_patches: list[umock._patch[Any]] = (  # pylint: disable=unsubscriptable-object
-            []
-        )
+        self.__object_patches: list[umock._patch[Any]] = []
         self.__patch_class: bool = patch_class
 
     def __call__(self, *args: Any, **kwargs: Any) -> Mock:
@@ -1450,7 +1440,7 @@ class Mock:
     def __get_method_type(
         self,
         name: str,
-        method_type: Union[type[classmethod], type[staticmethod]],  # type: ignore[type-arg]
+        method_type: type[classmethod] | type[staticmethod],  # type: ignore[type-arg]
     ) -> bool:
         try:
             return isinstance(inspect.getattr_static(self.__target, name), method_type)
@@ -1583,7 +1573,7 @@ class Mock:
             class_name = self.__target.__class__.__name__
         return f"_{class_name.lstrip('_')}__{name.lstrip('_')}"
 
-    def __get_original(self, name: str, create: bool) -> Optional[Any]:
+    def __get_original(self, name: str, create: bool) -> Any | None:
         try:
             return getattr(self.__target, name)
         except AttributeError:
@@ -1710,13 +1700,13 @@ class Mock:
         self,
         name: str,
         parts: list[str],
-        original: Optional[Any],
+        original: Any | None,
         *,
         create: bool,
         force_property: bool,
         force_async: bool,
     ) -> Assert:
-        patch: umock._patch[Any]  # pylint: disable=unsubscriptable-object
+        patch: umock._patch[Any]
         if (inspect.ismodule(self.__target) or self.__is_class_instance()) and (
             original is not None and not callable(original)
         ):
@@ -1764,7 +1754,7 @@ class Mock:
     def __is_class_attribute(
         self,
         name: str,
-        original: Optional[Any],
+        original: Any | None,
     ) -> bool:
         if callable(original) or not inspect.isclass(self.__target):
             return False
@@ -1802,9 +1792,9 @@ class Mock:
 
 
 def mocker(
-    target: Optional[Union[str, Any]] = None,
+    target: str | Any | None = None,
     *,
-    spec: Optional[Any] = None,
+    spec: Any | None = None,
     patch_class: bool = False,
     **kwargs: Any,
 ) -> Mock:

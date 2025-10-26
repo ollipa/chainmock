@@ -55,7 +55,7 @@ mocks support and adds some convenient extra functionality.
   should be used so it is not any harder than mocking sync code.
 - **Fully type annotated**: The whole codebase is fully type annotated so
   Chainmock works well with static analysis tools and editor autocomplete.
-- Works with **Python 3.9+ and PyPy3**.
+- Works with **Python 3.10+ and PyPy3**.
 - Supports `pytest`, `unittest`, and `doctest` test runners.
 
 ## Examples
