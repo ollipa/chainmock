@@ -14,7 +14,9 @@ Types of changes:
 
 ## Unreleased
 
--
+### Infrastructure
+
+- Add Pytest 9.0 to tox test run.
 
 ## Release 2.0.0
 
