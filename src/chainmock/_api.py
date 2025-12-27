@@ -1582,7 +1582,13 @@ class Mock:
             raise
 
     def __stub_attribute(
-        self, name: str, parts: list[str], *, create: bool, force_property: bool, force_async: bool
+        self,
+        name: str,
+        parts: list[str],
+        *,
+        create: bool,
+        force_property: bool,
+        force_async: bool,
     ) -> Assert:
         if name in list(set(dir(Mock)) - set(dir(type))):
             raise ValueError(f"Cannot replace Mock internal attribute {name}")
@@ -1635,7 +1641,13 @@ class Mock:
         return attr_mock
 
     def __patch_attribute(
-        self, name: str, parts: list[str], *, create: bool, force_property: bool, force_async: bool
+        self,
+        name: str,
+        parts: list[str],
+        *,
+        create: bool,
+        force_property: bool,
+        force_async: bool,
     ) -> Assert:
         if not self.__patch_class and self.__patch and inspect.isclass(self.__patch.temp_original):
             attr_mock: AnyMock = self.__get_patch_attr_mock(
@@ -1667,7 +1679,13 @@ class Mock:
         return assertion
 
     def __get_patch_attr_mock(
-        self, mock: AnyMock, name: str, *, create: bool, force_property: bool, force_async: bool
+        self,
+        mock: AnyMock,
+        name: str,
+        *,
+        create: bool,
+        force_property: bool,
+        force_async: bool,
     ) -> AnyMock:
         try:
             attr_mock: AnyMock = getattr(mock, name)

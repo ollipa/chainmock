@@ -18,6 +18,7 @@ Types of changes:
 
 - Add Pytest 9.0 to tox test run.
 - Replace Poetry with uv.
+- Replace pylint, black and isort with ruff.
 
 ## Release 2.0.0
 

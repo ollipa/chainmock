@@ -24,7 +24,9 @@ def on_startup(command: str, dirty: bool) -> None:
             line for line in src.splitlines(keepends=True) if not line.strip().endswith("#! hidden")
         )
         src = "".join(
-            line for line in src.splitlines(keepends=True) if not (line.strip().startswith("<chainmock") and line.strip().endswith(">"))
+            line
+            for line in src.splitlines(keepends=True)
+            if not (line.strip().startswith("<chainmock") and line.strip().endswith(">"))
         )
         if src.startswith("#! remove-prefix"):
             new_src = ""

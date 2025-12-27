@@ -15,13 +15,15 @@ class ChainmockTestCase:
 
     def test_init_mock_directly_should_fail(self) -> None:
         with assert_raises(
-            RuntimeError, "Mock should not be initialized directly. Use mocker function instead."
+            RuntimeError,
+            "Mock should not be initialized directly. Use mocker function instead.",
         ):
             Mock()
 
     def test_init_assert_directly_should_fail(self) -> None:
         with assert_raises(
-            RuntimeError, "Assert should not be initialized directly. Use mocker function instead."
+            RuntimeError,
+            "Assert should not be initialized directly. Use mocker function instead.",
         ):
             mock = mocker()
             Assert(mock, umock.MagicMock())
@@ -63,7 +65,8 @@ class ChainmockTestCase:
 
         mocker(FooClass).spy("method")
         with assert_raises(
-            RuntimeError, "Attribute 'method' has already been spied. Can't mock a spied attribute."
+            RuntimeError,
+            "Attribute 'method' has already been spied. Can't mock a spied attribute.",
         ):
             mocker(FooClass).mock("method")
         State.teardown()

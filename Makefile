@@ -8,7 +8,7 @@ TARGETS = src tests
 all: lint test
 
 .PHONY: lint
-lint: isort black mypy pylint
+lint: format mypy linter
 
 .PHONY: test
 test: install docs coverage
@@ -57,26 +57,19 @@ mypy:
 	@printf '*****************\n'
 	uv run mypy ${TARGETS}
 
-.PHONY: isort
-isort:
+.PHONY: format
+format:
 	@printf '\n\n*****************\n'
-	@printf '$(color)Running isort$(off)\n'
+	@printf '$(color)Running format$(off)\n'
 	@printf '*****************\n'
-	uv run isort --check-only ${TARGETS}
+	uv run ruff format --check ${TARGETS}
 
-.PHONY: black
-black:
+.PHONY: linter
+linter:
 	@printf '\n\n*****************\n'
-	@printf '$(color)Running black$(off)\n'
+	@printf '$(color)Running linter$(off)\n'
 	@printf '*****************\n'
-	uv run black --check ${TARGETS}
-
-.PHONY: pylint
-pylint:
-	@printf '\n\n*****************\n'
-	@printf '$(color)Running pylint$(off)\n'
-	@printf '*****************\n'
-	uv run pylint ${TARGETS}
+	uv run ruff check ${TARGETS}
 
 .PHONY: docs
 docs:

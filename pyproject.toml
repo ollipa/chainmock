@@ -38,9 +38,6 @@ chainmock = "chainmock._pytest_plugin"
 [dependency-groups]
 dev = [
     "mypy",
-    "pylint",
-    "isort",
-    "black",
     "ipython",
     "pytest-asyncio",
     "coverage",
@@ -50,6 +47,7 @@ dev = [
     "mkdocstrings",
     "pytest>= 6.2.0",
     "mkdocstrings-python",
+    "ruff",
 ]
 
 [tool.hatch.build.targets.sdist]
@@ -65,31 +63,7 @@ include = ["src/chainmock"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
-[tool.pylint.MASTER]
-load-plugins = [
-    "pylint.extensions.docparams",
-    "pylint.extensions.docstyle",
-    "pylint.extensions.typing",
-]
-good-names = ["fn", "T", "P"]
-
-[tool.pylint.messages_control]
-disable = [
-    "too-few-public-methods",
-    "too-many-public-methods",
-    "too-many-arguments",
-    "too-many-ancestors",
-    "duplicate-code",
-]
-
-[tool.pylint.format]
-max-line-length = "110"
-
-[tool.isort]
-line_length = 100
-profile = "black"
-
-[tool.black]
+[tool.ruff]
 line-length = 100
 
 [tool.mypy]

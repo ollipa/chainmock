@@ -388,7 +388,8 @@ class AsyncMockingTestCase:
 
         mocker(FooClass).mock("method").awaited_once()
         with assert_raises(
-            AssertionError, "Expected 'FooClass.method' to have been awaited once. Awaited 0 times."
+            AssertionError,
+            "Expected 'FooClass.method' to have been awaited once. Awaited 0 times.",
         ):
             State.teardown()
 

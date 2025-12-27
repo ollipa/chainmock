@@ -25,7 +25,8 @@ class SpyingTestCase:
 
     def test_spy_patched_object_should_fail(self) -> None:
         with assert_raises(
-            RuntimeError, "Spying is not available for patched objects. Call 'mock' instead."
+            RuntimeError,
+            "Spying is not available for patched objects. Call 'mock' instead.",
         ):
             mocker("tests.common.SomeClass").spy("instance_method")
 
@@ -300,7 +301,9 @@ class SpyingTestCase:
         ):
             State.teardown()
 
-    def test_spy_instance_call_instance_method_called_once_with_too_many_args(self) -> None:
+    def test_spy_instance_call_instance_method_called_once_with_too_many_args(
+        self,
+    ) -> None:
         # pylint: disable=too-many-function-args
         class FooClass:
             def method(self, arg1: int, arg2: str) -> str:
@@ -311,7 +314,8 @@ class SpyingTestCase:
         instance = FooClass()
         mocker(instance).spy("method").called_once_with(1, "foo")
         with assert_raises(
-            TypeError, re.compile(r".*method\(\) takes 3 positional arguments but 4 were given")
+            TypeError,
+            re.compile(r".*method\(\) takes 3 positional arguments but 4 were given"),
         ):
             instance.method(2, 1, "foo")  # type: ignore
         with assert_raises(
@@ -380,7 +384,9 @@ class SpyingTestCase:
         State.teardown()
         assert instance.instance_method_with_args(2) == 2
 
-    def test_spy_derived_instance_call_instance_method_called_once_with_fail(self) -> None:
+    def test_spy_derived_instance_call_instance_method_called_once_with_fail(
+        self,
+    ) -> None:
         instance = DerivedClass()
         mocker(instance).spy("instance_method_with_args").called_once_with(1)
         assert instance.instance_method_with_args(2) == 2
@@ -433,7 +439,9 @@ class SpyingTestCase:
         State.teardown()
         assert DerivedClass().class_method() == "class_attr"
 
-    def test_spy_derived_class_call_class_method_on_instance_called_once_with(self) -> None:
+    def test_spy_derived_class_call_class_method_on_instance_called_once_with(
+        self,
+    ) -> None:
         mocker(DerivedClass).spy("class_method_with_args").called_once_with(2)
         assert DerivedClass().class_method_with_args(2) == 2
         State.teardown()
@@ -515,7 +523,9 @@ class SpyingTestCase:
         State.teardown()
         assert DerivedClass().static_method() == "static_value"
 
-    def test_spy_derived_class_call_static_method_on_instance_called_once_with(self) -> None:
+    def test_spy_derived_class_call_static_method_on_instance_called_once_with(
+        self,
+    ) -> None:
         mocker(DerivedClass).spy("static_method_with_args").called_once_with(3)
         assert DerivedClass().static_method_with_args(3) == 3
         State.teardown()
@@ -544,7 +554,9 @@ class SpyingTestCase:
         State.teardown()
         assert instance.static_method_with_args(3) == 3
 
-    def test_spy_derived_instance_call_static_method_called_once_with_fail(self) -> None:
+    def test_spy_derived_instance_call_static_method_called_once_with_fail(
+        self,
+    ) -> None:
         instance = DerivedClass()
         mocker(instance).spy("static_method_with_args").called_once_with(3)
         assert instance.static_method_with_args(4) == 4

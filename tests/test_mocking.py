@@ -266,7 +266,9 @@ class MockingTestCase:
         ).called_once()
         assert DerivedClass().instance_method_with_args(1) == 2
 
-    def test_mock_instance_method_on_derived_class_and_base_class_called_with_args(self) -> None:
+    def test_mock_instance_method_on_derived_class_and_base_class_called_with_args(
+        self,
+    ) -> None:
         mocker(SomeClass).mock("instance_method_with_args").called_last_with(1).return_value(
             2
         ).called_once()
@@ -283,7 +285,9 @@ class MockingTestCase:
         assert DerivedClass().class_method_with_args(1) == 2
         assert DerivedClass.class_method_with_args(1) == 2
 
-    def test_mock_class_method_on_derived_class_and_base_class_called_with_args(self) -> None:
+    def test_mock_class_method_on_derived_class_and_base_class_called_with_args(
+        self,
+    ) -> None:
         mocker(SomeClass).mock("class_method_with_args").called_last_with(1).return_value(
             2
         ).called_once()
@@ -301,7 +305,9 @@ class MockingTestCase:
         assert DerivedClass().static_method_with_args(1) == 2
         assert DerivedClass.static_method_with_args(1) == 2
 
-    def test_mock_static_method_on_derived_class_and_base_class_called_with_args(self) -> None:
+    def test_mock_static_method_on_derived_class_and_base_class_called_with_args(
+        self,
+    ) -> None:
         mocker(SomeClass).mock("static_method_with_args").called_last_with(1).return_value(
             2
         ).called_once()
@@ -679,7 +685,8 @@ class MockingTestCase:
 
         mocker(FooClass).mock("method").called_once()
         with assert_raises(
-            AssertionError, "Expected 'FooClass.method' to have been called once. Called 0 times."
+            AssertionError,
+            "Expected 'FooClass.method' to have been called once. Called 0 times.",
         ):
             State.teardown()
 
