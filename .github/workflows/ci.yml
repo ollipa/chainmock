@@ -63,8 +63,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: |
-          run: uv sync --locked --all-extras --dev
+        run: uv sync --locked --all-extras --dev
 
       - name: Run linters
         run: make lint
@@ -87,8 +86,7 @@ jobs:
           enable-cache: true
 
       - name: Install dependencies
-        run: |
-          run: uv sync --locked --all-extras --dev
+        run: uv sync --locked --all-extras --dev
 
       - name: Run linters
         run: make docs
