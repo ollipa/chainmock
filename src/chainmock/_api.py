@@ -30,8 +30,9 @@ def only_async(fn: Callable[P, T]) -> Callable[P, T]:
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
         self: Assert = args[0]  # type: ignore[assignment]
         if not isinstance(self._attr_mock, umock.AsyncMock):
+            fn_name = getattr(fn, "__name__", repr(fn))
             raise AttributeError(
-                f"{self._attr_mock.__class__.__name__} does not have '{fn.__name__}' method. "
+                f"{self._attr_mock.__class__.__name__} does not have '{fn_name}' method. "
                 f"You can use 'force_async' parameter to force the mock to be an AsyncMock."
             )
         return fn(*args, **kwargs)

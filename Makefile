@@ -8,21 +8,10 @@ TARGETS = src tests
 all: lint test
 
 .PHONY: lint
-lint: format mypy linter
+lint: format linter typecheck
 
 .PHONY: test
-test: install docs coverage
-
-.PHONY: install
-install:
-	@printf '\n\n*****************\n'
-	@printf '$(color)Installing package$(off)\n'
-	@printf '*****************\n'
-ifeq (${VIRTUAL_ENV},)
-	@printf 'Skipping install. VIRTUAL_ENV is not set.\n'
-else
-	uv run pip install --quiet .
-endif
+test: docs coverage
 
 .PHONY: coverage
 coverage:
@@ -50,12 +39,12 @@ coverage:
 	@uv run coverage combine --quiet
 	uv run coverage report --fail-under=100 --show-missing
 
-.PHONY: mypy
-mypy:
+.PHONY: typecheck
+typecheck:
 	@printf '\n\n*****************\n'
-	@printf '$(color)Running mypy$(off)\n'
+	@printf '$(color)Running type checker$(off)\n'
 	@printf '*****************\n'
-	uv run mypy ${TARGETS}
+	uv run ty check ${TARGETS}
 
 .PHONY: format
 format:

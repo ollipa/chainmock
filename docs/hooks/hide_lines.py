@@ -10,7 +10,7 @@
 from typing import Any
 
 import mkdocs.plugins
-from pymdownx import highlight  # type: ignore
+from pymdownx import highlight
 
 
 @mkdocs.plugins.event_priority(0)
@@ -44,4 +44,4 @@ def on_startup(command: str, dirty: bool) -> None:
             return original(self, new_src, *args, **kwargs)
         return original(self, src, *args, **kwargs)
 
-    highlight.Highlight.highlight = patched
+    highlight.Highlight.highlight = patched  # ty: ignore[invalid-assignment]
