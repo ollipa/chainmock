@@ -1,6 +1,5 @@
 """Common data structures for testing."""
 
-# pylint: disable=missing-docstring
 from typing import Any, ClassVar
 
 GLOBAL_VARIABLE = "global_value"
@@ -15,7 +14,7 @@ class SomeClass:
     def _private(self) -> str:
         return "private_value"
 
-    def __very_private(self) -> str:  # pylint: disable=unused-private-member
+    def __very_private(self) -> str:
         return "very_private_value"
 
     def instance_method(self) -> str:

@@ -1,6 +1,5 @@
 """Chainmock API implementation."""
 
-# pylint: disable=too-many-lines
 from __future__ import annotations
 
 import functools
@@ -24,11 +23,10 @@ def only_async(fn: Callable[P, T]) -> Callable[P, T]:
     """Wrapper for async assertions that throws an exception if they are called
     when the mock is not an AsyncMock.
     """
-    # pylint: disable=protected-access
 
     @functools.wraps(fn)
     def wrapper(*args: P.args, **kwargs: P.kwargs) -> T:
-        self: Assert = args[0]  # type: ignore[assignment]
+        self: Assert = args[0]  # ty: ignore[invalid-assignment]
         if not isinstance(self._attr_mock, umock.AsyncMock):
             fn_name = getattr(fn, "__name__", repr(fn))
             raise AttributeError(
@@ -1161,7 +1159,7 @@ class Assert:
         expected_call = umock.call(*args, **kwargs)
         return all(call == expected_call for call in args_list)
 
-    def _assert_match_call_args(  # pylint: disable=too-many-branches
+    def _assert_match_call_args(
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
     ) -> None:
         if not self._assert_match_args(self._attr_mock.call_args_list, modifier, *args, **kwargs):
@@ -1178,7 +1176,7 @@ class Assert:
             )
             raise AssertionError(msg)
 
-    def _assert_match_await_args(  # pylint: disable=too-many-branches
+    def _assert_match_await_args(
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
     ) -> None:
         if not self._assert_match_args(self._attr_mock.await_args_list, modifier, *args, **kwargs):

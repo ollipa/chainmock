@@ -22,7 +22,7 @@ def assert_raises(
     """
     try:
         yield
-    except Exception as raised_exception:  # pylint: disable=broad-except
+    except Exception as raised_exception:
         if not isinstance(raised_exception, expected_exception):
             raise AssertionError(  # noqa: B904
                 f"\nExpected exception: '{expected_exception}'\n"

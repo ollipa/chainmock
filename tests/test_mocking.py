@@ -65,14 +65,12 @@ class MockingTestCase:
         mocker(SomeClass).mock("instance_method", force_property=True).called_once().return_value(
             "mocked"
         )
-        # pylint: disable=comparison-with-callable
         assert SomeClass().instance_method == "mocked"
 
     def test_mock_create_unknown_property(self) -> None:
         mocker(SomeClass).mock("unknown_property", force_property=True, create=True).return_value(
             "mocked"
         )
-        # pylint: disable=no-member
         assert SomeClass().unknown_property == "mocked"  # ty: ignore[unresolved-attribute]
         assert hasattr(SomeClass, "unknown_property")
         State.teardown()
@@ -848,7 +846,6 @@ class MockingTestCase:
         assert instance.attr == "instance_attr"
 
     def test_mock_runtime_instance_attribute(self) -> None:
-        # pylint: disable=attribute-defined-outside-init
         class FooClass:
             pass
 
@@ -866,7 +863,6 @@ class MockingTestCase:
         assert instance.method2() == "bar"  # ty: ignore[unresolved-attribute]
 
     def test_mock_non_existing_attribute(self) -> None:
-        # pylint: disable=no-member
         class FooClass:
             pass
 
@@ -882,13 +878,11 @@ class MockingTestCase:
             mocker(FooClass).mock("method", create=False)
 
     def test_mock_proxied_class_instance_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).mock("instance_method_with_args").return_value(3).called_once_with(1)
         assert SomeClassProxy().instance_method_with_args(1) == 3  # ty: ignore[call-non-callable]
 
     def test_mock_proxied_class_class_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).mock("class_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
@@ -897,7 +891,6 @@ class MockingTestCase:
         assert SomeClassProxy.class_method_with_args(2) == 3
 
     def test_mock_proxied_class_static_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).mock("static_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
@@ -906,7 +899,6 @@ class MockingTestCase:
         assert SomeClassProxy.static_method_with_args(2) == 3
 
     def test_mock_proxied_derived_instance_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).mock("instance_method_with_args").return_value(
             3
@@ -914,7 +906,6 @@ class MockingTestCase:
         assert DerivedClassProxy().instance_method_with_args(1) == 3  # ty: ignore[call-non-callable]
 
     def test_mock_proxied_derived_class_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).mock("class_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
@@ -923,7 +914,6 @@ class MockingTestCase:
         assert DerivedClassProxy.class_method_with_args(2) == 3
 
     def test_mock_proxied_derived_static_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).mock("static_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
@@ -932,20 +922,17 @@ class MockingTestCase:
         assert DerivedClassProxy.static_method_with_args(2) == 3
 
     def test_mock_proxied_module_function_with_args(self) -> None:
-        # pylint: disable=not-callable
         common_proxy = Proxy(common)
         mocker(common_proxy).mock("some_function").return_value(3).called_once_with(1)
         assert common_proxy.some_function(1) == 3
 
     def test_mock_private_instance_method(self) -> None:
-        # pylint: disable=protected-access
         mocker(SomeClass).mock("_private").return_value("mocked").called_once()
         assert SomeClass()._private() == "mocked"
         State.teardown()
         assert SomeClass()._private() == "private_value"
 
     def test_mock_private_mangled_instance_method(self) -> None:
-        # pylint: disable=protected-access
         mocker(SomeClass).mock("__very_private").return_value("mocked").called_once()
         assert SomeClass()._SomeClass__very_private() == "mocked"  # ty: ignore[unresolved-attribute]
         State.teardown()
@@ -1035,7 +1022,6 @@ class MockingTestCase:
             assert file.read() == "mocked2"
 
     def test_mock_builtin_called_once_with(self) -> None:
-        # pylint: disable=unreachable
         mocker(sys).mock("exit").called_once_with(123)
         sys.exit(123)
         State.teardown()

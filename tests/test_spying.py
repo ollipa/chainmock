@@ -304,7 +304,6 @@ class SpyingTestCase:
     def test_spy_instance_call_instance_method_called_once_with_too_many_args(
         self,
     ) -> None:
-        # pylint: disable=too-many-function-args
         class FooClass:
             def method(self, arg1: int, arg2: str) -> str:
                 del arg1
@@ -612,70 +611,61 @@ class SpyingTestCase:
         State.teardown()
 
     def test_spy_proxied_class_instance_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).spy("instance_method_with_args").called_once_with(1)
         assert SomeClassProxy().instance_method_with_args(1) == 1  # ty: ignore[call-non-callable]
 
     def test_spy_proxied_class_class_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).spy("class_method_with_args").has_calls([call(1), call(2)])
         assert SomeClassProxy().class_method_with_args(1) == 1  # ty: ignore[call-non-callable]
         assert SomeClassProxy.class_method_with_args(2) == 2
 
     def test_spy_proxied_class_static_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).spy("static_method_with_args").has_calls([call(1), call(2)])
         assert SomeClassProxy().static_method_with_args(1) == 1  # ty: ignore[call-non-callable]
         assert SomeClassProxy.static_method_with_args(2) == 2
 
     def test_spy_proxied_derived_instance_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).spy("instance_method_with_args").called_once_with(1)
         assert DerivedClassProxy().instance_method_with_args(1) == 1  # ty: ignore[call-non-callable]
 
     def test_spy_proxied_derived_class_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).spy("class_method_with_args").has_calls([call(1), call(2)])
         assert DerivedClassProxy().class_method_with_args(1) == 1  # ty: ignore[call-non-callable]
         assert DerivedClassProxy.class_method_with_args(2) == 2
 
     def test_spy_proxied_derived_static_method_with_args(self) -> None:
-        # pylint: disable=not-callable,invalid-name
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).spy("static_method_with_args").has_calls([call(1), call(2)])
         assert DerivedClassProxy().static_method_with_args(1) == 1  # ty: ignore[call-non-callable]
         assert DerivedClassProxy.static_method_with_args(2) == 2
 
     def test_spy_proxied_module_function_with_args(self) -> None:
-        # pylint: disable=not-callable
         common_proxy = Proxy(common)
         mocker(common_proxy).spy("some_function").called_once_with(1)
         assert common_proxy.some_function(1) == 1
 
     def test_spy_private_instance_method(self) -> None:
-        # pylint: disable=protected-access
         mocker(SomeClass).spy("_private").called_once()
         assert SomeClass()._private() == "private_value"
         State.teardown()
         assert SomeClass()._private() == "private_value"
 
     def test_spy_private_mangled_instance_method(self) -> None:
-        # pylint: disable=protected-access
         mocker(SomeClass).spy("__very_private").called_once()
-        assert SomeClass()._SomeClass__very_private() == "very_private_value"  # type: ignore[unresolved-attribute]
+        assert SomeClass()._SomeClass__very_private() == "very_private_value"  # ty: ignore[unresolved-attribute]
         State.teardown()
-        assert SomeClass()._SomeClass__very_private() == "very_private_value"  # type: ignore[unresolved-attribute]
+        assert SomeClass()._SomeClass__very_private() == "very_private_value"  # ty: ignore[unresolved-attribute]
 
         instance = SomeClass()
         mocker(instance).spy("__very_private").called_once()
-        assert instance._SomeClass__very_private() == "very_private_value"  # type: ignore[unresolved-attribute]
+        assert instance._SomeClass__very_private() == "very_private_value"  # ty: ignore[unresolved-attribute]
         State.teardown()
-        assert instance._SomeClass__very_private() == "very_private_value"  # type: ignore[unresolved-attribute]
+        assert instance._SomeClass__very_private() == "very_private_value"  # ty: ignore[unresolved-attribute]
 
     def test_spy_init_method(self) -> None:
         class FooClass:

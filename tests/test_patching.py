@@ -125,8 +125,6 @@ class PatchingTestCase:
         assert await First().get_second().get_third().async_method() == "value"
 
     def test_patch_non_existing_attribute(self) -> None:
-        # pylint: disable=no-member
-
         mocker("tests.test_patching.PatchClass").mock("foo_method", create=True).return_value(
             "mocked"
         ).called_once()
@@ -180,7 +178,6 @@ class PatchingTestCase:
     def test_patching_force_property(self) -> None:
         mocked = mocker("tests.test_patching.PatchClass")
         mocked.mock("instance_method", force_property=True).called_once().return_value("mocked")
-        # pylint: disable=comparison-with-callable
         assert PatchClass().instance_method == "mocked"
         State.teardown()
         assert PatchClass().instance_method() == "instance_attr"
@@ -188,7 +185,6 @@ class PatchingTestCase:
     def test_patching_create_unknown_property(self) -> None:
         mocked = mocker("tests.test_patching.PatchClass")
         mocked.mock("unknown_property", force_property=True, create=True).return_value("mocked")
-        # pylint: disable=no-member
         assert PatchClass().unknown_property == "mocked"  # ty: ignore[unresolved-attribute]
         assert hasattr(PatchClass(), "unknown_property")
         State.teardown()
@@ -209,5 +205,4 @@ class PatchingTestCase:
         mocked.mock("unknown_attr", create=True, force_async=True).return_value(
             "patched"
         ).called_once()
-        # pylint: disable=no-member
         assert await PatchClass().unknown_attr() == "patched"  # ty: ignore[unresolved-attribute]

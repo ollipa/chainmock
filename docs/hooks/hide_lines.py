@@ -14,8 +14,7 @@ from pymdownx import highlight
 
 
 @mkdocs.plugins.event_priority(0)
-# pylint: disable=unused-argument
-def on_startup(command: str, dirty: bool) -> None:
+def on_startup(command: str, dirty: bool) -> None:  # noqa: ARG001, FBT001
     """Monkey patch Highlight extension to hide lines in code blocks."""
     original = highlight.Highlight.highlight
 
@@ -33,9 +32,9 @@ def on_startup(command: str, dirty: bool) -> None:
             for line in src.splitlines():
                 if line.startswith("#! remove-prefix"):
                     continue
-                elif line.startswith(">>> ") or line.startswith("... "):
+                if line.startswith((">>> ", "... ")):
                     new_src += line[4:] + "\n"
-                elif line.startswith(">>>") or line.startswith("..."):
+                elif line.startswith((">>>", "...")):
                     new_src += line[3:] + "\n"
                 elif line.startswith("Traceback (most recent call last):"):
                     new_src += f"|\n{line}\n"

@@ -512,7 +512,6 @@ class AsyncMockingTestCase:
         mocked.mock("unknown_attr", create=True, force_async=True).return_value(
             "mocked"
         ).called_once()
-        # pylint: disable=no-member
         assert await SomeClass().unknown_attr() == "mocked"  # ty: ignore[unresolved-attribute]
 
     async def test_mock_async_chained_methods(self) -> None:
