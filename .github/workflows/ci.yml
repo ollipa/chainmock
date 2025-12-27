@@ -7,9 +7,6 @@ on:
     branches:
       - "**"
 
-env:
-  PYTHON_VERSION: "3.10"
-
 jobs:
   test:
     name: Run unit tests
@@ -55,7 +52,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: ".python-version"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
@@ -78,7 +75,7 @@ jobs:
       - name: Set up Python
         uses: actions/setup-python@v6
         with:
-          python-version: ${{ env.PYTHON_VERSION }}
+          python-version-file: ".python-version"
 
       - name: Install uv
         uses: astral-sh/setup-uv@v7
