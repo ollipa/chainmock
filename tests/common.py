@@ -1,7 +1,7 @@
 """Common data structures for testing."""
 
 # pylint: disable=missing-docstring
-from typing import Any
+from typing import Any, ClassVar
 
 GLOBAL_VARIABLE = "global_value"
 
@@ -101,7 +101,7 @@ class Proxy:
     def __repr__(self) -> str:
         return repr(object.__getattribute__(self, "_obj"))
 
-    _special_names = [
+    _special_names: ClassVar[list[str]] = [
         "__abs__",
         "__add__",
         "__and__",

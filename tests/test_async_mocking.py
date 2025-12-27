@@ -1,6 +1,5 @@
 """Test async mocking functionality."""
 
-# pylint: disable=missing-docstring
 import re
 
 from chainmock import mocker
@@ -506,7 +505,7 @@ class AsyncMockingTestCase:
     async def test_mock_force_async(self) -> None:
         mocked = mocker(SomeClass)
         mocked.mock("instance_method", force_async=True).return_value("mocked").called_once()
-        assert await SomeClass().instance_method() == "mocked"  # type: ignore
+        assert await SomeClass().instance_method() == "mocked"  # ty: ignore[invalid-await]
 
     async def test_mock_force_async_non_existing_attribute(self) -> None:
         mocked = mocker(SomeClass)
@@ -514,7 +513,7 @@ class AsyncMockingTestCase:
             "mocked"
         ).called_once()
         # pylint: disable=no-member
-        assert await SomeClass().unknown_attr() == "mocked"  # type: ignore
+        assert await SomeClass().unknown_attr() == "mocked"  # ty: ignore[unresolved-attribute]
 
     async def test_mock_async_chained_methods(self) -> None:
         class Third:

@@ -49,20 +49,23 @@ __all__ = [
 ]
 
 
-class AnyOf:  # pylint: disable=invalid-name
+class AnyOf:
     """A helper object that compares equal to any given type."""
 
     def __init__(self, kind: type[Any]) -> None:
         self._kind = kind
 
-    def __eq__(self, other: Any) -> bool:
+    def __eq__(self, other: object) -> bool:
         return isinstance(other, self._kind)
 
-    def __ne__(self, other: Any) -> bool:
+    def __ne__(self, other: object) -> bool:
         return not self.__eq__(other)
 
     def __repr__(self) -> str:
         return f"<ANY_{self._kind.__name__.upper()}>"
+
+    def __hash__(self) -> int:
+        return hash(self._kind)
 
 
 ANY_BOOL = AnyOf(bool)

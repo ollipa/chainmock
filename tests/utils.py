@@ -18,12 +18,13 @@ def assert_raises(
     Raises:
         AssertionError: Raised if the given exception or the message does not
             match the raised exception.
+
     """
     try:
         yield
     except Exception as raised_exception:  # pylint: disable=broad-except
         if not isinstance(raised_exception, expected_exception):
-            raise AssertionError(  # pylint: disable=raise-missing-from
+            raise AssertionError(  # noqa: B904
                 f"\nExpected exception: '{expected_exception}'\n"
                 f"Raised exception: '{type(raised_exception)}'"
             )
@@ -35,8 +36,7 @@ def assert_raises(
             fail = str(raised_exception) != str(match)
         if fail:
             raise AssertionError(
-                f"Expected error message:\n\n'{str(match)}'\n"
-                f"\nBut got:\n\n'{str(raised_exception)}'\n\n"
+                f"Expected error message:\n\n'{match!s}'\n\nBut got:\n\n'{raised_exception!s}'\n\n"
             ) from raised_exception
     else:
         raise AssertionError(f"Exception '{expected_exception.__name__}' was not raised")

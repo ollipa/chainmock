@@ -1,6 +1,5 @@
 """Test patching functionality."""
 
-# pylint: disable=missing-docstring
 import re
 
 from chainmock import mocker
@@ -131,7 +130,7 @@ class PatchingTestCase:
         mocker("tests.test_patching.PatchClass").mock("foo_method", create=True).return_value(
             "mocked"
         ).called_once()
-        assert PatchClass().foo_method() == "mocked"  # type: ignore
+        assert PatchClass().foo_method() == "mocked"  # ty: ignore[unresolved-attribute]
 
     def test_patch_non_existing_attribute_fail(self) -> None:
         with assert_raises(AttributeError, "Mock object has no attribute 'foo_method'"):
@@ -182,7 +181,7 @@ class PatchingTestCase:
         mocked = mocker("tests.test_patching.PatchClass")
         mocked.mock("instance_method", force_property=True).called_once().return_value("mocked")
         # pylint: disable=comparison-with-callable
-        assert PatchClass().instance_method == "mocked"  # type: ignore
+        assert PatchClass().instance_method == "mocked"
         State.teardown()
         assert PatchClass().instance_method() == "instance_attr"
 
@@ -190,7 +189,7 @@ class PatchingTestCase:
         mocked = mocker("tests.test_patching.PatchClass")
         mocked.mock("unknown_property", force_property=True, create=True).return_value("mocked")
         # pylint: disable=no-member
-        assert PatchClass().unknown_property == "mocked"  # type: ignore
+        assert PatchClass().unknown_property == "mocked"  # ty: ignore[unresolved-attribute]
         assert hasattr(PatchClass(), "unknown_property")
         State.teardown()
         assert not hasattr(PatchClass(), "unknown_property")
@@ -203,7 +202,7 @@ class PatchingTestCase:
     async def test_patching_force_async(self) -> None:
         mocked = mocker("tests.test_patching.PatchClass")
         mocked.mock("instance_method", force_async=True).return_value("patched").called_once()
-        assert await PatchClass().instance_method() == "patched"  # type: ignore
+        assert await PatchClass().instance_method() == "patched"  # # ty: ignore[invalid-await]
 
     async def test_patching_force_async_non_existing_attribute(self) -> None:
         mocked = mocker("tests.test_patching.PatchClass")
@@ -211,4 +210,4 @@ class PatchingTestCase:
             "patched"
         ).called_once()
         # pylint: disable=no-member
-        assert await PatchClass().unknown_attr() == "patched"  # type: ignore
+        assert await PatchClass().unknown_attr() == "patched"  # ty: ignore[unresolved-attribute]

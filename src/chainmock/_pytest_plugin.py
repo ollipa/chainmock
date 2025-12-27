@@ -10,7 +10,7 @@ from ._api import State
 
 @pytest.hookimpl(hookwrapper=True)
 def pytest_runtest_makereport(
-    item: Item,  # pylint: disable=unused-argument
+    item: Item,  # noqa: ARG001
     call: CallInfo[None],
 ) -> Generator[None]:
     """Hook into test execution and execute teardown after a test."""
@@ -19,7 +19,7 @@ def pytest_runtest_makereport(
         if call.excinfo is None:
             try:
                 State.validate_mocks()
-            except BaseException:  # pylint: disable=broad-except
+            except BaseException:  # noqa: BLE001
                 call.excinfo = ExceptionInfo.from_current()
     elif call.when == "teardown":
         State.reset_mocks()

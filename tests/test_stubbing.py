@@ -1,6 +1,5 @@
 """Test stubbing functionality."""
 
-# pylint: disable=missing-docstring
 import re
 
 from chainmock._api import Mock, State, mocker

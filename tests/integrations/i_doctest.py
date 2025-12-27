@@ -1,6 +1,5 @@
 """Test docstring integration and examples in docstrings."""
 
-# pylint: disable=missing-docstring
 import asyncio
 import doctest
 import os
@@ -35,7 +34,7 @@ class Teapot:
     def pour(self) -> None:
         self._state = "empty"
 
-    def add_tea(self, tea_type: str, loose: bool = True) -> str:
+    def add_tea(self, tea_type: str, *, loose: bool = True) -> str:
         if loose:
             return f"loose {tea_type}"
         return f"bagged {tea_type}"
@@ -105,20 +104,20 @@ if __name__ == "__main__":
         if md_file.endswith(".md")
     ]
     md_files.append("../../docs/unittest_comparison.md")
-    for md_file in md_files:
-        results.append(
-            doctest.testfile(
-                md_file,
-                extraglobs={
-                    "Teapot": Teapot,
-                    "teapot": Teapot(),
-                    "mocker": _api.mocker,
-                    "State": _api.State,
-                    "asyncio": asyncio,
-                },
-                optionflags=doctest.ELLIPSIS,
-            )
+    results.extend(
+        doctest.testfile(
+            md_file,
+            extraglobs={
+                "Teapot": Teapot,
+                "teapot": Teapot(),
+                "mocker": _api.mocker,
+                "State": _api.State,
+                "asyncio": asyncio,
+            },
+            optionflags=doctest.ELLIPSIS,
         )
+        for md_file in md_files
+    )
 
     test_count = sum(result.attempted for result in results)
     failed_count = sum(result.failed for result in results)

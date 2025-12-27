@@ -63,8 +63,73 @@ include = ["src/chainmock"]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
+[tool.ty.rules]
+unused-ignore-comment = "warn"
+
 [tool.ruff]
 line-length = 100
+
+[tool.ruff.lint]
+select = [
+    "E",     # pycodestyle error
+    "W",     # pycodestyle warning
+    "F",     # pyflakes
+    "B",     # flake8-bugbear
+    "YTT",   # flake8-2020
+    "ASYNC", # flake8-async
+    "S",     # flake8-bandit
+    "BLE",   # flake8-blind-except
+    "FBT",   # flake8-boolean-trap
+    "A",     # flake8-builtins
+    "C4",    # flake8-comprehensions
+    "DTZ",   # flake8-datetimez
+    "T10",   # flake8-debugger
+    "EXE",   # flake8-executable
+    "ISC",   # flake8-implicit-str-concat
+    "LOG",   # flake8-logging
+    "G",     # flake8-logging-format
+    "PIE",   # flake8-pie
+    "PYI",   # flake8-pyi
+    "PT",    # flake8-pytest-style
+    "Q0",    # flake8-quotes
+    "RSE",   # flake8-raise
+    "RET",   # flake8-return
+    "SLF",   # flake8-self
+    "SIM",   # flake8-simplify
+    "SLOT",  # flake8-slots
+    "TID",   # flake8-tidy-imports
+    "TD",    # flake8-todos
+    "ARG",   # flake8-unused-arguments
+    "FLY",   # flynt
+    "I",     # isort
+    "N",     # pep8-naming
+    "PERF",  # perflint
+    "D",     # pydocstyle
+    "PGH",   # pygrep-hooks
+    "PL",    # pylint
+    "UP",    # pyupgrade
+    "FURB",  # refurb
+    "RUF",   # ruff
+    "TRY",   # tryceratops
+]
+ignore = [
+    "S101",    # assert detected
+    "S311",    # standard pseudo-randomness
+    "D105",    # missing docstring in magic method
+    "D107",    # missing docstring in __init__ method
+    "D203",    # incorrect-blank-line-before-class
+    "D205",    # blank line between summary and description
+    "D213",    # multi-line-summary-second-line
+    "D401",    # first line should be in imperative mood (false positives)
+    "PLR2004", # magic-value-comparison
+    "PLR0913", # too-many-arguments
+    "TRY003",  # raise-vanilla-args
+    "TRY004",  # type-check-without-type-error
+]
+
+[tool.ruff.lint.per-file-ignores]
+# Ignore docstring errors in tests.
+"tests/**.py" = ["D"]
 
 [tool.pytest.ini_options]
 xfail_strict = true

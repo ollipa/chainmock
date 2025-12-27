@@ -24,9 +24,9 @@ def new_stop_test(self: unittest.TestResult, test: unittest.TestCase) -> None:
 
     try:
         State.validate_mocks()
-    except BaseException:  # pylint: disable=broad-except
+    except BaseException:  # noqa: BLE001
         self.addFailure(test, sys.exc_info())
     return original_stop_test(self, test)
 
 
-unittest.TestResult.stopTest = new_stop_test  # type: ignore
+unittest.TestResult.stopTest = new_stop_test  # ty: ignore[invalid-assignment]

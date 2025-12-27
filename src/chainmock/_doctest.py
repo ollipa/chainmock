@@ -21,4 +21,4 @@ def new_run(
         State.teardown()
 
 
-DocTestRunner.run = new_run  # type: ignore
+DocTestRunner.run = new_run  # ty: ignore[invalid-assignment]

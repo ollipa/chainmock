@@ -1,6 +1,5 @@
 """Test common functionality in Chainmock."""
 
-# pylint: disable=missing-docstring
 from unittest import mock as umock
 
 from chainmock._api import Assert, Mock, State, mocker

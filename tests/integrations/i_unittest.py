@@ -1,6 +1,6 @@
 """Test unittest integration."""
 
-# pylint: disable=missing-docstring
+# ruff: noqa: PT009
 import sys
 import unittest
 

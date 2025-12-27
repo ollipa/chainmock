@@ -7,7 +7,7 @@ import functools
 import inspect
 import itertools
 from collections.abc import Callable, Sequence
-from typing import Any, Literal, ParamSpec, TypeVar
+from typing import Any, ClassVar, Literal, ParamSpec, TypeVar
 from unittest import mock as umock
 from unittest.util import safe_repr
 
@@ -102,6 +102,7 @@ class Assert:
 
         Returns:
             Python unittest mock (`AsyncMock`, `MagicMock`, or `PropertyMock`).
+
         """
         return self._attr_mock
 
@@ -128,6 +129,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         if self._kind == "spy":
             raise AttributeError(
@@ -197,6 +199,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         if self._kind == "spy":
             raise AttributeError(
@@ -225,6 +228,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_called_with, *args, **kwargs)
@@ -252,6 +256,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_awaited_with, *args, **kwargs)
@@ -290,6 +295,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_match_call_args, "last", *args, **kwargs)
@@ -329,6 +335,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_match_await_args, "last", *args, **kwargs)
@@ -356,6 +363,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_called_once_with, *args, **kwargs)
@@ -364,8 +372,7 @@ class Assert:
 
     @only_async
     def awaited_once_with(self, *args: Any, **kwargs: Any) -> Assert:
-        """Assert that the mock was awaited exactly once with the specified
-        arguments.
+        """Assert that the mock was awaited exactly once with the specified arguments.
 
         Wrapper for `unittest.mock.AsyncMock.assert_awaited_once_with`.
 
@@ -384,6 +391,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_awaited_once_with, *args, **kwargs)
@@ -414,6 +422,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_any_call, *args, **kwargs)
@@ -445,6 +454,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_any_await, *args, **kwargs)
@@ -469,6 +479,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_all_calls_with, *args, **kwargs))
         return self
@@ -492,6 +503,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_all_awaits_with, *args, **kwargs))
         return self
@@ -527,6 +539,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_match_call_args, "any", *args, **kwargs)
@@ -565,6 +578,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_match_await_args, "any", *args, **kwargs)
@@ -608,6 +622,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_match_call_args, "all", *args, **kwargs)
@@ -652,13 +667,14 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_match_await_args, "all", *args, **kwargs)
         )
         return self
 
-    def has_calls(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
+    def has_calls(self, calls: Sequence[umock._Call], *, any_order: bool = False) -> Assert:
         """Assert that the mock has been called with the specified calls.
 
         If `any_order` is True then the calls can be in any order, but they must
@@ -687,6 +703,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_has_calls, calls, any_order)
@@ -694,7 +711,7 @@ class Assert:
         return self
 
     @only_async
-    def has_awaits(self, calls: Sequence[umock._Call], any_order: bool = False) -> Assert:
+    def has_awaits(self, calls: Sequence[umock._Call], *, any_order: bool = False) -> Assert:
         """Assert that the mock has been awaited with the specified calls.
 
         If `any_order` is True then the calls can be in any order, but they must
@@ -723,6 +740,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._attr_mock.assert_has_awaits, calls, any_order)
@@ -744,6 +762,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._attr_mock.assert_not_called))
         return self
@@ -764,6 +783,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._attr_mock.assert_not_awaited))
         return self
@@ -784,6 +804,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._attr_mock.assert_called))
         return self
@@ -805,6 +826,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._attr_mock.assert_awaited))
         return self
@@ -825,6 +847,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_call_count, 1))
         return self
@@ -846,6 +869,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_await_count, 1))
         return self
@@ -861,6 +885,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_call_count, 2))
         return self
@@ -877,6 +902,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_await_count, 2))
         return self
@@ -896,6 +922,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_call_count, call_count))
         return self
@@ -916,6 +943,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_await_count, await_count))
         return self
@@ -944,6 +972,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_call_count, call_count, "at least"))
         return self
@@ -973,6 +1002,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_await_count, await_count, "at least")
@@ -1003,6 +1033,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(functools.partial(self._assert_call_count, call_count, "at most"))
         return self
@@ -1032,6 +1063,7 @@ class Assert:
 
         Returns:
             Assert instance so that calls can be chained.
+
         """
         self.__assertions.append(
             functools.partial(self._assert_await_count, await_count, "at most")
@@ -1064,6 +1096,7 @@ class Assert:
 
         Returns:
             Mock instance associated with this assertion.
+
         """
         return self.__parent
 
@@ -1077,12 +1110,12 @@ class Assert:
         if modifier == "at most" and self._attr_mock.call_count <= call_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
-        name = self._attr_mock._mock_name or "mock"  # pylint:disable=protected-access
+        name = self._attr_mock._mock_name or "mock"  # noqa: SLF001
         msg = (
-            f"Expected '{name}' to have been called {modifier_str}"  # pylint:disable=protected-access
+            f"Expected '{name}' to have been called {modifier_str}"
             f"{self._format_call_count(call_count)}. "
             f"Called {self._format_call_count(self._attr_mock.call_count)}."
-            f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
+            f"{self._attr_mock._calls_repr()}"  # noqa: SLF001
         )
         raise AssertionError(msg)
 
@@ -1096,7 +1129,7 @@ class Assert:
         if modifier == "at most" and self._attr_mock.await_count <= await_count:
             return
         modifier_str = f"{modifier} " if modifier else ""
-        name = self._attr_mock._mock_name or "mock"  # pylint:disable=protected-access
+        name = self._attr_mock._mock_name or "mock"  # noqa: SLF001
         msg = (
             f"Expected '{name}' to have been awaited {modifier_str}"
             f"{self._format_call_count(await_count)}. "
@@ -1108,9 +1141,9 @@ class Assert:
     def _assert_all_calls_with(self, *args: Any, **kwargs: Any) -> None:
         if not self._all_args_match(self._attr_mock.call_args_list, *args, **kwargs):
             msg = (
-                f"All calls have not been made with the given arguments:\n"  # pylint:disable=protected-access
+                f"All calls have not been made with the given arguments:\n"
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
+                f"{self._attr_mock._calls_repr()}"  # noqa: SLF001
             )
             raise AssertionError(msg)
 
@@ -1126,10 +1159,7 @@ class Assert:
     @staticmethod
     def _all_args_match(args_list: umock._CallList, *args: Any, **kwargs: Any) -> bool:
         expected_call = umock.call(*args, **kwargs)
-        for call in args_list:
-            if call != expected_call:
-                return False
-        return True
+        return all(call == expected_call for call in args_list)
 
     def _assert_match_call_args(  # pylint: disable=too-many-branches
         self, modifier: Literal["all", "any", "last"], *args: Any, **kwargs: Any
@@ -1144,7 +1174,7 @@ class Assert:
             msg = (
                 f"{msg}:\n"
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
+                f"{self._attr_mock._calls_repr()}"  # noqa: SLF001
             )
             raise AssertionError(msg)
 
@@ -1158,11 +1188,7 @@ class Assert:
                 msg = "All awaits do not contain the given arguments"
             else:
                 msg = "No await includes arguments"
-            msg = (
-                f"{msg}:\n"  # pylint:disable=protected-access
-                f"{self._args_repr(*args, **kwargs)}"
-                f"{self._awaits_repr()}"
-            )
+            msg = f"{msg}:\n{self._args_repr(*args, **kwargs)}{self._awaits_repr()}"
             raise AssertionError(msg)
 
     @staticmethod
@@ -1174,7 +1200,7 @@ class Assert:
     ) -> bool:
         match = False
         if modifier == "last":
-            args_list = umock._CallList([args_list[-1]])  # pylint:disable=protected-access
+            args_list = umock._CallList([args_list[-1]])  # noqa: SLF001
         for call_args, call_kwargs in args_list:
             arg_match = True
             kwarg_match = True
@@ -1210,7 +1236,7 @@ class Assert:
     @staticmethod
     def _args_repr(*args: Any, **kwargs: Any) -> str:
         format_args = (repr(arg) for arg in args)
-        format_kwargs = (f"{name}={repr(value)}" for name, value in kwargs.items())
+        format_kwargs = (f"{name}={value!r}" for name, value in kwargs.items())
         return f"Arguments: call({', '.join(itertools.chain(format_args, format_kwargs))})"
 
     @staticmethod
@@ -1233,7 +1259,7 @@ class State:
     Used internally by chainmock to tear down mocks.
     """
 
-    MOCKS: dict[int | str, Mock] = {}
+    MOCKS: ClassVar[dict[int | str, Mock]] = {}
 
     @classmethod
     def get_or_create_mock(
@@ -1245,15 +1271,14 @@ class State:
     ) -> Mock:
         """Get existing mock or create a new one if the object has not been mocked yet."""
         if target is None:  # Do not cache stubs
-            Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
+            Stub = type(  # noqa: N806
+                "Stub", (Mock,), {}
+            )  # Use intermediary class to attach properties
             stub = Stub(target, spec=spec, _internal=True)
             cls.MOCKS[id(stub)] = stub
-            return stub  # type: ignore[no-any-return]
+            return stub
         key: int | str
-        if isinstance(target, str):
-            key = target
-        else:
-            key = id(target)
+        key = target if isinstance(target, str) else id(target)
         mock = cls.MOCKS.get(key)
         if mock is None:
             patch = None
@@ -1267,7 +1292,7 @@ class State:
     def reset_mocks(cls) -> None:
         """Reset all mocks and return all mocked objects to their original state."""
         for mock in cls.MOCKS.values():
-            mock._reset()  # pylint: disable=protected-access
+            mock._reset()  # noqa: SLF001
 
     @classmethod
     def reset_state(cls) -> None:
@@ -1280,7 +1305,7 @@ class State:
         mocks = cls.MOCKS
         cls.MOCKS = {}
         for mock in mocks.values():
-            mock._validate()  # pylint: disable=protected-access
+            mock._validate()  # noqa: SLF001
 
     @classmethod
     def teardown(cls) -> None:
@@ -1325,14 +1350,14 @@ class Mock:
         self.__object_patches: list[umock._patch[Any]] = []
         self.__patch_class: bool = patch_class
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Mock:
+    def __call__(self, *args: Any, **kwargs: Any) -> Mock:  # noqa: ARG002
         """Return self when Mock is called directly.
 
         This allows mocking methods that are properties but are also callable.
         """
         return self
 
-    @property  # type: ignore[misc]
+    @property
     def __class__(self) -> type[Any]:
         if self.__spec_class is None:
             return type(self)
@@ -1357,6 +1382,7 @@ class Mock:
             >>> with open("file_name") as file:
             ...    file.read()
             'mocked'
+
         """
         return self.__mock
 
@@ -1398,6 +1424,7 @@ class Mock:
             ValueError: Raised if the given attribute name is empty.
             RuntimeError: If trying to spy stubs or patched objects. Also raised
                 if trying to spy a mocked attribute.
+
         """
         if self.__target is None:
             raise RuntimeError("Spying is not available for stubs. Call 'mock' instead.")
@@ -1406,7 +1433,7 @@ class Mock:
         if not name:
             raise ValueError("Attribute name cannot be empty.")
         if cached := self.__assertions.get(name):
-            if cached._kind == "mock":  # pylint: disable=protected-access
+            if cached._kind == "mock":  # noqa: SLF001
                 raise RuntimeError(
                     f"Attribute '{name}' has already been mocked. Can't spy a mocked attribute."
                 )
@@ -1441,14 +1468,14 @@ class Mock:
     def __get_method_type(
         self,
         name: str,
-        method_type: type[classmethod] | type[staticmethod],  # type: ignore[type-arg]
+        method_type: type[classmethod | staticmethod],
     ) -> bool:
         try:
             return isinstance(inspect.getattr_static(self.__target, name), method_type)
         except AttributeError:
             # Inspecting proxied objects raises AttributeError
             if hasattr(self.__target, "__mro__"):
-                for cls in inspect.getmro(self.__target):  # type: ignore[arg-type]
+                for cls in inspect.getmro(self.__target):
                     method = vars(cls).get(name)
                     if method is not None:
                         return isinstance(method, method_type)
@@ -1521,9 +1548,10 @@ class Mock:
         Raises:
             ValueError: Raised if the given attribute name is empty.
             RuntimeError: If trying to mock a spied attribute.
+
         """
         if cached := self.__assertions.get(name):
-            if cached._kind == "spy":  # pylint: disable=protected-access
+            if cached._kind == "spy":  # noqa: SLF001
                 raise RuntimeError(
                     f"Attribute '{name}' has already been spied. Can't mock a spied attribute."
                 )
@@ -1550,7 +1578,7 @@ class Mock:
                 force_async=force_async,
             )
         else:
-            original = self.__get_original(parsed_name, create)
+            original = self.__get_original(parsed_name, create=create)
             assertion = self.__mock_attribute(
                 parsed_name,
                 parts,
@@ -1574,7 +1602,7 @@ class Mock:
             class_name = self.__target.__class__.__name__
         return f"_{class_name.lstrip('_')}__{name.lstrip('_')}"
 
-    def __get_original(self, name: str, create: bool) -> Any | None:
+    def __get_original(self, name: str, *, create: bool) -> Any | None:
         try:
             return getattr(self.__target, name)
         except AttributeError:
@@ -1599,7 +1627,7 @@ class Mock:
             force_property=force_property if not parts else False,
             force_async=force_async if not parts else False,
         )
-        attr_mock._mock_name = f"Stub.{name}"  # pylint: disable=protected-access
+        attr_mock._mock_name = f"Stub.{name}"  # noqa: SLF001
         assertion = Assert(self, attr_mock, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
@@ -1629,10 +1657,7 @@ class Mock:
                 return self.__get_stub_property_mock(name)
         if force_property:
             return self.__get_stub_property_mock(name)
-        if force_async:
-            attr_mock = umock.AsyncMock()
-        else:
-            attr_mock = getattr(self.__mock, name)
+        attr_mock = umock.AsyncMock() if force_async else getattr(self.__mock, name)
         setattr(self, name, attr_mock)
         return attr_mock
 
@@ -1669,7 +1694,9 @@ class Mock:
         assertion = Assert(self, attr_mock, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
-            Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
+            Stub = type(  # noqa: N806
+                "Stub", (Mock,), {}
+            )  # Use intermediary class to attach properties
             stub = Stub(_internal=True)
             assertion.return_value(stub)
             assertion = stub.mock(
@@ -1737,8 +1764,7 @@ class Mock:
         else:
             new_callable = None
             if (
-                not parts
-                and force_property
+                (not parts and force_property)
                 or (original is not None and isinstance(original, property))
                 or self.__is_class_attribute(name, original)
             ):
@@ -1757,7 +1783,9 @@ class Mock:
         assertion = Assert(self, attr_mock, patch=patch, _internal=True)
         if len(parts) > 0:
             # Support for chaining methods
-            Stub = type("Stub", (Mock,), {})  # Use intermediary class to attach properties
+            Stub = type(  # noqa: N806
+                "Stub", (Mock,), {}
+            )  # Use intermediary class to attach properties
             stub = Stub(_internal=True)
             assertion.return_value(stub)
             assertion = stub.mock(
@@ -1807,7 +1835,7 @@ class Mock:
     def _validate(self) -> None:
         for key in list(self.__assertions):
             assertion = self.__assertions.pop(key)
-            assertion._validate()  # pylint: disable=protected-access
+            assertion._validate()  # noqa: SLF001
 
 
 def mocker(
@@ -1937,6 +1965,7 @@ def mocker(
 
     Returns:
         Mock instance.
+
     """
     mock = State.get_or_create_mock(target, spec=spec, patch_class=patch_class)
     for name, value in kwargs.items():
