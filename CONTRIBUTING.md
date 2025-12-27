@@ -31,18 +31,12 @@ We welcome code contributions! If you would like to contribute code, please foll
 
 ## Getting started
 
-Before you start contributing, ensure that you have the latest version of Poetry installed. See [Poetry documentation](https://python-poetry.org/docs/#installation) for installation instructions.
+Before you start contributing, ensure that you have the latest version of `uv` installed. See [uv documentation](https://docs.astral.sh/uv/) for installation instructions.
 
-After installing Poetry, run the following command to install the project's dependencies:
-
-```bash
-poetry install
-```
-
-After installing the dependencies, run the following command to activate the project's virtual environment:
+After installing `uv`, run the following command to install the project's dependencies:
 
 ```bash
-poetry shell
+uv venv
 ```
 
 ## Pull Request Guidelines
@@ -69,7 +63,11 @@ make test
 
 ## Running tests with Tox
 
-Tox is used to run tests in multiple Python environments. To execute tests with different Python versions you need to first have the Python versions installed locally. You can use, for example, [pyenv](https://github.com/pyenv/pyenv) project to install multiple Python versions.
+Tox is used to run tests in multiple Python environments. To execute tests with different Python versions you need to first have the Python versions installed locally. You can use [uv](https://docs.astral.sh/uv/guides/install-python/) to install multiple Python versions:
+
+```
+uv python install 3.13 3.14
+```
 
 After installing the Python versions, you can run the tests with the following command:
 
@@ -80,7 +78,7 @@ tox
 The above command will run all the tests in all the Python versions defined in `tox.ini` file. You can also run the tests in a specific Python version with the `-e` flag:
 
 ```bash
-tox -e py312
+tox -e py314
 ```
 
 For more information see the [Tox documentation](https://tox.wiki/).

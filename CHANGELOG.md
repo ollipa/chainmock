@@ -17,6 +17,7 @@ Types of changes:
 ### Infrastructure
 
 - Add Pytest 9.0 to tox test run.
+- Replace Poetry with uv.
 
 ## Release 2.0.0
 

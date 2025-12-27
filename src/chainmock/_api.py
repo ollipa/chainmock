@@ -1081,7 +1081,7 @@ class Assert:
             f"Expected '{name}' to have been called {modifier_str}"  # pylint:disable=protected-access
             f"{self._format_call_count(call_count)}. "
             f"Called {self._format_call_count(self._attr_mock.call_count)}."
-            f"{self._attr_mock._calls_repr()}"
+            f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
         )
         raise AssertionError(msg)
 
@@ -1109,7 +1109,7 @@ class Assert:
             msg = (
                 f"All calls have not been made with the given arguments:\n"  # pylint:disable=protected-access
                 f"{self._args_repr(*args, **kwargs)}"
-                f"{self._attr_mock._calls_repr()}"
+                f"{self._attr_mock._calls_repr()}"  # pylint:disable=protected-access
             )
             raise AssertionError(msg)
 
