@@ -206,7 +206,7 @@ class Proxy:
         try:
             cache = cls.__dict__["_class_proxy_cache"]
         except KeyError:
-            cls._class_proxy_cache = cache = {}
+            cls._class_proxy_cache = cache = {}  # ty:ignore[unresolved-attribute]
         try:
             theclass = cache[obj.__class__]
         except KeyError:

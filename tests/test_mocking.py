@@ -835,7 +835,7 @@ class MockingTestCase:
         mocker(FooClass).mock("method").return_value("mocked").called_once()
         assert FooClass.method() == "mocked"  # ty: ignore[unresolved-attribute]
         State.teardown()
-        assert FooClass.method() == "foo"  # ty: ignore[unresolved-attribute]
+        assert FooClass.method() == "foo"
 
     def test_mock_instance_attribute(self) -> None:
         instance = SomeClass()
@@ -859,8 +859,8 @@ class MockingTestCase:
         assert instance.method1() == "mocked1"  # ty: ignore[unresolved-attribute]
         assert instance.method2() == "mocked2"  # ty: ignore[unresolved-attribute]
         State.teardown()
-        assert instance.method1() == "foo"  # ty: ignore[unresolved-attribute]
-        assert instance.method2() == "bar"  # ty: ignore[unresolved-attribute]
+        assert instance.method1() == "foo"
+        assert instance.method2() == "bar"
 
     def test_mock_non_existing_attribute(self) -> None:
         class FooClass:
