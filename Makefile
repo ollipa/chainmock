@@ -44,7 +44,7 @@ typecheck:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running type checker$(off)\n'
 	@printf '*****************\n'
-	uv run ty check ${TARGETS}
+	uv run ty check --error-on-warning ${TARGETS}
 
 .PHONY: format
 format:

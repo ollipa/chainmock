@@ -880,14 +880,14 @@ class MockingTestCase:
     def test_mock_proxied_class_instance_method_with_args(self) -> None:
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).mock("instance_method_with_args").return_value(3).called_once_with(1)
-        assert SomeClassProxy().instance_method_with_args(1) == 3  # ty: ignore[call-non-callable]
+        assert SomeClassProxy().instance_method_with_args(1) == 3
 
     def test_mock_proxied_class_class_method_with_args(self) -> None:
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).mock("class_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
         )
-        assert SomeClassProxy().class_method_with_args(1) == 3  # ty: ignore[call-non-callable]
+        assert SomeClassProxy().class_method_with_args(1) == 3
         assert SomeClassProxy.class_method_with_args(2) == 3
 
     def test_mock_proxied_class_static_method_with_args(self) -> None:
@@ -895,7 +895,7 @@ class MockingTestCase:
         mocker(SomeClassProxy).mock("static_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
         )
-        assert SomeClassProxy().static_method_with_args(1) == 3  # ty: ignore[call-non-callable]
+        assert SomeClassProxy().static_method_with_args(1) == 3
         assert SomeClassProxy.static_method_with_args(2) == 3
 
     def test_mock_proxied_derived_instance_method_with_args(self) -> None:
@@ -903,14 +903,14 @@ class MockingTestCase:
         mocker(DerivedClassProxy).mock("instance_method_with_args").return_value(
             3
         ).called_once_with(1)
-        assert DerivedClassProxy().instance_method_with_args(1) == 3  # ty: ignore[call-non-callable]
+        assert DerivedClassProxy().instance_method_with_args(1) == 3
 
     def test_mock_proxied_derived_class_method_with_args(self) -> None:
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).mock("class_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
         )
-        assert DerivedClassProxy().class_method_with_args(1) == 3  # ty: ignore[call-non-callable]
+        assert DerivedClassProxy().class_method_with_args(1) == 3
         assert DerivedClassProxy.class_method_with_args(2) == 3
 
     def test_mock_proxied_derived_static_method_with_args(self) -> None:
@@ -918,7 +918,7 @@ class MockingTestCase:
         mocker(DerivedClassProxy).mock("static_method_with_args").return_value(3).has_calls(
             [call(1), call(2)]
         )
-        assert DerivedClassProxy().static_method_with_args(1) == 3  # ty: ignore[call-non-callable]
+        assert DerivedClassProxy().static_method_with_args(1) == 3
         assert DerivedClassProxy.static_method_with_args(2) == 3
 
     def test_mock_proxied_module_function_with_args(self) -> None:

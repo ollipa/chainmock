@@ -613,35 +613,35 @@ class SpyingTestCase:
     def test_spy_proxied_class_instance_method_with_args(self) -> None:
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).spy("instance_method_with_args").called_once_with(1)
-        assert SomeClassProxy().instance_method_with_args(1) == 1  # ty: ignore[call-non-callable]
+        assert SomeClassProxy().instance_method_with_args(1) == 1
 
     def test_spy_proxied_class_class_method_with_args(self) -> None:
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).spy("class_method_with_args").has_calls([call(1), call(2)])
-        assert SomeClassProxy().class_method_with_args(1) == 1  # ty: ignore[call-non-callable]
+        assert SomeClassProxy().class_method_with_args(1) == 1
         assert SomeClassProxy.class_method_with_args(2) == 2
 
     def test_spy_proxied_class_static_method_with_args(self) -> None:
         SomeClassProxy = Proxy(SomeClass)
         mocker(SomeClassProxy).spy("static_method_with_args").has_calls([call(1), call(2)])
-        assert SomeClassProxy().static_method_with_args(1) == 1  # ty: ignore[call-non-callable]
+        assert SomeClassProxy().static_method_with_args(1) == 1
         assert SomeClassProxy.static_method_with_args(2) == 2
 
     def test_spy_proxied_derived_instance_method_with_args(self) -> None:
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).spy("instance_method_with_args").called_once_with(1)
-        assert DerivedClassProxy().instance_method_with_args(1) == 1  # ty: ignore[call-non-callable]
+        assert DerivedClassProxy().instance_method_with_args(1) == 1
 
     def test_spy_proxied_derived_class_method_with_args(self) -> None:
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).spy("class_method_with_args").has_calls([call(1), call(2)])
-        assert DerivedClassProxy().class_method_with_args(1) == 1  # ty: ignore[call-non-callable]
+        assert DerivedClassProxy().class_method_with_args(1) == 1
         assert DerivedClassProxy.class_method_with_args(2) == 2
 
     def test_spy_proxied_derived_static_method_with_args(self) -> None:
         DerivedClassProxy = Proxy(DerivedClass)
         mocker(DerivedClassProxy).spy("static_method_with_args").has_calls([call(1), call(2)])
-        assert DerivedClassProxy().static_method_with_args(1) == 1  # ty: ignore[call-non-callable]
+        assert DerivedClassProxy().static_method_with_args(1) == 1
         assert DerivedClassProxy.static_method_with_args(2) == 2
 
     def test_spy_proxied_module_function_with_args(self) -> None:
