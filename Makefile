@@ -2,7 +2,7 @@
 color := $(shell tput setaf 2)
 off := $(shell tput sgr0)
 PYTHON := $(if $(shell command -v python3),python3,python)
-TARGETS = src tests docs
+TARGETS = src tests docs scripts
 
 .PHONY: all
 all: lint test

@@ -13,6 +13,7 @@ We appreciate your interest in contributing to our open-source project. Please t
 - [Testing and linters](#testing-and-linters)
 - [Running tests with Tox](#running-tests-with-tox)
 - [Updating documentation](#updating-documentation)
+- [Releasing a new version](#releasing-a-new-version)
 - [License](#license)
 
 ## How can I contribute?
@@ -94,6 +95,48 @@ mkdocs serve
 For more details see the [Mkdocs documentation](https://www.mkdocs.org/user-guide/) and [Material for Mkdocs documentation](https://squidfunk.github.io/mkdocs-material/).
 
 The documentation is hosted in [Read the Docs](https://about.readthedocs.com/) and is automatically built and deployed when a pull request is merged.
+
+## Releasing a new version
+
+Releases are made with `scripts/release.py`. It needs [GitHub CLI](https://cli.github.com/)
+and a clean `main` branch that is in sync with `origin/main`.
+
+1. Bump the version, push it to `main` and create the GitHub release. Choose `major`,
+   `minor` or `patch` following semantic versioning:
+
+   ```bash
+   uv run scripts/release.py bump minor
+   ```
+
+   The script updates the version in `pyproject.toml` and `uv.lock` and moves the
+   entries in the `Unreleased` section of `CHANGELOG.md` under the new version. It shows
+   the changes and asks for confirmation before it commits them and pushes the commit
+   directly to `main`. It then shows the release notes and asks for confirmation before
+   it creates the GitHub release and its `v`-prefixed tag at the pushed commit.
+
+   If you decline creating the release, or it fails, create it later from an up-to-date
+   `main` with `uv run scripts/release.py release`.
+
+2. The release starts the publish workflow, which first runs the CI workflow. After the
+   tests and linters pass and the release checks succeed, the workflow waits for
+   approval to deploy to the `pypi` environment. Before approving, check that the commit
+   of the run is on `main` and that its `.github/workflows/` directory is the same as on
+   `main`.
+
+Saving a draft or publishing a pre-release does not publish anything to PyPI, but
+changing a pre-release to a release does start the workflow.
+
+If the workflow fails before the deployment, nothing has been uploaded to PyPI. Fix the
+problem on `main`, remove the failed release with `gh release delete v1.2.3 --cleanup-tag`
+and create it again. If the fix changes the released code, bump a new version instead.
+
+### Release infrastructure
+
+PyPI trusted publishing is tied to the workflow file `publish.yml` and the `pypi`
+environment. The manual approval exists only if the `pypi` environment has required
+reviewers: GitHub creates a missing environment without any protection when a workflow
+references it. Do not delete or rename the environment, and do not leave the environment
+name blank in the PyPI trusted publisher.
 
 ## License
 

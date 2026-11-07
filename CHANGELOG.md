@@ -34,6 +34,9 @@ Types of changes:
 - Replace Poetry with uv.
 - Replace pylint, black and isort with ruff.
 - Replace mypy with ty.
+- Publish releases to PyPI only after tests and linters pass and the deployment is
+  approved.
+- Add `scripts/release.py` for bumping the version and creating releases.
 
 ## Release 2.0.0
 
