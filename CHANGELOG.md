@@ -19,6 +19,10 @@ Types of changes:
 - `any_order` argument is now positional only in `has_calls` and `has_awaits` methods.
 - Typing improvements.
 
+### Removed
+
+- Drop support for Python 3.10.
+
 ### Infrastructure
 
 - Add Pytest 9.0 to tox test run.

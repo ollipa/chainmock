@@ -4,7 +4,7 @@ version = "2.0.0"
 description = "Mocking library for Python and Pytest"
 authors = [{ name = "Olli Paakkunainen", email = "olli@paakkunainen.fi" }]
 license = "MIT"
-requires-python = ">=3.10,<4"
+requires-python = ">=3.11,<4"
 readme = "README.md"
 keywords = ["testing", "mock", "mocking", "pytest"]
 classifiers = [
@@ -13,7 +13,6 @@ classifiers = [
     "Development Status :: 5 - Production/Stable",
     "Framework :: Pytest",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.10",
     "Programming Language :: Python :: 3.11",
     "Programming Language :: Python :: 3.12",
     "Programming Language :: Python :: 3.13",
@@ -44,7 +43,7 @@ dev = [
     "mkdocs-material",
     "markdown-include",
     "mkdocstrings",
-    "pytest>= 6.2.0",
+    "pytest>= 7.1.0",
     "mkdocstrings-python",
     "ruff",
     "ty",
