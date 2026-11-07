@@ -31,6 +31,7 @@ Types of changes:
 - Add PyPy 3.12 to tox test run.
 - Add a single required CI check for branch protection.
 - Use tox-uv to create tox environments with uv.
+- Split development dependencies into `test`, `docs` and `lint` groups. The `dev` group includes them all.
 - Replace Poetry with uv.
 - Replace pylint, black and isort with ruff.
 - Replace mypy with ty.

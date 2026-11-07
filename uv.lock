@@ -72,23 +72,51 @@ dev = [
     { name = "tox-uv" },
     { name = "ty" },
 ]
+docs = [
+    { name = "markdown-include" },
+    { name = "mkdocs-material" },
+    { name = "mkdocstrings" },
+    { name = "mkdocstrings-python" },
+]
+lint = [
+    { name = "ruff" },
+    { name = "ty" },
+]
+test = [
+    { name = "pytest" },
+    { name = "pytest-asyncio" },
+]
 
 [package.metadata]
 
 [package.metadata.requires-dev]
 dev = [
-    { name = "coverage" },
-    { name = "ipython" },
-    { name = "markdown-include" },
-    { name = "mkdocs-material" },
-    { name = "mkdocstrings" },
-    { name = "mkdocstrings-python" },
+    { name = "coverage", specifier = ">=7.0.0" },
+    { name = "ipython", specifier = ">=9.0.0" },
+    { name = "markdown-include", specifier = ">=0.8.0" },
+    { name = "mkdocs-material", specifier = ">=9.0.0" },
+    { name = "mkdocstrings", specifier = ">=1.0.0" },
+    { name = "mkdocstrings-python", specifier = ">=2.0.0" },
     { name = "pytest", specifier = ">=7.1.0" },
-    { name = "pytest-asyncio" },
-    { name = "ruff" },
-    { name = "tox" },
-    { name = "tox-uv", specifier = ">=1.37.7" },
-    { name = "ty" },
+    { name = "pytest-asyncio", specifier = ">=0.23.0" },
+    { name = "ruff", specifier = ">=0.17.0" },
+    { name = "tox", specifier = ">=4.0.0" },
+    { name = "tox-uv", specifier = ">=1.0.0" },
+    { name = "ty", specifier = ">=0.0.99" },
+]
+docs = [
+    { name = "markdown-include", specifier = ">=0.8.0" },
+    { name = "mkdocs-material", specifier = ">=9.0.0" },
+    { name = "mkdocstrings", specifier = ">=1.0.0" },
+    { name = "mkdocstrings-python", specifier = ">=2.0.0" },
+]
+lint = [
+    { name = "ruff", specifier = ">=0.17.0" },
+    { name = "ty", specifier = ">=0.0.99" },
+]
+test = [
+    { name = "pytest", specifier = ">=7.1.0" },
+    { name = "pytest-asyncio", specifier = ">=0.23.0" },
 ]
 
 [[package]]

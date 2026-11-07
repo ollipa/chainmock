@@ -35,19 +35,22 @@ Documentation = "https://chainmock.readthedocs.io"
 chainmock = "chainmock._pytest_plugin"
 
 [dependency-groups]
+test = ["pytest>=7.1.0", "pytest-asyncio>=0.23.0"]
+docs = [
+    "markdown-include>=0.8.0",
+    "mkdocs-material>=9.0.0",
+    "mkdocstrings>=1.0.0",
+    "mkdocstrings-python>=2.0.0",
+]
+lint = ["ruff>=0.17.0", "ty>=0.0.99"]
 dev = [
-    "ipython",
-    "pytest-asyncio",
-    "coverage",
-    "tox",
-    "mkdocs-material",
-    "markdown-include",
-    "mkdocstrings",
-    "pytest>= 7.1.0",
-    "mkdocstrings-python",
-    "ruff",
-    "ty",
-    "tox-uv>=1.37.7",
+    { include-group = "test" },
+    { include-group = "docs" },
+    { include-group = "lint" },
+    "coverage>=7.0.0",
+    "ipython>=9.0.0",
+    "tox>=4.0.0",
+    "tox-uv>=1.0.0",
 ]
 
 [tool.hatch.build.targets.sdist]
