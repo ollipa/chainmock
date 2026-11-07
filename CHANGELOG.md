@@ -30,6 +30,7 @@ Types of changes:
 - Add Python 3.16 alpha to tox test run.
 - Add PyPy 3.12 to tox test run.
 - Add a single required CI check for branch protection.
+- Use tox-uv to create tox environments with uv.
 - Replace Poetry with uv.
 - Replace pylint, black and isort with ruff.
 - Replace mypy with ty.

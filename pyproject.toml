@@ -47,6 +47,7 @@ dev = [
     "mkdocstrings-python",
     "ruff",
     "ty",
+    "tox-uv>=1.37.7",
 ]
 
 [tool.hatch.build.targets.sdist]
