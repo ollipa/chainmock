@@ -21,7 +21,7 @@ coverage:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running doctest$(off)\n'
 	@printf '*****************\n'
-	uv run coverage run --parallel-mode --source chainmock tests/integrations/i_doctest.py
+	uv run coverage run --parallel-mode --source chainmock -m tests.integrations.i_doctest
 
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running pytest$(off)\n'
@@ -31,7 +31,7 @@ coverage:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Running unittest$(off)\n'
 	@printf '*****************\n'
-	PYTHONPATH=./ uv run coverage run --parallel-mode --source chainmock tests/integrations/i_unittest.py 2> /dev/null
+	uv run coverage run --parallel-mode --source chainmock -m tests.integrations.i_unittest
 
 	@printf '\n\n*****************\n'
 	@printf '$(color)Test coverage$(off)\n'

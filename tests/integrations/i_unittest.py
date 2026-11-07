@@ -1,6 +1,7 @@
 """Test unittest integration."""
 
 # ruff: noqa: PT009
+import io
 import sys
 import unittest
 
@@ -85,7 +86,9 @@ class TestNoFailureOnError(unittest.TestCase):
 def run_tests() -> None:
     expected_failures = 3
     expected_errors = 1
-    test = unittest.main(exit=False)
+    # Some tests fail on purpose, so only show the test output if the run fails.
+    output = io.StringIO()
+    test = unittest.main(exit=False, testRunner=unittest.TextTestRunner(stream=output))
 
     test_count = test.result.testsRun
     error_count = len(test.result.errors)
@@ -99,6 +102,7 @@ def run_tests() -> None:
     )
 
     if test_count < 250 or failed_count != expected_failures or error_count != expected_errors:
+        print(output.getvalue())
         print("Unittest test run FAILED\n")
         sys.exit(1)
 
