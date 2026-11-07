@@ -14,6 +14,8 @@ Types of changes:
 
 ## Unreleased
 
+## Release 3.0.0
+
 ### Added
 
 - Export `Mocker` type for the `mocker` function.
