@@ -2,12 +2,17 @@
 
 from unittest import mock as umock
 
+from chainmock import Mocker
 from chainmock._api import Assert, Mock, State, mocker
 
 from .utils import assert_raises
 
 
 class ChainmockTestCase:
+    def test_mocker_matches_mocker_type(self) -> None:
+        typed_mocker: Mocker = mocker
+        assert typed_mocker is mocker
+
     def test_return_self_when_called(self) -> None:
         stub = mocker()
         assert stub() is stub

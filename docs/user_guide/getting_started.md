@@ -12,6 +12,33 @@ from chainmock import mocker
 
 `mocker` function is the main entrypoint to Chainmock. It provides different functionality depending on the arguments you pass to it. Supported functionalities are partial mocking (and spying), stubbing, and patching.
 
+### Pytest fixture
+
+If you prefer pytest fixtures over imports, you can add a fixture that returns the `mocker` function to your `conftest.py`:
+
+```python
+import chainmock
+import pytest
+
+
+@pytest.fixture
+def mocker() -> chainmock.Mocker:
+    return chainmock.mocker
+```
+
+Then use it in your tests:
+
+```python
+from chainmock import Mocker
+
+
+def test_boil(mocker: Mocker):
+    mocker(Teapot).mock("boil").called_once()
+    Teapot().boil()
+```
+
+Chainmock tears down the mocks after each test, so the fixture doesn't need any teardown code.
+
 ## What you can do with Chainmock?
 
 !!! note

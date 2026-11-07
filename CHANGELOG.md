@@ -14,7 +14,11 @@ Types of changes:
 
 ## Unreleased
 
-## Changed
+### Added
+
+- Export `Mocker` type for the `mocker` function.
+
+### Changed
 
 - `any_order` argument is now positional only in `has_calls` and `has_awaits` methods.
 - Typing improvements.
@@ -22,6 +26,10 @@ Types of changes:
 ### Removed
 
 - Drop support for Python 3.10.
+
+### Documentation
+
+- Document how to create a pytest fixture for the `mocker` function.
 
 ### Infrastructure
 

@@ -6,7 +6,7 @@ import functools
 import inspect
 import itertools
 from collections.abc import Callable, Sequence
-from typing import Any, ClassVar, Concatenate, Literal, ParamSpec, Self, TypeVar
+from typing import Any, ClassVar, Concatenate, Literal, ParamSpec, Protocol, Self, TypeVar
 from unittest import mock as umock
 from unittest.util import safe_repr
 
@@ -1833,6 +1833,19 @@ class Mock:
         for key in list(self.__assertions):
             assertion = self.__assertions.pop(key)
             assertion._validate()  # noqa: SLF001
+
+
+class Mocker(Protocol):
+    """Type of the `mocker` function."""
+
+    def __call__(
+        self,
+        target: str | Any | None = None,
+        *,
+        spec: Any | None = None,
+        patch_class: bool = False,
+        **kwargs: Any,
+    ) -> Mock: ...
 
 
 def mocker(
