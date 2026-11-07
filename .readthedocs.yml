@@ -1,8 +1,5 @@
 version: 2
 
-mkdocs:
-  configuration: mkdocs.yml
-
 build:
   os: ubuntu-24.04
   tools:
@@ -16,3 +13,9 @@ build:
       - uv venv "${READTHEDOCS_VIRTUALENV_PATH}"
     install:
       - UV_PROJECT_ENVIRONMENT="${READTHEDOCS_VIRTUALENV_PATH}" uv sync --frozen --no-default-groups --group docs
+    build:
+      html:
+        - python -m zensical build --strict
+    post_build:
+      - mkdir -p $READTHEDOCS_OUTPUT/html/
+      - cp --recursive site/* $READTHEDOCS_OUTPUT/html/

@@ -43,6 +43,7 @@ Types of changes:
 - Include tests, documentation tested by doctests, changelog and tox configuration in the
   source distribution.
 - Run test suites without `PYTHONPATH` changes so they work with `tox --current-env`.
+- Migrate documentation from MkDocs with Material for MkDocs to Zensical.
 - Ignore dependency releases newer than 3 days and never build dependencies from source with uv.
 - Replace Poetry with uv.
 - Replace pylint, black and isort with ruff.

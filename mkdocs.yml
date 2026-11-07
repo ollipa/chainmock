@@ -3,6 +3,7 @@ site_description: chainmock - Mocking library for Python and Pytest
 site_url: https://chainmock.readthedocs.io/en/latest/
 theme:
   name: material
+  variant: classic
   logo: assets/icon_white.png
   favicon: assets/icon_black.png
   features:
@@ -27,12 +28,12 @@ extra_css:
 repo_name: chainmock
 repo_url: https://github.com/ollipa/chainmock
 edit_uri: ""
+exclude_docs: |
+  /extensions/
 watch:
   - README.md
   - CONTRIBUTING.md
   - CHANGELOG.md
-hooks:
-  - docs/hooks/hide_lines.py
 
 nav:
   - Overview: index.md
@@ -73,3 +74,4 @@ markdown_extensions:
   - pymdownx.snippets
   - markdown_include.include:
       base_path: docs
+  - docs.extensions.hide_lines

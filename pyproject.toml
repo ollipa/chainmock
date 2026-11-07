@@ -38,9 +38,9 @@ chainmock = "chainmock._pytest_plugin"
 test = ["pytest>=7.1.0", "pytest-asyncio>=0.23.0"]
 docs = [
     "markdown-include>=0.8.0",
-    "mkdocs-material>=9.0.0",
     "mkdocstrings>=1.0.0",
     "mkdocstrings-python>=2.0.0",
+    "zensical>=0.1.0",
 ]
 lint = ["ruff>=0.17.0", "ty>=0.0.97"]
 dev = [
@@ -55,6 +55,8 @@ dev = [
 
 [tool.uv]
 exclude-newer = "3 days"
+# Allows zensical 0.1.0 before it is 3 days old. Remove after 2026-11-08 16:00 UTC.
+exclude-newer-package = { zensical = "2026-11-05T16:00:00Z" }
 no-build = true
 
 [tool.hatch.build.targets.sdist]

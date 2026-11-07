@@ -86,13 +86,15 @@ For more information see the [Tox documentation](https://tox.wiki/).
 
 ## Updating documentation
 
-The documentation is created using [Mkdocs](https://www.mkdocs.org/). To test the documentation locally, run the following command:
+The documentation is created using [Zensical](https://zensical.org/). To test the documentation locally, run the following command:
 
 ```bash
-mkdocs serve
+make serve
 ```
 
-For more details see the [Mkdocs documentation](https://www.mkdocs.org/user-guide/) and [Material for Mkdocs documentation](https://squidfunk.github.io/mkdocs-material/).
+Run Zensical with `python -m zensical` instead of `zensical`, so it can import the Markdown extension in `docs/extensions`.
+
+For more details see the [Zensical documentation](https://zensical.org/docs/).
 
 The documentation is hosted in [Read the Docs](https://about.readthedocs.com/) and is automatically built and deployed when a pull request is merged.
 

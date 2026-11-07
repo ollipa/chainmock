@@ -65,8 +65,12 @@ docs:
 	@printf '\n\n*****************\n'
 	@printf '$(color)Test building docs$(off)\n'
 	@printf '*****************\n'
-	uv run mkdocs build --strict
+	uv run python -m zensical build --strict --clean
+	@if grep -rlE '#! (hidden|remove-prefix)|&lt;chainmock\._api' site; then \
+		echo 'Error: lines that docs/extensions/hide_lines.py should hide were rendered'; \
+		exit 1; \
+	fi
 
 .PHONY: serve
 serve:
-	uv run mkdocs serve --open
+	uv run python -m zensical serve --open
