@@ -28,6 +28,8 @@ Types of changes:
 - Add Pytest 9.0, 9.1 and 9.2 to tox test run.
 - Run Python 3.15 tests against Pytest 9.1 and 9.2.
 - Add Python 3.16 alpha to tox test run.
+- Add PyPy 3.12 to tox test run.
+- Add a single required CI check for branch protection.
 - Replace Poetry with uv.
 - Replace pylint, black and isort with ruff.
 - Replace mypy with ty.
