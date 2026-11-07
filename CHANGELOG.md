@@ -32,6 +32,7 @@ Types of changes:
 - Add a single required CI check for branch protection.
 - Use tox-uv to create tox environments with uv.
 - Split development dependencies into `test`, `docs` and `lint` groups. The `dev` group includes them all.
+- Include tests, changelog and tox configuration in the source distribution.
 - Ignore dependency releases newer than 3 days and never build dependencies from source with uv.
 - Replace Poetry with uv.
 - Replace pylint, black and isort with ruff.

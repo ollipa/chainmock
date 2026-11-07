@@ -58,7 +58,7 @@ exclude-newer = "3 days"
 no-build = true
 
 [tool.hatch.build.targets.sdist]
-include = ["src/chainmock"]
+include = ["/src/chainmock", "/tests", "/CHANGELOG.md", "/tox.ini"]
 
 [tool.hatch.build.targets.wheel]
 include = ["src/chainmock"]
