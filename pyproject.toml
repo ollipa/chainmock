@@ -42,7 +42,7 @@ docs = [
     "mkdocstrings>=1.0.0",
     "mkdocstrings-python>=2.0.0",
 ]
-lint = ["ruff>=0.17.0", "ty>=0.0.99"]
+lint = ["ruff>=0.17.0", "ty>=0.0.97"]
 dev = [
     { include-group = "test" },
     { include-group = "docs" },
@@ -52,6 +52,10 @@ dev = [
     "tox>=4.0.0",
     "tox-uv>=1.0.0",
 ]
+
+[tool.uv]
+exclude-newer = "3 days"
+no-build = true
 
 [tool.hatch.build.targets.sdist]
 include = ["src/chainmock"]
