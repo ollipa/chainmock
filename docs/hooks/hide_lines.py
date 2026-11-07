@@ -43,4 +43,4 @@ def on_startup(command: str, dirty: bool) -> None:  # noqa: ARG001, FBT001
             return original(self, new_src, *args, **kwargs)
         return original(self, src, *args, **kwargs)
 
-    highlight.Highlight.highlight = patched  # ty: ignore[invalid-assignment]
+    highlight.Highlight.highlight = patched
