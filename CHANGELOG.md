@@ -22,7 +22,7 @@ Types of changes:
 
 ### Changed
 
-- `any_order` argument is now positional only in `has_calls` and `has_awaits` methods.
+- `any_order` argument is now keyword-only in `has_calls` and `has_awaits` methods.
 - Typing improvements.
 
 ### Removed
