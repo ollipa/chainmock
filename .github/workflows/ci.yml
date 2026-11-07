@@ -29,7 +29,8 @@ jobs:
             "3.13",
             "3.14",
             "3.15",
-            "3.16-dev",
+            # Disabled until pytest-asyncio supports Python 3.16 (removed asyncio.get_event_loop_policy).
+            # "3.16-dev",
           ]
 
     steps:
